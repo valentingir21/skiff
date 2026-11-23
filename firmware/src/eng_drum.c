@@ -479,7 +479,9 @@ static const preset_t DRUM_PRESETS[] = {
     /* (1.3, from Felucca 1.5.6) the kits DEEP TIGHT PERC (KIT's values appended), each a preset (appended) */
     {"DEEP DRUMS", {DK_DEEP, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 28), TAG(PT_DRUM)},
     {"SNAP KIT", {DK_TIGHT, 64, 64, 56, 64, 100, 0, 16}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 8), TAG(PT_DRUM)},
-    {"PERC KIT", {DK_PERC, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 24), TAG(PT_DRUM)},
+    {"PERC KIT", {DK_PERC, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 24), TAG(PT_DRUM)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
+    {"KT HARD", {5, 60, 100, 50, 100, 127, 0, 90}, {0, 100, 127, 100}, 0, 0, FX(40, 0, 0, 15), TAG(PT_DRUM)},
+    {"KT HARDTECH", {DK_TIGHT, 62, 90, 40, 110, 127, 0, 110}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 0, 10), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
 };
 
 static const engine_t ENG_DRUM = {

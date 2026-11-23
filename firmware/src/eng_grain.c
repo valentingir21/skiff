@@ -448,7 +448,8 @@ static const preset_t GRAIN_PRESETS[] = {
     /* (Skiff phase 9) more for every engine: basses, kits */
     {"PIANO HAZE", {0, 20, 100, 80, 0, 50, 20, 90}, {70, 90, 120, 100}, 0, 0, FX(0, 50, 30, 90), TAG(PT_PAD)},
     {"SAX DRONE", {3, 60, 120, 90, -12, 20, 10, 80}, {90, 90, 127, 100}, 0, 0, FX(0, 40, 20, 90), TAG(PT_PAD)},
-    {"SCATTER", {2, 64, 40, 70, 12, 50, 0, 110}, {0, 70, 100, 50}, 0, 0, FX(0, 20, 45, 60), TAG(PT_FX)},
+    {"SCATTER", {2, 64, 40, 70, 12, 50, 0, 110}, {0, 70, 100, 50}, 0, 0, FX(0, 20, 45, 60), TAG(PT_FX)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
+    {"DR GRAIN", {3, 60, 120, 96, -12, 60, 20, 60}, {100, 90, 127, 110}, 0, 0, FX(15, 40, 20, 115), TAG(PT_PAD)},
 };
 
 static const engine_t ENG_GRAIN = {

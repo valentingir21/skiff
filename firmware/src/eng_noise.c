@@ -268,7 +268,11 @@ static const preset_t NOISE_PRESETS[] = {
     {"GEIGER", {NZ_DUST, 10, 100, 40, 64, 34, 0, 0}, {0, 90, 127, 40}, 0, 0, FX(0, 0, 5, 15), TAG(PT_FX)},
     {"PLASMA", {NZ_META, 0, 90, 90, 100, 40, 80, 0}, {60, 90, 110, 90}, 0, 0, FX(0, 30, 30, 80), MORE({P_LRATE, 56}, {P_LD_FLT, 18}), TAG(PT_FX)},
     /* (Skiff phase 9) more for every engine: basses, kits */
-    {"OCEAN", {NZ_ANLG, 50, 60, 20, 0, 0, 40, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 30, 10, 90), MORE({P_LRATE, 20}, {P_LD_FLT, 40}, {P_LWAVE, 1}), TAG(PT_FX)},
+    {"OCEAN", {NZ_ANLG, 50, 60, 20, 0, 0, 40, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 30, 10, 90), MORE({P_LRATE, 20}, {P_LD_FLT, 40}, {P_LWAVE, 1}), TAG(PT_FX)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
+    {"FX RISER", {NZ_ANLG, 64, 20, 70, 0, 0, 0, 0}, {118, 90, 127, 90}, 63, 0, FX(0, 40, 40, 90), TAG(PT_FX)},
+    {"FX DOWNLIFT", {NZ_ANLG, 64, 24, 60, 0, 0, 0, 0}, {0, 112, 0, 100}, 63, 0, FX(0, 40, 40, 100), TAG(PT_FX)},
+    {"DR ATMO", {NZ_ANLG, 30, 40, 90, 64, 0, 90, 0}, {110, 90, 127, 110}, 0, 0, FX(0, 50, 30, 120), MORE({P_LRATE, 16}, {P_LD_FLT, 24}), TAG(PT_FX)},
+    {"DR METAL", {NZ_META, 0, 70, 100, 100, 40, 60, 0}, {90, 90, 127, 110}, 0, 0, FX(20, 40, 30, 115), MORE({P_LRATE, 20}, {P_LD_FLT, 16}), TAG(PT_PAD)},
 };
 
 static const engine_t ENG_NOISE = {

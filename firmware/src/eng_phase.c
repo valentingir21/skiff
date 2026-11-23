@@ -295,7 +295,7 @@ static void phase_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const
 static const preset_t PHASE_PRESETS[] = {
     /* name, {WAVE, WAVE2, DCW, ENV, DTN, LINE, SUB, FOLD}, {A D S R}, fenv, mono */
     {"PD BRASS", {0, 0, 30, 90, 0, 0, 0, 0}, {8, 70, 90, 40}, 0, 0, FX(0, 20, 20, 40), TAG(PT_LEAD)},
-    {"PD ORGAN", {3, 0, 40, 0, 0, 0, 0, 0}, {0, 127, 127, 30}, 0, 0, FX(0, 40, 0, 30), TAG(PT_KEYS)},
+    {"LD PD FOLD", {0, 1, 80, 60, 10, 0, 0, 80}, {0, 72, 105, 40}, 0, 1, FX(35, 10, 35, 30), MORE({P_GLIDE, 16}), TAG(PT_LEAD)},
     {"PD STRINGS", {0, 4, 50, 40, 12, 0, 0, 0}, {40, 90, 100, 70}, 0, 0, FX(0, 50, 20, 60), TAG(PT_PAD)},
     {"RESO", {5, 0, 60, 60, 0, 0, 0, 0}, {0, 70, 30, 60}, 0, 0, FX(0, 0, 40, 40), TAG(PT_LEAD)},
     {"PD BELL", {6, 0, 80, 50, 0, 0, 0, 0}, {0, 95, 0, 90}, 0, 0, FX(0, 0, 30, 70), TAG(PT_KEYS)},
@@ -304,7 +304,8 @@ static const preset_t PHASE_PRESETS[] = {
     {"NEUTRINO", {3, 0, 20, 70, 0, 0, 0, 0}, {0, 80, 0, 75}, 0, 0, FX(0, 10, 75, 55), TAG(PT_PLUCK)},
     /* (Skiff phase 9) more for every engine: basses, kits */
     {"PD BASS", {0, 0, 50, 80, 4, 0, 60, 0}, {0, 60, 60, 25}, 0, 1, FX(5, 0, 5, 10), TAG(PT_BASS)},
-    {"SOFT KEYS", {3, 0, 30, 60, 6, 0, 0, 0}, {0, 85, 30, 60}, 0, 0, FX(0, 40, 20, 40), TAG(PT_KEYS)},
+    {"BS PD FOLD", {1, 0, 50, 80, 4, 0, 80, 60}, {0, 60, 70, 22}, 0, 1, FX(40, 0, 10, 6), TAG(PT_BASS)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
+    {"LD PD SCREAM", {5, 0, 90, 50, 8, 0, 0, 40}, {0, 70, 100, 40}, 0, 1, FX(60, 20, 40, 30), MORE({P_DTYPE, 1}, {P_LRATE, 90}, {P_LD_FLT, 6}), TAG(PT_LEAD)},
 };
 
 static const engine_t ENG_PHASE = {

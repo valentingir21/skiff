@@ -182,7 +182,7 @@ static const preset_t ANALOG_PRESETS[] = {
     {"SQR BASS", {1, 0, 0, 0, 50, 70, 40, 64}, {0, 60, 40, 30}, 30, 1, FX(5, 0, 10, 10), TAG(PT_BASS)},
     {"PWM STR", {4, 8, 40, 0, 75, 20, 0, 48}, {60, 80, 110, 85}, 8, 0, FX(0, 50, 20, 60), TAG(PT_PAD)},
     {"ACID", {0, 0, 0, 0, 50, 100, 25, 64}, {0, 55, 20, 30}, 48, 1, FX(20, 0, 45, 15), TAG(PT_BASS)},
-    {"SINE KEY", {3, 6, 50, 0, 127, 0, 0, 0}, {2, 80, 30, 70}, 0, 0, FX(0, 30, 25, 40), TAG(PT_KEYS)},
+    {"LD HOOVER", {4, 28, 64, 0, 96, 18, 30, 64}, {2, 70, 110, 50}, 6, 1, FX(20, 100, 25, 45), MORE({P_VOICE, V_UNISON}, {P_M1SRC, 9}, {P_M1DST, 1}, {P_M1AMT, -30}), TAG(PT_LEAD)},
     {"RAVE", {4, 30, 64, 0, 85, 20, 30, 64}, {20, 80, 110, 60}, 10, 1, FX(30, 40, 30, 30), TAG(PT_LEAD)},
     {"SUB BASS", {3, 0, 0, 0, 40, 0, 20, 0}, {0, 60, 100, 20}, 0, 1, FX(0, 0, 0, 10), TAG(PT_BASS)},
     {"SYNTH PLUCK", {0, 8, 50, 0, 30, 40, 0, 64}, {0, 88, 0, 60}, 55, 0, FX(0, 20, 50, 30), TAG(PT_PLUCK)},
@@ -191,13 +191,13 @@ static const preset_t ANALOG_PRESETS[] = {
     {"STRINGS", {4, 6, 64, 0, 92, 8, 0, 48}, {48, 90, 118, 72}, 6, 0, FX(0, 95, 15, 55), MORE({P_LD_SHP, 20}, {P_LRATE, 72}, {P_LD_PIT, 8}, {P_LFADE, 80}), TAG(PT_PAD)},   /* ((Skiff phase 9) as SOFT PAD to the ear: a bright string
                                                                          * machine now, its PWM moving, a late vibrato) */
     /* (Skiff) for the themes: CRYPT (dungeon synth), NEON (synthwave), QUARK (particles) */
-    {"BONE FLUTE", {2, 3, 30, 22, 84, 15, 0, 64}, {56, 80, 110, 64}, 6, 1, FX(0, 15, 30, 85), MORE({P_LRATE, 84}, {P_LFADE, 90}, {P_LD_PIT, 8}), TAG(PT_LEAD)},
+    {"BS ACID 303", {0, 0, 0, 0, 56, 112, 30, 64}, {0, 80, 110, 20}, 40, 1, FX(25, 0, 25, 6), MORE({P_M1SRC, 9}, {P_M1DST, 2}, {P_M1AMT, 63}, {P_GLIDE, 40}), TAG(PT_BASS)},
     {"WAR HORN", {0, 5, 64, 4, 42, 12, 20, 64}, {72, 80, 110, 80}, 30, 1, FX(0, 10, 10, 90), MORE({P_LRATE, 80}, {P_LFADE, 96}, {P_LD_PIT, 8}), TAG(PT_LEAD)},
     {"DARK STRINGS", {1, 4, 64, 6, 40, 34, 22, 40}, {100, 90, 120, 105}, 10, 0, FX(0, 30, 0, 110), MORE({P_LRATE, 30}, {P_LD_FLT, 8}, {P_LD_PIT, 8}, {P_LFADE, 110}), TAG(PT_PAD)},   /* ((phase 9) hollow and dark, a slow swell) */
     {"NIGHT BASS", {0, 7, 64, 0, 40, 35, 15, 64}, {0, 64, 50, 30}, 45, 1, FX(0, 5, 10, 8), TAG(PT_BASS)},
     {"NEON LEAD", {0, 14, 64, 0, 92, 25, 12, 64}, {6, 70, 110, 55}, 14, 1, FX(0, 25, 55, 40), MORE({P_LRATE, 86}, {P_LFADE, 92}, {P_LD_PIT, 11}, {P_GLIDE, 28}), TAG(PT_LEAD)},
     {"SUNSET PAD", {4, 9, 55, 0, 74, 15, 0, 48}, {78, 90, 115, 92}, 10, 0, FX(0, 85, 25, 70), MORE({P_LWAVE, 1}, {P_LRATE, 52}, {P_LD_SHP, 48}), TAG(PT_PAD)},
-    {"HERO BRASS", {0, 16, 64, 0, 50, 18, 8, 56}, {50, 75, 95, 55}, 44, 0, FX(0, 45, 20, 45), TAG(PT_PAD)},
+    {"ST TECHNO", {0, 7, 64, 0, 66, 40, 20, 64}, {0, 66, 0, 48}, 34, 0, FX(15, 20, 55, 55), TAG(PT_KEYS)},
     {"SYN TOM", {3, 0, 0, 6, 127, 0, 25, 0}, {0, 76, 0, 60}, 0, 0, FX(0, 0, 10, 45), MORE({P_ED_PIT, 63}), TAG(PT_DRUM)},
     {"QUANTA", {3, 0, 0, 0, 127, 0, 0, 0}, {0, 64, 127, 50}, 0, 1, FX(0, 0, 55, 35), MORE({P_LWAVE, 4}, {P_LRATE, 96}, {P_LD_PIT, 50}), TAG(PT_FX)},
     /* (Skiff phase 9) more for every engine: basses, kits */
@@ -205,7 +205,33 @@ static const preset_t ANALOG_PRESETS[] = {
     {"DRIVE BASS", {0, 14, 64, 0, 62, 20, 10, 64}, {0, 64, 64, 25}, 24, 1, FX(40, 0, 5, 5), MORE({P_DTYPE, 1}, {P_DTONE, -32}), TAG(PT_BASS)},
     /* (1.3) WAVE SYNC: the envelope sweeps the synced saw (ENV DEST SHAPE); SUB: a saw on its square an octave down */
     {"HARD SYNC", {5, 36, 96, 0, 88, 24, 12, 64}, {2, 70, 96, 40}, 16, 1, FX(0, 15, 40, 30), MORE({P_ED_SHP, 44}, {P_GLIDE, 20}), TAG(PT_LEAD)},
-    {"SUB SAW", {6, 0, 80, 0, 70, 22, 6, 64}, {0, 60, 110, 22}, 20, 1, FX(0, 0, 5, 10), TAG(PT_BASS)},
+    {"SUB SAW", {6, 0, 80, 0, 70, 22, 6, 64}, {0, 60, 110, 22}, 20, 1, FX(0, 0, 5, 10), TAG(PT_BASS)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
+    {"LD SSAW UNI", {0, 14, 64, 0, 100, 12, 8, 64}, {2, 70, 115, 55}, 6, 1, FX(0, 25, 40, 50), MORE({P_VOICE, V_UNISON}, {P_DETUNE, 72}, {P_SPRD, 110}), TAG(PT_LEAD)},
+    {"LD TRANCE", {0, 9, 64, 0, 108, 16, 4, 72}, {4, 74, 110, 60}, 10, 1, FX(0, 35, 55, 60), MORE({P_VOICE, V_UNISON}, {P_DETUNE, 54}, {P_SPRD, 100}, {P_GLIDE, 16}), TAG(PT_LEAD)},
+    {"LD HARDTECH", {6, 8, 70, 0, 90, 30, 70, 64}, {0, 70, 110, 35}, 18, 1, FX(70, 0, 20, 20), MORE({P_DTYPE, 1}, {P_DTONE, 12}, {P_GLIDE, 14}), TAG(PT_LEAD)},
+    {"LD GABBER", {4, 34, 64, 0, 88, 24, 70, 64}, {0, 70, 110, 40}, 10, 1, FX(80, 70, 15, 25), MORE({P_VOICE, V_UNISON}, {P_M1SRC, 9}, {P_M1DST, 1}, {P_M1AMT, -40}), TAG(PT_LEAD)},
+    {"LD SYNC", {5, 40, 100, 0, 96, 22, 30, 64}, {0, 72, 105, 40}, 8, 1, FX(30, 15, 40, 30), MORE({P_ED_SHP, 50}, {P_DTYPE, 1}, {P_GLIDE, 18}), TAG(PT_LEAD)},
+    {"LD PLUCK", {0, 12, 64, 0, 40, 45, 10, 64}, {0, 70, 0, 52}, 52, 0, FX(0, 25, 65, 45), TAG(PT_PLUCK)},
+    {"LD SSAW POLY", {0, 22, 64, 0, 100, 14, 6, 64}, {3, 72, 112, 58}, 6, 0, FX(0, 110, 40, 55), MORE({P_SPRD, 120}), TAG(PT_LEAD)},
+    {"LD ACID", {0, 3, 30, 0, 50, 100, 45, 80}, {0, 70, 60, 30}, 44, 1, FX(40, 0, 50, 25), MORE({P_GLIDE, 30}, {P_DTYPE, 1}), TAG(PT_LEAD)},
+    {"BS ACID SQR", {1, 0, 0, 0, 42, 106, 30, 64}, {0, 64, 25, 20}, 54, 1, FX(20, 0, 30, 6), MORE({P_GLIDE, 40}), TAG(PT_BASS)},
+    {"BS ACID HARD", {0, 0, 0, 0, 52, 112, 80, 64}, {0, 60, 20, 20}, 56, 1, FX(75, 0, 20, 5), MORE({P_DTYPE, 1}, {P_DTONE, 16}, {P_GLIDE, 40}), TAG(PT_BASS)},
+    {"BS RUMBLE", {3, 0, 0, 0, 36, 0, 70, 0}, {0, 84, 60, 72}, 0, 1, FX(45, 0, 35, 85), MORE({P_DTONE, -40}), TAG(PT_BASS)},
+    {"BS REESE DRK", {0, 30, 64, 0, 56, 20, 40, 40}, {0, 64, 127, 30}, 6, 1, FX(35, 15, 0, 8), MORE({P_LRATE, 24}, {P_LD_FLT, 10}, {P_DTYPE, 4}), TAG(PT_BASS)},
+    {"BS SUB CLEAN", {2, 0, 0, 0, 60, 0, 12, 0}, {0, 64, 127, 18}, 0, 1, FX(0, 0, 0, 0), TAG(PT_BASS)},
+    {"BS HARDTECH", {6, 0, 50, 0, 58, 40, 60, 64}, {0, 60, 40, 20}, 40, 1, FX(60, 0, 10, 6), MORE({P_DTYPE, 1}, {P_DTONE, 8}), TAG(PT_BASS)},
+    {"BS FUZZ", {1, 6, 64, 0, 62, 30, 50, 64}, {0, 64, 100, 22}, 20, 1, FX(85, 0, 5, 5), MORE({P_DTYPE, 4}, {P_DTONE, -16}), TAG(PT_BASS)},
+    {"BS ROLLING", {0, 8, 64, 0, 52, 35, 20, 64}, {0, 58, 30, 20}, 40, 1, FX(20, 0, 15, 5), TAG(PT_BASS)},
+    {"BS MINI", {0, 6, 40, 0, 42, 55, 35, 64}, {0, 68, 70, 28}, 36, 1, FX(15, 0, 10, 8), MORE({P_GLIDE, 22}), TAG(PT_BASS)},
+    {"PA DARK", {4, 10, 64, 6, 44, 20, 0, 40}, {96, 92, 115, 100}, 8, 0, FX(0, 70, 25, 105), MORE({P_LRATE, 26}, {P_LD_FLT, 12}, {P_LD_SHP, 30}, {P_SPRD, 100}), TAG(PT_PAD)},
+    {"PA SSAW", {0, 24, 64, 0, 80, 10, 0, 50}, {70, 90, 118, 96}, 4, 0, FX(0, 115, 30, 95), MORE({P_SPRD, 127}, {P_LRATE, 40}, {P_LD_PIT, 4}), TAG(PT_PAD)},
+    {"PA TRANCE", {0, 16, 64, 0, 96, 18, 0, 56}, {60, 88, 115, 90}, 12, 0, FX(0, 95, 45, 85), MORE({P_SPRD, 110}), TAG(PT_PAD)},
+    {"ST RAVE", {4, 20, 64, 0, 80, 20, 25, 64}, {0, 64, 10, 45}, 24, 0, FX(20, 70, 50, 50), MORE({P_SPRD, 80}), TAG(PT_KEYS)},
+    {"ST SSAW", {0, 16, 64, 0, 92, 18, 12, 64}, {0, 68, 0, 50}, 26, 1, FX(10, 30, 55, 55), MORE({P_VOICE, V_UNISON}, {P_DETUNE, 70}, {P_SPRD, 115}), TAG(PT_KEYS)},
+    {"ST CHORD", {0, 20, 64, 0, 72, 34, 18, 64}, {0, 66, 0, 52}, 34, 0, FX(15, 90, 55, 60), MORE({P_SPRD, 110}), TAG(PT_KEYS)},
+    {"FX IMPACT", {3, 0, 0, 70, 80, 10, 90, 0}, {0, 96, 0, 96}, 0, 0, FX(60, 0, 25, 115), MORE({P_ED_PIT, 63}), TAG(PT_FX)},
+    {"FX ZAP", {3, 0, 0, 0, 127, 0, 20, 0}, {0, 70, 0, 50}, 0, 0, FX(20, 0, 60, 40), MORE({P_ED_PIT, 63}, {P_M1SRC, 9}, {P_M1DST, 1}, {P_M1AMT, 63}), TAG(PT_FX)},
+    {"DR DARK", {0, 30, 64, 20, 34, 40, 20, 30}, {110, 100, 127, 110}, 0, 0, FX(20, 60, 30, 120), MORE({P_LRATE, 14}, {P_LD_FLT, 20}, {P_SPRD, 100}), TAG(PT_PAD)},
 };
 
 static const engine_t ENG_ANALOG = {

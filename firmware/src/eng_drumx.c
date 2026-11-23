@@ -157,7 +157,8 @@ static const preset_t DRUMX_PRESETS[] = {
     {"SOFT KIT", {64, 64, 56, 60, 56, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 40), TAG(PT_DRUM)},
     {"GLITCH KIT", {64, 64, 70, 60, 64, 30, 20, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 35, 20), TAG(PT_DRUM)},
     {"TRIBAL KIT", {64, 64, 64, 64, 60, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 35), TAG(PT_DRUM)},
-    {"LASER KIT", {64, 64, 70, 64, 64, 10, 0, 10}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 30, 25), TAG(PT_DRUM)},
+    {"LASER KIT", {64, 64, 70, 64, 64, 10, 0, 10}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 30, 25), TAG(PT_DRUM)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
+    {"KT INDUS", {80, 58, 90, 60, 80, 50, 70, 90}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 40), TAG(PT_DRUM)},
 };
 
 /* (Skiff phase 9) the factory kits a preset loads as the project's kit (ui.c apply_preset_to), 8 lanes as dx_kit has
@@ -237,7 +238,7 @@ static const dx_lane_t DX_KITS[][8] = {
         {DX_MODE(DXW_SINE, DXF_LP, 0) | DXM_SINE << 5, {70, 127, 50, 0, 40}, {80, 127, 60, 0, 60}},   /* BELL */
     },
 };
-static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8};
+static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 4};   /* ((techno-presets) KT INDUS: INDUSTRIAL's kit) */
 _Static_assert(sizeof DRUMX_PKIT == NELEM(DRUMX_PRESETS), "a kit (or none) per DRUM-X preset");
 _Static_assert(NELEM(DRUMX_PRESETS) <= 64u, "its favourites end before THEME CUSTOM's colours (ui.c CPAL_COLS)");
 _Static_assert(sizeof DX_KITS[0] == sizeof dx_kit, "a factory kit is a kit");

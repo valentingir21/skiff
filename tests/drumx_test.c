@@ -167,6 +167,9 @@ int main(int argc, char **argv)
                  ENG_DRUMX.presets[i].name);
         check(nm, all && !memcmp(dx_kit, DX_KITS[DRUMX_PKIT[i] - 1u], sizeof dx_kit), "peaks %d .. %d%s", lo, hi, why);
     }
+    /* (techno-presets) the checks below play OWN KIT, which keeps the kit loaded last: the one they were made on,
+     * LASER KIT's (the last preset before KT INDUS was appended), not KT INDUS's */
+    memcpy(dx_kit, DX_KITS[DRUMX_PKIT[9] - 1u], sizeof dx_kit);
 
     /* 2 */
     {

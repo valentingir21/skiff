@@ -355,7 +355,10 @@ static const preset_t TRIO_PRESETS[] = {
     {"NEON ARP", {1, 12, 0, 5, 0, 70, 35, 40}, {0, 66, 0, 45}, 36, 0, FX(0, 25, 70, 25), TAG(PT_PLUCK)},
     {"COLLIDER", {13, 0, 23, 9, 2, 60, 50, 64}, {0, 70, 0, 55}, 0, 0, FX(8, 10, 50, 50), MORE({P_ED_PIT, 36}), TAG(PT_FX)},
     /* (Skiff phase 9) more for every engine: basses, kits */
-    {"DIRTY BASS", {1, -12, 0, 8, 1, 62, 85, 30}, {0, 50, 50, 20}, 35, 1, FX(72, 0, 5, 5), MORE({P_DTYPE, 1}, {P_DTONE, -10}), TAG(PT_BASS)},
+    {"DIRTY BASS", {1, -12, 0, 8, 1, 62, 85, 30}, {0, 50, 50, 20}, 35, 1, FX(72, 0, 5, 5), MORE({P_DTYPE, 1}, {P_DTONE, -10}), TAG(PT_BASS)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
+    {"LD TRIO SAW", {0, 0, 0, 22, 0, 96, 20, 64}, {2, 72, 112, 55}, 8, 0, FX(0, 90, 40, 50), MORE({P_SPRD, 110}), TAG(PT_LEAD)},
+    {"PA TRIO WIDE", {0, 0, 12, 18, 0, 70, 15, 64}, {80, 90, 118, 95}, 10, 0, FX(0, 100, 30, 100), MORE({P_SPRD, 120}, {P_LRATE, 30}, {P_LD_FLT, 10}), TAG(PT_PAD)},
+    {"BS TRIO SYNC", {9, 7, 0, 0, 0, 70, 40, 64}, {0, 60, 60, 20}, 30, 1, FX(50, 0, 10, 5), MORE({P_DTYPE, 1}), TAG(PT_BASS)},
 };
 
 static const engine_t ENG_TRIO = {

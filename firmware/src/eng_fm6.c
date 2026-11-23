@@ -391,17 +391,20 @@ static const preset_t FM6_PRESETS[] = {
     {"FM BASS", {0, 0, 0, 0, 0, 0, 0, 2}, {0, 0, 127, 0}, 0, 1, FX(0, 0, 10, 10), TAG(PT_BASS)},
     {"FM BRASS", {0, 0, 0, 0, 0, 0, 0, 3}, {0, 0, 127, 0}, 0, 0, FX(0, 25, 20, 40), TAG(PT_LEAD)},
     {"PAD", {0, 0, 0, 0, 0, 0, 30, 4}, {0, 0, 127, 0}, 0, 0, FX(0, 60, 30, 70), TAG(PT_PAD)},
-    {"FM MARIMBA", {0, 0, 0, 0, 0, 0, 0, 5}, {0, 0, 127, 0}, 0, 0, FX(0, 0, 25, 40), TAG(PT_KEYS)},
-    {"FM ORGAN", {0, 0, 0, 0, 0, 0, 0, 6}, {0, 0, 127, 0}, 0, 0, FX(10, 40, 0, 30), TAG(PT_KEYS)},
-    {"NYLON PICK", {0, 0, 0, 0, 0, 0, 0, 7}, {0, 0, 127, 0}, 0, 0, FX(0, 20, 35, 30), TAG(PT_PLUCK)},
+    {"BS FM DIRTY", {0, 6, 14, 0, 6, 0, 0, 2}, {0, 0, 127, 0}, 0, 1, FX(55, 0, 5, 6), MORE({P_DTYPE, 1}), TAG(PT_BASS)},
+    {"PA FM COLD", {0, 0, -4, 2, 20, 0, 70, 4}, {0, 0, 127, 0}, 0, 0, FX(0, 80, 30, 105), MORE({P_LRATE, 30}, {P_LD_FLT, 10}), TAG(PT_PAD)},
+    {"ST FM IRON", {0, 7, 10, 3, -10, 3, 50, 1}, {0, 0, 127, 0}, 0, 0, FX(30, 0, 45, 85), TAG(PT_KEYS)},
     /* (Skiff) for the themes: CRYPT (dungeon synth), NEON (synthwave), QUARK (particles) */
     {"GRAVE BELL", {0, 0, 6, 0, 20, 0, 30, 1}, {0, 0, 127, 0}, 0, 0, FX(0, 10, 15, 100), TAG(PT_KEYS)},
-    {"GLASS KEYS", {0, 0, 8, 0, 0, 0, 24, 0}, {0, 0, 127, 0}, 0, 0, FX(0, 75, 30, 45), TAG(PT_KEYS)},
+    {"PA FM DARK", {0, 2, 6, 1, 30, 0, 90, 3}, {0, 0, 127, 0}, 0, 0, FX(10, 70, 20, 110), TAG(PT_PAD)},
     {"ISOTOPE", {0, 0, 14, 2, -10, 0, 50, 1}, {0, 0, 127, 0}, 0, 0, FX(0, 20, 50, 70), TAG(PT_KEYS)},
     {"DARK MATTER", {0, 4, 16, 0, 10, 0, 0, 2}, {0, 0, 127, 0}, 0, 1, FX(8, 0, 0, 10), TAG(PT_BASS)},
     /* (Skiff phase 9) more for every engine: basses, kits */
     {"PICK BASS", {0, 2, 12, 0, 16, 2, 0, 7}, {0, 0, 127, 0}, 0, 1, FX(0, 0, 5, 10), TAG(PT_BASS)},
     {"GROWL BASS", {0, 5, 8, 0, 20, 0, 8, 3}, {0, 0, 127, 0}, 20, 1, FX(30, 0, 5, 5), MORE({P_LD_FLT, 36}, {P_LRATE, 80}, {P_DTYPE, 2}), TAG(PT_BASS)},
+    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md);
+     * TINE EP (preset 0, what a switch to FM6 loads) stays */
+    {"ST FM METAL", {0, 4, 10, 3, -16, 2, 20, 1}, {0, 0, 127, 0}, 0, 0, FX(25, 10, 40, 55), TAG(PT_KEYS)},
 };
 
 static const engine_t ENG_FM6 = {

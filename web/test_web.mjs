@@ -51,9 +51,9 @@ async function editorMock() {
   inp.onmidimessage = (e) => link.receive(e.data);
   const rq = async (r, o) => link.request(r, o);
   const info = E.parse[E.CMD.INFO](await rq(E.req.info()));
-  ok(info.nengines === 18 && info.engines[1] === "-" && info.engines[12] === "FM6" && info.engines[13] === "-" && info.engines[14] === "DRUM-X"
+  ok(info.nengines === 19 && info.engines[1] === "-" && info.engines[12] === "FM6" && info.engines[13] === "-" && info.engines[14] === "DRUM-X"
  && info.engines[3] === "-" && info.engines[5] === "-" && info.engines[6] === "TRIO" && info.engines[7] === "-"   /* ((techno-engines) LOFI VOICE WHEEL SLICE left out: reserved) */
- && info.engines[8] === "GRAIN" && info.engines[9] === "PHYS" && info.engines[10] === "DRUM" && info.engines[11] === "NOISE" && info.pcount === 148 && info.pe0 === 140 && info.engines[4] === "SAMPLE" && info.engines[15] === "SUPERSAW" && info.engines[16] === "ACID" && info.engines[17] === "MINI",
+ && info.engines[8] === "GRAIN" && info.engines[9] === "PHYS" && info.engines[10] === "DRUM" && info.engines[11] === "NOISE" && info.pcount === 148 && info.pe0 === 140 && info.engines[4] === "SAMPLE" && info.engines[15] === "SUPERSAW" && info.engines[16] === "ACID" && info.engines[17] === "MINI" && info.engines[18] === "HOOVER",
     "editor: INFO ((2.5) P_COUNT 148, P_E0 140 from its wide-ids tag)");
   {
     /* (Skiff 1.3) wide ids: a track id from 128 on ((2.0) E0..E7 since P_E0 135, after the lane pans 127..134; (2.1) P_E0

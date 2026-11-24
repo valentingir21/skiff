@@ -23,6 +23,7 @@ static void *eng_part(const track_t *t);
 #include "eng_phys.c"           /* PHYS: DaisySP physical models (phys_dsp.c, MIT) */
 #include "eng_drum.c"           /* DRUM: the 8-lane kit (drum_voice.c) */
 #include "eng_drumx.c"          /* (Skiff) DRUM-X: JIANT FM's drum engine (drumx_voice.c, GPL-3.0-only) */
+#include "eng_hoover.c"  /* (techno-engines) HOOVER */
 #include "eng_mini.c"    /* (techno-engines) MINI */
 #include "eng_acid.c"    /* (techno-engines) ACID */
 #include "eng_ssaw.c"    /* (techno-engines) SUPERSAW */
@@ -48,6 +49,7 @@ typedef union {
     drumx_lane_t drumx[DV_NLANE];
     ssaw_vc_t ssaw[NVOICE];         /* (techno-engines) SUPERSAW */
     acid_vc_t acid[NVOICE];         /* (techno-engines) ACID */
+    hoover_vc_t hoover[NVOICE];     /* (techno-engines) HOOVER */
     fm6_note_t fm6[FM6_POLY];
 #if FELUCCA_WHEEL
     drw_vc_t wheel[NVOICE];
@@ -64,6 +66,7 @@ typedef union {
     drumx_lane_t drumx[DV_NLANE];
     ssaw_vc_t ssaw[NVOICE];         /* (techno-engines) SUPERSAW */
     acid_vc_t acid[NVOICE];         /* (techno-engines) ACID */
+    hoover_vc_t hoover[NVOICE];     /* (techno-engines) HOOVER */
     fm6_note_t fm6[FM6_POLY];
 #if FELUCCA_WHEEL
     drw_vc_t wheel[NVOICE];
@@ -144,6 +147,7 @@ static const engine_t *const ENGINES[NENGINES] = {
     &ENG_SSAW,                /* 15 (techno-engines) */
     &ENG_ACID,                /* 16 (techno-engines) */
     &ENG_MINI,                /* 17 (techno-engines) */
+    &ENG_HOOVER,              /* 18 (techno-engines) */
 };
 
 /* a track's engine number as an index (the audio paths: a compare, cheaper than % NENGINES; a bad number: 0) */
@@ -199,6 +203,7 @@ static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
 #if FELUCCA_SLICE
     13,                          /* SLICE */
 #endif
+    18,                          /* HOOVER (techno-engines: SLICE's place) */
     10,                          /* DRUM */
     14,                          /* DRUM-X */
 };

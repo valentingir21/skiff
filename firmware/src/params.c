@@ -83,7 +83,10 @@ static const char *const N_MSRC[] = {"OFF", "LFO", "ENV", "VEL", "KEY", "RAND", 
 static const char *const N_MDST[] = {"OFF", "PITCH", "CUT", "SHP", "AMP", "PAN", "DIST", "CHO", "DLY", "REV", "RATE",
                                      "VIB", "E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8",
                                      "DEPTH", "VEL", "TIME"};   /* ((1.3) the LFO's depth; at a note: VEL, TIME) */
-static const char *const N_ENGNAME[] = {"ANALOG", FELUCCA_FM4 ? "DIGITAL" : "-", "PHASE", "LOFI", "SAMPLE", "VOICE", "TRIO", "WHEEL", "GRAIN", "PHYS",
+static const char *const N_ENGNAME[] = {"ANALOG", FELUCCA_FM4 ? "DIGITAL" : "-", "PHASE",
+                                             FELUCCA_LOFI ? "LOFI" : "-", "SAMPLE",   /* ((techno-engines) the ones */
+                                             FELUCCA_VOICE ? "VOICE" : "-", "TRIO",   /* left out of the build: "-") */
+                                             FELUCCA_WHEEL ? "WHEEL" : "-", "GRAIN", "PHYS",
                                              "DRUM", "NOISE", "FM6",
 #if FELUCCA_SLICE
                                              "SLICE",
@@ -92,6 +95,7 @@ static const char *const N_ENGNAME[] = {"ANALOG", FELUCCA_FM4 ? "DIGITAL" : "-",
 #endif
                                              "DRUM-X",
 };
+_Static_assert(sizeof N_ENGNAME / sizeof N_ENGNAME[0] == NENGINES, "N_ENGNAME: a name per engine");
 
 #define PD(l, f, mn, mx, df) {l, 0, mn, mx, df, f, 0}
 #define PE(l, n, df) {l, n, 0, (int16_t)(sizeof(n) / sizeof(n[0]) - 1), df, F_ENUM, 0}

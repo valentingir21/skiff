@@ -900,7 +900,8 @@ static int esnd_make(uint32_t k, const uint8_t *b, esnd_t *s)
     uint32_t eng = b[0] - 1u, u = b[0] & 127u, pi;
     s->kit = s->fm6 = 0;
     if (b[0] & 128u) {
-        if (u >= UP_SLOTS || !up_used(u) || !eng_allowed(k, up_engine(u)))
+        /* ((techno-engines) a user sound of an engine left out of this build: none, as one the track may not play) */
+        if (u >= UP_SLOTS || !up_used(u) || !eng_allowed(k, up_engine(u)) || eng_gone(up_engine(u)))
             return 0;
         up_values(up_rec(u), s->p);
         s->eng = (uint8_t)up_engine(u);

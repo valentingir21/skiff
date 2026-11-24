@@ -1564,6 +1564,10 @@ static int project_restore_runtime(const project_t *input)
             apply_preset_to(t, TRK_DEF[k][1]);
             track_defaults_steps(t);
         }
+        /* ((techno-engines) its engine left out of this build (LOFI VOICE WHEEL SLICE): ANALOG's first preset; the
+         * track's own values, its patterns and its mix stay (param_kept) */
+        else if (eng_gone(p->t[k].engine))
+            set_engine_of(t, 0);
 #if FELUCCA_LEGACY
         else if (p->t[k].preset == PROJ_DEF_KEEP) {     /* the steps, LEVEL PAN MUTE, LEN DIV SWING GATE kept */
             int16_t keep[P_COUNT];

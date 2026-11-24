@@ -8,11 +8,17 @@ static void *eng_part(const track_t *t);
 #include "dsp.c"
 #include "eng_analog.c"
 #include "eng_phase.c"
+#if FELUCCA_LOFI
 #include "eng_lofi.c"
+#endif
 #include "eng_sample.c"
+#if FELUCCA_VOICE
 #include "eng_formant.c"
+#endif
 #include "eng_trio.c"
+#if FELUCCA_WHEEL
 #include "eng_wheel.c"
+#endif
 #include "eng_grain.c"
 #include "eng_phys.c"           /* PHYS: DaisySP physical models (phys_dsp.c, MIT) */
 #include "eng_drum.c"           /* DRUM: the 8-lane kit (drum_voice.c) */
@@ -38,7 +44,9 @@ typedef union {
     drum_lane_t drum[DV_NLANE];
     drumx_lane_t drumx[DV_NLANE];
     fm6_note_t fm6[FM6_POLY];
+#if FELUCCA_WHEEL
     drw_vc_t wheel[NVOICE];
+#endif
 #if FELUCCA_SLICE
     int16_t slice[SLC_NV][SLC_RB];   /* SLICE's reverse windows */
 #endif
@@ -50,7 +58,9 @@ typedef union {
     drum_lane_t drum[DV_NLANE];
     drumx_lane_t drumx[DV_NLANE];
     fm6_note_t fm6[FM6_POLY];
+#if FELUCCA_WHEEL
     drw_vc_t wheel[NVOICE];
+#endif
 #if FELUCCA_SLICE
     int16_t slice[SLC_NV][SLC_RB];
 #endif
@@ -70,6 +80,23 @@ static uint32_t eng_size(const track_t *t)            /* its area's bytes (the e
     return sizeof(eng_mem_t);
 }
 
+/* (techno-engines) the engines left out of this build (LOFI VOICE WHEEL SLICE: core.h) keep their numbers with this: no
+ * presets, never offered (eng_ok), silent; a sound that names one loads as ANALOG's first preset (eng_gone) */
+static void gone_note_on(track_t *t, voice_t *v) { (void)t; (void)v; }
+static void gone_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const vmod_t *m)
+{
+    (void)t; (void)v; (void)out; (void)n; (void)m;
+}
+#define GONE_E {"-", 0, 0, 0, 0, F_INT, 0}
+static const engine_t ENG_GONE = {
+    .name = "-",
+    .page_title = {"-", "-"},
+    .edit = {GONE_E, GONE_E, GONE_E, GONE_E, GONE_E, GONE_E, GONE_E, GONE_E},
+    .note_on = gone_note_on,
+    .render = gone_render,
+    .knob = {P_E4, P_E5, P_E6, P_REL},
+};
+
 /* the editor protocol, user presets and projects store these indices: append, never reorder */
 static const engine_t *const ENGINES[NENGINES] = {
     &ENG_ANALOG,                 /* 0 */
@@ -79,11 +106,23 @@ static const engine_t *const ENGINES[NENGINES] = {
     &ENG_FM4_GONE,               /* 1: reserved (DIGITAL, retired: its sounds convert to FM6, fm4_convert.c) */
 #endif
     &ENG_PHASE,                  /* 2 */
+#if FELUCCA_LOFI
     &ENG_LOFI,                   /* 3 */
+#else
+    &ENG_GONE,                   /* 3: reserved ((techno-engines) LOFI left out: engines.c eng_gone) */
+#endif
     &ENG_SAMPLE,                 /* 4 */
+#if FELUCCA_VOICE
     &ENG_FORMANT,                /* 5 VOICE (eng_formant.c: "voice" is a sounding note in voice.c) */
+#else
+    &ENG_GONE,                   /* 5: reserved ((techno-engines) VOICE left out) */
+#endif
     &ENG_TRIO,                   /* 6 */
+#if FELUCCA_WHEEL
     &ENG_WHEEL,                  /* 7 */
+#else
+    &ENG_GONE,                   /* 7: reserved ((techno-engines) WHEEL left out) */
+#endif
     &ENG_GRAIN,                  /* 8 */
     &ENG_PHYS,                   /* 9 (ENGI_PHYS) */
     &ENG_DRUM,                   /* 10 (ENGI_DRUM) */
@@ -92,7 +131,7 @@ static const engine_t *const ENGINES[NENGINES] = {
 #if FELUCCA_SLICE
     &ENG_SLICE,                  /* 13 (ENGI_SLICE) */
 #else
-    &ENG_FM4_GONE,               /* 13: reserved (FELUCCA_SLICE=0 builds without SLICE: never offered, eng_ok) */
+    &ENG_GONE,                   /* 13: reserved (FELUCCA_SLICE=0 builds without SLICE: never offered, eng_ok) */
 #endif
     &ENG_DRUMX,                  /* 14 (ENGI_DRUMX, Skiff) */
 };
@@ -130,7 +169,19 @@ static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
 #if FELUCCA_FM4
     1,                           /* DIGITAL */
 #endif
-    2, 3, 4, 5, 6, 7, 8, 9,      /* PHASE LOFI SAMPLE VOICE TRIO WHEEL GRAIN PHYS */
+    2,                           /* PHASE */
+#if FELUCCA_LOFI
+    3,                           /* LOFI */
+#endif
+    4,                           /* SAMPLE */
+#if FELUCCA_VOICE
+    5,                           /* VOICE */
+#endif
+    6,                           /* TRIO */
+#if FELUCCA_WHEEL
+    7,                           /* WHEEL */
+#endif
+    8, 9,                        /* GRAIN PHYS */
     11,                          /* NOISE */
 #if FELUCCA_SLICE
     13,                          /* SLICE */
@@ -141,7 +192,14 @@ static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
 
 /* the engines one can pick (engine 1 only with FELUCCA_FM4), in ENGINE_ORDER: eng_ok(e), the n-th of them
  * eng_vis(n), e's place among them eng_rank(e), the next / previous one eng_step(e, dir) (wraps) */
-static int eng_ok(uint32_t e) { return e < NENGINES && (FELUCCA_FM4 || e != ENGI_DIGITAL) && (FELUCCA_SLICE || e != ENGI_SLICE); }
+static int eng_ok(uint32_t e)
+{
+    return e < NENGINES && (FELUCCA_FM4 || e != ENGI_DIGITAL) && (FELUCCA_SLICE || e != ENGI_SLICE) &&
+           (FELUCCA_LOFI || e != ENGI_LOFI) && (FELUCCA_VOICE || e != ENGI_VOICE) && (FELUCCA_WHEEL || e != ENGI_WHEEL);
+}
+/* (techno-engines) an engine left out of this build (LOFI VOICE WHEEL SLICE: core.h), named by a stored sound (a
+ * project, a user preset, a song entry, the editor): 1. DIGITAL is not one (its sounds convert to FM6, as ever) */
+static int eng_gone(uint32_t e) { return e < NENGINES && e != ENGI_DIGITAL && !eng_ok(e); }
 static uint32_t eng_vis(uint32_t n) { return ENGINE_ORDER[n % NENG_SHOWN]; }
 static uint32_t eng_rank(uint32_t e)
 {
@@ -172,6 +230,7 @@ static uint32_t eng_step_for(uint32_t k, uint32_t e, int32_t dir)   /* eng_step 
 }
 
 /* the parts at power-on (engine, preset; the sequencers empty): bass, pad, lead, drums, (phase 6) a sample sound
- * and a second kit: ANALOG ACID, FM6 PAD (was DIGITAL PAD), LOFI PULSE LD, DRUM KIT, PIANO, DRUM KIT */
-static const uint8_t TRK_DEF[NPART][2] = {{0, 4}, {ENGI_FM6, 4}, {3, 0}, {ENGI_DRUM, 0}, {ENGI_SAMPLE, 0}, {ENGI_DRUM, 0}};
+ * and a second kit: ANALOG ACID, FM6 PAD (was DIGITAL PAD), TRIO ARP LEAD ((techno-engines) LOFI PULSE LD before: LOFI
+ * left out), DRUM KIT, PIANO, DRUM KIT */
+static const uint8_t TRK_DEF[NPART][2] = {{0, 4}, {ENGI_FM6, 4}, {6, 1}, {ENGI_DRUM, 0}, {ENGI_SAMPLE, 0}, {ENGI_DRUM, 0}};
 static uint32_t trk_def_engine(uint32_t i) { return TRK_DEF[i % NPART][0]; }

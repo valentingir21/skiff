@@ -438,6 +438,11 @@ static int up_load(uint32_t k)
     track_t *t = TSEL;
     if (!up_used(k))
         return 1;
+    if (eng_gone(up_engine(k))) {                       /* ((techno-engines) its engine left out of this build: ANALOG's */
+        set_engine_of(t, 0);                            /* first preset, as a project's track of one loads (project.c) */
+        ui.force = 1;
+        return 0;
+    }
     if (!eng_allowed(song.sel, up_engine(k))) {
         eng_refused(up_engine(k));
         return 2;

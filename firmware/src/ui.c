@@ -2078,6 +2078,8 @@ static int set_engine_of(track_t *t, uint32_t ei)
     if (ei % NENGINES == ENGI_DIGITAL)               /* ((2.0) DIGITAL (retired; the editor's SET, PRESET): FM6 */
         ei = ENGI_FM6;
 #endif
+    if (eng_gone(ei % NENGINES))                     /* ((techno-engines) an engine left out of this build: ANALOG */
+        ei = 0;
     e = ENGINES[ei % NENGINES];
     if (!eng_allowed(trk_index(t), ei)) {
         eng_refused(ei);

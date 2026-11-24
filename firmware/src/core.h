@@ -50,8 +50,20 @@ _Static_assert(NTRK <= 8 && NPART < VOICES_1CORE && VOICES_2CORE <= NVOICE * NPA
 #define AUDIO_RAM                /* (Skiff) audio code run from RAM on the unit (felucca.c); host builds: nothing */
 #define AUDIO_FAR(fn) fn         /* .. a call between it and XIP code: on the unit through a pointer; here direct */
 #endif
+/* (techno-engines) SLICE, LOFI, VOICE and WHEEL are left out of this firmware (0): their code stays in the tree (1
+ * builds them again), their engine numbers stay reserved (never offered, never reused), and a sound that names one
+ * loads as ANALOG's first preset instead (engines.c eng_gone) */
 #ifndef FELUCCA_SLICE
-#define FELUCCA_SLICE 1          /* the SLICE engine (eng_slice.c), engine 13; FELUCCA_SLICE=0 builds without it */
+#define FELUCCA_SLICE 0          /* the SLICE engine (eng_slice.c), engine 13; FELUCCA_SLICE=0 builds without it */
+#endif
+#ifndef FELUCCA_LOFI
+#define FELUCCA_LOFI 0           /* (techno-engines) the LOFI engine (eng_lofi.c), engine 3 */
+#endif
+#ifndef FELUCCA_VOICE
+#define FELUCCA_VOICE 0          /* (techno-engines) the VOICE engine (eng_formant.c), engine 5 */
+#endif
+#ifndef FELUCCA_WHEEL
+#define FELUCCA_WHEEL 0          /* (techno-engines) the WHEEL engine (eng_wheel.c), engine 7 */
 #endif
 #ifndef FELUCCA_FM4
 #define FELUCCA_FM4 0            /* the DIGITAL engine (eng_digital.c, four-operator FM): kept in the tree, not built
@@ -66,7 +78,11 @@ _Static_assert(NTRK <= 8 && NPART < VOICES_1CORE && VOICES_2CORE <= NVOICE * NPA
 #define NENGINES 15u             /* (Skiff) DRUM-X (14) after SLICE (13): the other engines keep their numbers */
 #define ENGI_DIGITAL 1u          /* reserved without FELUCCA_FM4: never selectable (eng_ok), its sounds load as FM6 */
 #define ENGI_SLICE 13u           /* reserved without FELUCCA_SLICE, as DIGITAL is without FELUCCA_FM4 */
-#define NENG_SHOWN (NENGINES - !FELUCCA_FM4 - !FELUCCA_SLICE)   /* the engines one can pick: PRESETS, the EDIT layer,
+#define ENGI_LOFI 3u             /* (techno-engines) reserved without FELUCCA_LOFI, */
+#define ENGI_VOICE 5u            /* .. FELUCCA_VOICE, */
+#define ENGI_WHEEL 7u            /* .. FELUCCA_WHEEL */
+#define NENG_GONE (!FELUCCA_FM4 + !FELUCCA_SLICE + !FELUCCA_LOFI + !FELUCCA_VOICE + !FELUCCA_WHEEL)
+#define NENG_SHOWN (NENGINES - NENG_GONE)   /* the engines one can pick: PRESETS, the EDIT layer,
                                                 * the editor, in the display order of engines.c ENGINE_ORDER */
 #define UP_SLOTS 32u             /* user presets (upreset.c) */
 #define NELEM(a) (sizeof(a) / sizeof((a)[0]))

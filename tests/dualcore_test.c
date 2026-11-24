@@ -169,10 +169,11 @@ int main(void)
             sc[n++].morph = 0;
         }
     }
-    sc[n++] = (scen_t){"mix: PHYS FM6 ANALOG DRUM VOICE FM6", {ENGI_PHYS, ENGI_FM6, 0, ENGI_DRUM, 5, ENGI_FM6}, {1, 4, 7, 0, 2, 6}, 0};
-    sc[n++] = (scen_t){"mix: GRAIN NOISE VOICE LOFI VOICE DRUMX", {ENGI_GRAIN, 11, 5, 3, 5, ENGI_DRUMX}, {1, 4, 7, 2, 3, 0}, 0};
-    sc[n++] = (scen_t){"mix: TRIO WHEEL PHASE FM6 WHEEL SAMPLE", {6, 7, 2, ENGI_FM6, 7, ENGI_SAMPLE}, {1, 4, 5, 3, 2, 1}, 0};
-    sc[n++] = (scen_t){"mix: PHYS morph + DRUM GRAIN ..", {ENGI_PHYS, ENGI_DRUM, ENGI_GRAIN, 0, ENGI_DRUMX, 3}, {2, 1, 3, 5, 0, 1}, 1};
+    /* ((techno-engines) VOICE LOFI WHEEL left out of the build: TRIO, PHASE, NOISE in their places) */
+    sc[n++] = (scen_t){"mix: PHYS FM6 ANALOG DRUM TRIO FM6", {ENGI_PHYS, ENGI_FM6, 0, ENGI_DRUM, 6, ENGI_FM6}, {1, 4, 7, 0, 2, 6}, 0};
+    sc[n++] = (scen_t){"mix: GRAIN NOISE TRIO PHASE TRIO DRUMX", {ENGI_GRAIN, 11, 6, 2, 6, ENGI_DRUMX}, {1, 4, 7, 2, 3, 0}, 0};
+    sc[n++] = (scen_t){"mix: TRIO NOISE PHASE FM6 NOISE SAMPLE", {6, 11, 2, ENGI_FM6, 11, ENGI_SAMPLE}, {1, 4, 5, 3, 2, 1}, 0};
+    sc[n++] = (scen_t){"mix: PHYS morph + DRUM GRAIN ..", {ENGI_PHYS, ENGI_DRUM, ENGI_GRAIN, 0, ENGI_DRUMX, 2}, {2, 1, 3, 5, 0, 1}, 1};
 #if FELUCCA_SLICE
     sc[n++] = (scen_t){"mix: SAMPLE SLICE GRAIN PHASE SLICE", {ENGI_SAMPLE, ENGI_SLICE, ENGI_GRAIN, 2, ENGI_SLICE, ENGI_DRUM}, {2, 1, 3, 5, 0, 1}, 0};
 #endif

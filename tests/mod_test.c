@@ -560,9 +560,10 @@ static int demos(const char *dir)
         fclose(f);
         n++;
     }
-    /* MODW -> VIB: LOFI WAVE LEAD, the mod wheel (CC1) rises over 4 s: vibrato from none to deep */
-    e = eng_by_name("LOFI");
-    fresh(e, preset_by_name(e, "WAVE LEAD"));
+    /* MODW -> VIB: ANALOG SAW LEAD ((techno-engines) LOFI WAVE LEAD before: LOFI left out), the mod wheel (CC1) rises
+     * over 4 s: vibrato from none to deep */
+    e = eng_by_name("ANALOG");
+    fresh(e, preset_by_name(e, "SAW LEAD"));
     t->p[P_LRATE] = 70;
     t->p[P_LD_PIT] = 0;
     t->p[P_LFADE] = 0;
@@ -595,8 +596,9 @@ static int demos(const char *dir)
         fclose(f);
         n++;
     }
-    /* AT -> WHEEL DRV: an organ chord, channel aftertouch pushes the drive up and down */
-    e = eng_by_name("WHEEL");
+    /* AT -> DRIVE: a chord, channel aftertouch pushes the drive up and down ((techno-engines) on ANALOG: WHEEL, the organ
+     * of before, left out of the build) */
+    e = eng_by_name("ANALOG");
     fresh(e, 0);
     slot(t, 0, MS_AT, MD_E1 + (int32_t)edit_by_label(e, "DRIVE", 6), 63);
     slot(t, 1, MS_AT, MD_CUT, 20);

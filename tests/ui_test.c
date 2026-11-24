@@ -3297,12 +3297,7 @@ static int test_sample_alert(void)
     return bad;
 }
 
-#if FELUCCA_SLICE
-/* SLICES (EDIT family, a SLICE track: ui_slice.c; the MAN slices of eng_slice.c, ported from hugelton/Felucca#27 by
- * andreahaku): in the EDIT cycle after EDIT 2 on SLICE only; BREAK shows its slices, edits need a user slot; the first
- * edit takes the slices shown (8 equal) as MAN and sets DIV MAN; KNOB 1 the marker (then END), KNOB 2 moves it,
- * KNOB 3 / 4 pick SPLIT / JOIN and OCT+ does it (it stays picked), OCT- drops the pick, then goes HOME; a key picks
- * its slice and the keys of the selected slice are lit; the slot is marked for the store; another engine: EDIT 1 */
+/* ((techno-engines) out of the SLICE block below: the SAMPLE tests and ui_render.c use it too) */
 static void host_slot_make(uint32_t k)                /* USR k + 1: 2 s at 22.05 kHz, a noise burst every 0.25 s */
 {
     smp_user_hdr_t *h = (smp_user_hdr_t *)((uint8_t *)host_slots + k * SMP_USER_SIZE);
@@ -3324,6 +3319,13 @@ static void host_slot_make(uint32_t k)                /* USR k + 1: 2 s at 22.05
     h->zone[0].root16 = 60 * 16;
     h->zone[0].hi = 127;
 }
+
+#if FELUCCA_SLICE
+/* SLICES (EDIT family, a SLICE track: ui_slice.c; the MAN slices of eng_slice.c, ported from hugelton/Felucca#27 by
+ * andreahaku): in the EDIT cycle after EDIT 2 on SLICE only; BREAK shows its slices, edits need a user slot; the first
+ * edit takes the slices shown (8 equal) as MAN and sets DIV MAN; KNOB 1 the marker (then END), KNOB 2 moves it,
+ * KNOB 3 / 4 pick SPLIT / JOIN and OCT+ does it (it stays picked), OCT- drops the pick, then goes HOME; a key picks
+ * its slice and the keys of the selected slice are lit; the slot is marked for the store; another engine: EDIT 1 */
 static int test_slices(void)
 {
     static const char *const CYC_S[] = {"EDIT 1", "EDIT 2", "SLICES", "VOICE", "VOICE 2", "EDIT 1"};
@@ -3723,9 +3725,9 @@ static int test_quick_layers(void)
     bad += check("  every engine one can pick has its white key from F3 (NENG_SHOWN, not a fixed count; never DIGITAL)",
                  ok && a == NENG_SHOWN);
     set_engine_of(TSEL, 0);
-    lay_combo(B_EDIT, white(eng_rank(3))); key_up(white(eng_rank(3))); frame();
+    lay_combo(B_EDIT, white(eng_rank(2))); key_up(white(eng_rank(2))); frame();   /* ((techno-engines) PHASE: LOFI (3) left out) */
     turn(EN_K2, 1);
-    ok = TSEL->eng_req == 3u && TSEL->preset == 1u;
+    ok = TSEL->eng_req == 2u && TSEL->preset == 1u;
     turn(EN_K3, 1);
     ok &= preset_favorite();
     oct_back();
@@ -4493,9 +4495,11 @@ static int test_fm6_charts(void)
 static int test_fm4_retired(void)
 {
     int bad = 0, ok = 1;
-    uint32_t i, k, e, total, seen = 0, all = ((1u << NENGINES) - 1u) & ~(1u << ENGI_DIGITAL);
+    uint32_t i, k, e, total, seen = 0, all = 0;
     int16_t p[P_COUNT];
     uint8_t v[FP_SIZE + 1u];
+    for (e = 0; e < NENGINES; e++)                      /* ((techno-engines) every engine but DIGITAL and those left out */
+        all |= (uint32_t)eng_ok(e) << e;                /* of the build) */
     ui_power_on();
     bad += check("power-on: track 2 is FM6 PAD (TRK_DEF, was DIGITAL PAD)", trk[1].eng_req == ENGI_FM6 &&
                  str_eq(ENGINES[ENGI_FM6]->presets[trk[1].preset].name, "PAD"));
@@ -4505,7 +4509,7 @@ static int test_fm4_retired(void)
         if (e < NENGINES)
             seen |= 1u << e;
     }
-    bad += check("PRESETS: the list holds every engine's presets but DIGITAL's", seen == all && NENG_SHOWN == NENGINES - 1u);
+    bad += check("PRESETS: the list holds every engine's presets but DIGITAL's", seen == all && NENG_SHOWN == NENGINES - NENG_GONE);
     go_page(GR_BROWSE);
     set_engine_of(TSEL, 0);
     for (i = 0, seen = 0; i < NENG_SHOWN; i++) {
@@ -4516,8 +4520,9 @@ static int test_fm4_retired(void)
                  seen == all && TSEL->eng_req == 0u && eng_step(0, 1) == ENGI_FM6 && eng_step(ENGI_FM6, 1) == 2u &&
                  eng_step(ENGI_FM6, -1) == 0u && eng_step(0, -1) == ENGI_DRUMX && eng_step(ENGI_DRUMX, -1) == ENGI_DRUM);
     {   /* the display order (engines.c ENGINE_ORDER): every engine one can pick once; the PRESETS list follows it */
-        static const char *const ORDER[] = {"ANALOG", "FM6", "PHASE", "LOFI", "SAMPLE", "VOICE", "TRIO", "WHEEL", "GRAIN",
-                                            "PHYS", "NOISE", "SLICE", "DRUM", "DRUM-X"};
+        static const char *const ORDER[] = {"ANALOG", "FM6", "PHASE",   /* ((techno-engines) LOFI VOICE WHEEL SLICE */
+                                            "SAMPLE", "TRIO", "GRAIN",   /* left out of the build) */
+                                            "PHYS", "NOISE", "DRUM", "DRUM-X"};
         uint32_t last = 0xFFu, r = 0, n = 0;
         ok = NENG_SHOWN == NELEM(ORDER);
         for (i = 0; ok && i < NENG_SHOWN; i++)
@@ -8375,9 +8380,11 @@ static int test_u4(void)
     ui_power_on();
     param_format(&GP[G_RTYPE], 1, v, &u);
     ok = str_eq(v, "SPRING");
+#if FELUCCA_WHEEL                                       /* ((techno-engines) WHEEL left out of the build) */
     set_engine_of(TSEL, 7u);                            /* (WHEEL) */
     param_format(track_desc(TSEL, P_E0), 1, v, &u);
     ok &= str_eq(v, "MELLOW");
+#endif
     bad += check("U4 V5: values in full (SPRING, MELLOW; were SPRIN, MELLO)", ok);
     set_engine_of(TSEL, ENGI_DRUM);
     TSEL->engine = TSEL->eng_req;
@@ -8646,8 +8653,10 @@ static int test_u3(void)
     ui_power_on();                                      /* V2: KNOB 1's throw, a tone on every engine */
     set_engine_of(TSEL, ENGI_SAMPLE);
     ok = throw_id(TSEL, 0) == P_E4 && throw_id(TSEL, 1) == P_REV;
+#if FELUCCA_LOFI                                        /* ((techno-engines) LOFI left out of the build) */
     set_engine_of(TSEL, 3);
     ok &= throw_id(TSEL, 0) == P_E7;
+#endif
     set_engine_of(TSEL, ENGI_FM6);
     ok &= throw_id(TSEL, 0) == ENGINES[ENGI_FM6]->knob[0];
     bad += check("U3 V2: PERFORM's KNOB 1 throws SAMPLE's CUT, LOFI's TONE; FM6 its HOME KNOB 1 (MLVL) as before", ok);

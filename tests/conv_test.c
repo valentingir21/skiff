@@ -563,7 +563,8 @@ int main(int argc, char **argv)
         project_load(1);                           /* (slot 2: Felucca 1.4's) */
         ok &= proj_cur == 1u && trk[0].eng_req == 2u && trk[0].p[P_LSYNC] == 2 && trk[0].p[P_SPRD] == 20 &&
               trk[0].p[P_E0 + 2] == 99 && !trk[0].p[P_ITYPE] && !trk[0].p[P_ESYNC] && trk[0].step[8].note[0] == 62u &&
-              trk[1].eng_req == 3u && trk[1].step[0].note[0] == 55u;
+              trk[1].eng_req == (FELUCCA_LOFI ? 3u : 0u) &&   /* ((techno-engines) T2 LOFI: left out, it loads as ANALOG */
+              trk[1].step[0].note[0] == 55u;                  /* (engines.c eng_gone), its notes kept) */
         bad += check("  slots 1 and 2 (FUNA of 111 and 104): sounds by name, notes, slot 1's song", ok);
         ok = 1;
         for (k = 0; k < 5u; k++)

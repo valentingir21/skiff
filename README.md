@@ -14,6 +14,14 @@ synths and drums, patterns and songs, live performance, and a screen that shows 
   <img src="https://img.shields.io/badge/hardware-M--VAVE%20FM--1%20%7C%20SMK--37%20Pro-555" alt="Hardware: M-VAVE FM-1 | SMK-37 Pro">
 </p>
 
+> **This fork: Skiff techno** (branch `techno-engines-v2`, by valentingir21). The same Skiff, its effects, sequencer and
+> screens unchanged, tuned for techno, hard techno, industrial, hard trance and hardtech: a techno preset bank, and five
+> engines in place of WHEEL, VOICE, LOFI and SLICE (left out of the build; their sounds load as ANALOG): **SUPERSAW**
+> (the JP-8000's, polyphonic), **ACID** (a TB-303: accent, slide; its filter Open303's by Robin Schmidt through X0X and
+> Skiff Atlatl), **MINI** (a Minimoog: Skiff Atlatl's FMINI by LIkst4, from FMini-1 by Guilherme Ruppert), **HOOVER**
+> (the rave "Mentasm" lead) and **INDUS** (metal and machines). Skiff is by illuminus5, built on Felucca by Hügelton
+> Instruments; credits and licences in [LICENSING.md](LICENSING.md).
+
 <p align="center"><b>New in 2.7:</b> the Screen tab goes full screen, works the FM-1 from the page (mouse, touch or
 keyboard) and comes to the SMK-37, the editor's Sequencer as a piano roll, SYNC OUT for Pocket Operators, and fixes: the phaser's squeal, the
 filter on spread voices, TRIO's and SUB BASS's clicks, the editor's stray entries ·

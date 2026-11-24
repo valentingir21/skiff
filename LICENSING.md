@@ -11,6 +11,8 @@ under the same licence. Felucca's files keep their copyright notices; Skiff's ch
 
 Copyright (C) 2026 Leo Kuroshita (@kurogedelic), Hügelton Instruments (Felucca)
 Copyright (C) 2026 illuminus5 (Skiff's changes and additions)
+Copyright (C) 2026 valentingir21 (the techno-engines fork: SUPERSAW, ACID, MINI's port, HOOVER, INDUS, the techno
+presets; WHEEL, VOICE, LOFI and SLICE left out of its build)
 
 ## What is GPL-3.0-only
 
@@ -69,6 +71,8 @@ made: `assets/breaks/ATTRIBUTION.txt`).
 | fm1-clk320-probe by curist (<https://github.com/curist/fm1-clk320-probe>): the switch from the FM-1's 360 MHz to JieLi's rated 320 MHz behind MENU > SYSTEM > CPU CLOCK (the check of the clock registers, the switch, its reason codes and a crystal-timed clock loop), unchanged; its sequence after the JieLi AC79 SDK's `sys_clock_update` (Apache-2.0) | MIT | `firmware/hal/fm1_clk320.h`, `firmware/hal/fm1_clk320_probe.h`, `LICENSES/MIT-fm1-clk320.txt` |
 | The SMK-37 board layer by genkigenki (M. Geisler) for Felucca (<https://github.com/genkigenki/Felucca>, branch `smk37`, commit b67312c; hugelton/Felucca#237): the M-VAVE SMK-37 Pro build target behind `BOARD_SMK37` (the input HAL, its velocity and pads, the LCD pins and the pad LEDs, the SMK flash map and its guards, the store's owner tag and the stock mapping's marker, the update staging and loader windows, the per-model identities, the package's region table, the installers' model rule and their tests), adapted to Skiff (its detent decoder on the SMK knobs, its store and pattern pool, its LED picture), modified 2026-10-18 | GPL-3.0-only | `firmware/hal/smk_input.h`, `firmware/hal/smk_compat.h`, `firmware/hal/fm1_flash_map.h`, `firmware/hal/fm1_lcd_hw.h`, `BOARD_SMK37` blocks in `firmware/`, `tools/build.py`, `tools/fm1pkg_make.py`, `tools/fm1_install.py`, `web/fm1ota.js`, `web/fm1pkg.js`, `tests/smk_*`, `tests/ldr_test.c`, `tests/ota_test.c`, `tests/install_test.py`, `web/test_web.mjs` |
 | fm1-to-smk37 by genkigenki (<https://github.com/genkigenki/fm1-to-smk37>): the SMK-37 hardware notes (pins, matrix, flash map, update) the SMK-37 build was checked against; no text of it is in this tree | CC BY-NC 4.0 | credit only |
+| (techno-engines fork, valentingir21) Skiff Atlatl by LIkst4 (<https://github.com/LIkst4/skiff-atlatl>), a Skiff 2.7 fork: the MINI engine is its FMINI engine, ported (the DSP as written; the LFO as Skiff's voices read it, five of its basses an octave up in patches 123..127, its own presets), itself the Minimoog voice of FMini-1 by Guilherme Ruppert (<https://github.com/ruppert/fmini-1>, a Felucca fork); the ACID engine's filter is Atlatl's ACID filter (`flt.c` `fl_acid`) and its tables, after X0X's `bass303.c` (charlesvestal/fm1-x0x, GPL-3.0-only), itself a port of Open303's TeeBeeFilter by Robin Schmidt | GPL-3.0-only (Open303's parts MIT) | `firmware/src/eng_mini.c`, `firmware/src/mini/`, `firmware/src/eng_acid.c`, `LICENSES/MIT-Open303.txt` |
+| (techno-engines fork) the SUPERSAW engine's detune curve, offsets and mix gains: from Adam Szabo's measurements of the Roland JP-8000 ("How to Emulate the Super Saw", 2010); no code copied | (data) | `firmware/src/eng_ssaw.c` |
 | JieLi AC79 SDK by JieLi Technology: three of its files go into every `.fwsc` package (below); none are in this tree | Apache-2.0 | `LICENSES/Apache-2.0.txt` |
 
 On the device, HOME held > ABOUT opens the information screen; turning PRESETS scrolls on into

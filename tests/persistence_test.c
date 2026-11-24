@@ -654,7 +654,7 @@ static int cpu2_once_test(void)
     favorites.factory[15][24] = 0xA5u;
     settings_save();
     boot_settings();
-    ok = CPU2_SET == CPU2_DEFAULT && ui_set_rev == 2u + CPU2_DEFAULT;
+    ok = CPU2_SET == CPU2_DEFAULT && ui_set_rev == 4u;   /* ((techno-engines) 4: the old stars cleared once, ui.c unit_g_boot) */
     e0 = erases;
     boot_settings();
     bad += check("(2.5) 2.2's 1 CORE: the FM-1's first boot moves it to 2 CORES, saved, once (the SMK-37 stays)",
@@ -666,6 +666,35 @@ static int cpu2_once_test(void)
     bad += check("  .. set back to 1 CORE, it stays so at the next power-on", !CPU2_SET && erases == e0);
     settings_reset();
     bad += check("  .. RESET SETTINGS: 2 CORES on the FM-1, 1 CORE on the SMK-37", CPU2_SET == CPU2_DEFAULT);
+    return bad;
+}
+
+/* (techno-engines) the stars of the engines left out of the build (rows 3 5 7 13, DIGITAL's two bytes of row 1) cleared
+ * once at boot (ui.c unit_g_boot, ui_set_rev 4): the new engines take those rows (favorites.c fav_row); the other rows,
+ * the MIDI LEARN bytes of row 1 and the settings' row 15 kept; a star set afterwards survives the next boot */
+static int fav_rows_test(void)
+{
+    int bad = 0, ok;
+    uint32_t r;
+    reset();
+    settings_init();
+    ui_set_rev = 3;
+    for (r = 0; r < 14u; r++)                    /* the engines' rows (14 and 15 hold settings too; row 1 from byte 2 */
+        memset(favorites.factory[r], 0x5A, r == 1u ? 2u : 32u);   /* MIDI LEARN's map) */
+    favorites.factory[15][24] = 0xA5u;           /* (Skiff's settings) */
+    settings_save();
+    boot_settings();
+    ok = ui_set_rev == 4u && favorites.factory[1][0] == 0 && favorites.factory[1][1] == 0;
+    for (r = 0; r < 14u; r++)                    /* (not 4, 10, 12: the converter's build moves DIGITAL's and SAMPLE */
+        if (r != 1u && r != 4u && r != 10u && r != 12u)   /* PERC's stars there, settings_persist.c) */
+            ok &= (r == 3u || r == 5u || r == 7u || r == 13u) ? favorites.factory[r][0] == 0 && favorites.factory[r][31] == 0
+                                                             : favorites.factory[r][0] == 0x5A && favorites.factory[r][31] == 0x5A;
+    bad += check("(techno-engines) the left-out engines' stars cleared once at boot, the others kept", ok);
+    favorite_set(15, 2, 1);                      /* SUPERSAW's 3rd preset: row 3 */
+    settings_save();
+    boot_settings();
+    bad += check("  .. a new engine's star kept over the next boot (row 3, nothing cleared again)",
+                 favorite_has(15, 2) && favorites.factory[3][0] == 4u && !favorite_has(15, 3) && favorites.factory[0][0] == 0x5A);
     return bad;
 }
 
@@ -699,7 +728,7 @@ static int other_fw_test(void)
         if (i < 2)
             ok = !song.g[G_CLOCK] && !song.g[G_ROUTE] && !song.g[G_TUNE] && !ui_ptag && !ui_hints_off &&
                  launch_mode() == LAUNCH_LOOP && !perf_scenes() && !(ui_rec_prefs & REC_FEEL) && (ui_prefs & PREF_BPM_LOCK) &&
-                 ui_set_rev == 2u + CPU2_DEFAULT;
+                 ui_set_rev == 4u;   /* ((techno-engines) 4: the old stars cleared once, ui.c unit_g_boot) */
         else
             ok = song.g[G_CLOCK] == 1 && song.g[G_ROUTE] == 1 && song.g[G_TUNE] == -4 && ui_ptag == 3u && ui_hints_off &&
                  launch_mode() == LAUNCH_NOW && perf_scenes() && (ui_rec_prefs & REC_FEEL) && !(ui_prefs & PREF_BPM_LOCK);
@@ -1073,6 +1102,7 @@ int main(void)
     bad += autosave_save_test();
     bad += other_fw_test();
     bad += cpu2_once_test();
+    bad += fav_rows_test();
     printf("%s\n", bad ? "PERSISTENCE TEST FAILED" : "persistence test passed");
     return bad != 0;
 }

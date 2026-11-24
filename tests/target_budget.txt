@@ -90,3 +90,4 @@ perf_pre_st 79
 lpan_render 11
 lpan_mix 91
 drum_smp 139
+ssaw_render 509

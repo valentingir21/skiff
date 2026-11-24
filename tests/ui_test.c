@@ -4520,9 +4520,8 @@ static int test_fm4_retired(void)
                  seen == all && TSEL->eng_req == 0u && eng_step(0, 1) == ENGI_FM6 && eng_step(ENGI_FM6, 1) == 2u &&
                  eng_step(ENGI_FM6, -1) == 0u && eng_step(0, -1) == ENGI_DRUMX && eng_step(ENGI_DRUMX, -1) == ENGI_DRUM);
     {   /* the display order (engines.c ENGINE_ORDER): every engine one can pick once; the PRESETS list follows it */
-        static const char *const ORDER[] = {"ANALOG", "FM6", "PHASE",   /* ((techno-engines) LOFI VOICE WHEEL SLICE */
-                                            "SAMPLE", "TRIO", "GRAIN",   /* left out of the build) */
-                                            "PHYS", "NOISE", "DRUM", "DRUM-X"};
+        static const char *const ORDER[] = {   /* ((techno-engines) LOFI VOICE WHEEL SLICE left out; the new ones */
+            "ANALOG", "FM6", "PHASE", "SUPERSAW", "SAMPLE", "TRIO", "GRAIN", "PHYS", "NOISE", "DRUM", "DRUM-X"};   /* in their places) */
         uint32_t last = 0xFFu, r = 0, n = 0;
         ok = NENG_SHOWN == NELEM(ORDER);
         for (i = 0; ok && i < NENG_SHOWN; i++)
@@ -8599,7 +8598,7 @@ static int test_u3(void)
     project_load(1);
     ok &= song.g[G_TUNE] == 7;
     unit_g_boot();
-    ok &= (int8_t)ui_unit_g(2) == 7 && ui_set_rev == 2u + CPU2_DEFAULT && !unit_g_adopt;   /* ((2.5) 3: cpu2_move's) */
+    ok &= (int8_t)ui_unit_g(2) == 7 && ui_set_rev == 4u && !unit_g_adopt;   /* ((techno-engines) 4: the old stars cleared once) */   /* ((2.5) 3: cpu2_move's) */
     bad += check("U3 R8: TUNE is the unit's: a project load leaves it, boot puts it back; the first boot takes the session's", ok);
     song.g[G_TUNE] = 0;
     ui_power_on();                                      /* R5: AUTOMATION's top row */

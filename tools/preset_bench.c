@@ -137,10 +137,15 @@ static double phrase_kit(void)
     return 32;
 }
 
-static double make_phrase(const preset_t *p)
+static double make_phrase(uint32_t e, const preset_t *p)
 {
     const char *n = p->name;
     nev = 0;
+#ifdef ENGI_ACID
+    if (e == ENGI_ACID)                           /* ((techno-engines) the 303: its line, accents and slides) */
+        return phrase_acid();
+#endif
+    (void)e;
     if (!strncmp(n, "BS", 2))
         return strstr(n, "ACID") ? phrase_acid() : strstr(n, "RUMBLE") || strstr(n, "SUB") ? phrase_bass(1)
                                                                                              : phrase_bass(0);
@@ -176,7 +181,7 @@ static int voices_free(void)
 static void render(const char *path, uint32_t e, uint32_t pi)
 {
     const preset_t *p = &ENGINES[e]->presets[pi];
-    double len = make_phrase(p) * step_s() + 2.5;   /* the phrase, then its tail */
+    double len = make_phrase(e, p) * step_s() + 2.5;   /* the phrase, then its tail */
     uint32_t frames = (uint32_t)(len * FS) / CTL * CTL, f, k = 0, i;
     int32_t o[2 * CTL];
     int32_t peak = 0;

@@ -736,6 +736,15 @@ static void unit_g_boot(void)
         ui_set_rev = 3;
         save = 1;
     }
+    if (ui_set_rev < 4u) {                            /* ((techno-engines) the stars of LOFI VOICE WHEEL SLICE (left out of */
+        static const uint8_t ROW[4] = {3, 5, 7, 13};  /* this build) and DIGITAL's two bytes: the new engines' rows now */
+        uint32_t i;                                   /* (favorites.c fav_row), cleared once */
+        for (i = 0; i < 4u; i++)
+            memset(favorites.factory[ROW[i]], 0, 32u);
+        favorites.factory[1][0] = favorites.factory[1][1] = 0;
+        ui_set_rev = 4;
+        save = 1;
+    }
     if (save)
         settings_save();
 }

@@ -51,6 +51,7 @@ FUNCS = ["analog_render", "digital_render", "digital_render_legacy", "digital_re
                                                  # send, MONO's line, STEREO / PING's, the stereo chorus, THROW / DUB in stereo)
          "lpan_render", "lpan_mix",              # (2.0, #36) a kit's lane panned: its voice, the mix (voice.c, fx.c)
          "ssaw_render",   # ((techno-engines) SUPERSAW)
+         "acid_render",   # ((techno-engines) ACID; acid_filter inlined there)
          "drum_smp"]                             # (2.0, #35) a user kit's lane (eng_drum.c)
 # built only with FELUCCA_FM4=1 (DIGITAL, src/eng_digital.c; not in the default build, so not in BUDGET): absent,
 # they are skipped; present, checked against these (their budget lines until the engine was retired in 1.0)

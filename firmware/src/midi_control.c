@@ -226,6 +226,7 @@ static const uint8_t MIDI_CC_ENG[NENGINES] = {
     FELUCCA_SLICE ? 0x80 : 0x00,                      /* SLICE TONE */
     0x30,                                             /* DRUM-X TONE */
     0x34,                                             /* SUPERSAW (techno-engines) */
+    0x23,                                             /* ACID (techno-engines) */
 };
 /* a CC sets parameter id of track t as a knob would: 0..127 over its range */
 static void midi_cc_set(track_t *t, uint32_t id, uint32_t value)

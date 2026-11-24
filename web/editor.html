@@ -2375,7 +2375,7 @@ function makeMockDevice(opt = {}) {
     D("SIZE", F.PCT, 0, 127, 90), D("DAMP", F.PCT, 0, 127, 60), D("RATE", F.LFOHZ, 0, 127, 40), D("DEPTH", F.PCT, 0, 127, 60),
     E("MIDI", ["USB", "TRS"], 0), E("SYNC", NDASH, 0), E("ROUTE", ["CH1-6", "SEL"], 0), D("CPU", F.INT, 0, 0, 0),
     D("SLOT", F.INT, 1, 4, 1), E("NAME", NDASH, 0), E("LOAD", NGO, 0), E("SAVE", NGO, 0),
-    E("ENGINE", ["ANALOG", "-", "PHASE", "-", "SAMPLE", "-", "TRIO", "-", "GRAIN", "PHYS", "DRUM", "NOISE", "FM6", "-", "DRUM-X", "SUPERSAW"], 0), E("SET", NGO, 0),
+    E("ENGINE", ["ANALOG", "-", "PHASE", "-", "SAMPLE", "-", "TRIO", "-", "GRAIN", "PHYS", "DRUM", "NOISE", "FM6", "-", "DRUM-X", "SUPERSAW", "ACID"], 0), E("SET", NGO, 0),
     E("CLRSQ", NGO, 0), E("INIT", NGO, 0),
     E("TYPE", ["ROOM", "SPRING", "HALL"], 0),       /* G_RTYPE (id 24, was G_DRCH): the reverb's model ((Skiff phase 9) HALL) */
     E("MODE", ["CHORUS", "FLANGER", "PHASER"], 0), D("FEEDBACK", F.PCT, 0, 127, 0),   /* 25, 26: (Skiff phase 9) the CHORUS bus
@@ -2602,7 +2602,17 @@ function makeMockDevice(opt = {}) {
         P("ST SS STAB", [72, 100, 96, 25, 64, 15, 64, 0], [0, 68, 0, 52], 0, 0, [[120, 120]]),
         P("PA SS WIDE", [90, 110, 85, 8, 70, 0, 50, 0], [80, 90, 118, 98], 0, 0, [[120, 127], [9, 30], [14, 8]]),
         P("PA SS DARK", [84, 100, 52, 20, 80, 0, 40, 0], [60, 90, 118, 96], 0, 0, [[120, 127], [9, 22], [14, 14]]),
-        P("BS SUPERSAW", [40, 70, 60, 30, 32, 30, 64, 90], [0, 64, 90, 22], 1)] }
+        P("BS SUPERSAW", [40, 70, 60, 30, 32, 30, 64, 90], [0, 64, 90, 22], 1)] },
+    /* (techno-engines) ACID (src/eng_*.c) */
+    { name: "ACID", titles: ["303", "ACCENT"], edit: [E("WAVE", ["SAW", "SQR"], 0), D("CUTOFF", F.CUTOFF, 0, 127, 40), D("RES", F.PCT, 0, 127, 90), D("ENV MOD", F.PCT, 0, 127, 70), D("DECAY", F.PCT, 0, 127, 60), D("ACCENT", F.PCT, 0, 127, 80), D("DRIVE", F.PCT, 0, 127, 0), D("CHAR", F.PCT, 0, 127, 63)],
+      presets: [P("BS 303", [0, 30, 95, 80, 60, 80, 0, 63], [0, 100, 127, 12], 1, 0, [[41, 1], [38, 26]]),
+        P("BS 303 RESO", [0, 24, 118, 70, 66, 90, 0, 70], [0, 100, 127, 12], 1, 0, [[41, 1], [38, 26]]),
+        P("BS 303 HARD", [0, 36, 105, 85, 52, 100, 90, 55], [0, 100, 127, 10], 1, 0, [[41, 1], [38, 26], [95, 1]]),
+        P("BS 303 DARK", [1, 14, 90, 55, 70, 60, 10, 80], [0, 100, 127, 14], 1, 0, [[41, 1], [38, 26]]),
+        P("BS 303 SQLCH", [0, 20, 124, 100, 40, 110, 20, 63], [0, 100, 127, 10], 1, 0, [[41, 1], [38, 26]]),
+        P("BS PHUTURE", [0, 26, 112, 90, 74, 95, 15, 50], [0, 100, 127, 14], 1, 0, [[41, 1], [38, 26]]),
+        P("BS 303 DIST", [1, 34, 110, 90, 56, 110, 120, 60], [0, 100, 127, 10], 1, 0, [[41, 1], [38, 26], [95, 4]]),
+        P("LD 303 TRNC", [0, 40, 100, 75, 80, 70, 0, 63], [0, 100, 127, 20], 1, 0, [[41, 1], [38, 26]])] }
   ];
   const FM6_E = ENG.findIndex((e) => e.name === "FM6"), FM6_OWN = FM6.FACTORY_PK.length, DRUM_E = ENG.findIndex((e) => e.name === "DRUM");
   /* factory PATTERNS[] (engines.c; the device loads them from SEQ > PATTERNS, presets only suggest one): absolute
@@ -3540,7 +3550,7 @@ function enumShown(d) {
 /* the order the device shows its engines in (src/engines.c ENGINE_ORDER): the lists here follow it, the protocol keeps
    the engine numbers. engineOrder(names): the indices of names in that order, "-" (a reserved number) left out; a name
    the list does not know (another firmware) follows in index order */
-const ENGINE_ORDER = ["ANALOG", "FM6", "DIGITAL", "PHASE", "SUPERSAW", "SAMPLE", "TRIO", "GRAIN", "PHYS", "NOISE", "DRUM", "DRUM-X"];
+const ENGINE_ORDER = ["ANALOG", "FM6", "DIGITAL", "PHASE", "SUPERSAW", "SAMPLE", "ACID", "TRIO", "GRAIN", "PHYS", "NOISE", "DRUM", "DRUM-X"];
 function engineOrder(names) {
   const rank = (n) => { const k = ENGINE_ORDER.indexOf(n); return k < 0 ? ENGINE_ORDER.length : k; };
   return (names || []).map((n, i) => i).filter((i) => names[i] !== "-")

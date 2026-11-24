@@ -4521,7 +4521,7 @@ static int test_fm4_retired(void)
                  eng_step(ENGI_FM6, -1) == 0u && eng_step(0, -1) == ENGI_DRUMX && eng_step(ENGI_DRUMX, -1) == ENGI_DRUM);
     {   /* the display order (engines.c ENGINE_ORDER): every engine one can pick once; the PRESETS list follows it */
         static const char *const ORDER[] = {   /* ((techno-engines) LOFI VOICE WHEEL SLICE left out; the new ones */
-            "ANALOG", "FM6", "PHASE", "SUPERSAW", "SAMPLE", "ACID", "TRIO", "GRAIN", "PHYS", "NOISE", "DRUM", "DRUM-X"};   /* in their places) */   /* in their places) */
+            "ANALOG", "FM6", "PHASE", "SUPERSAW", "SAMPLE", "ACID", "TRIO", "MINI", "GRAIN", "PHYS", "NOISE", "DRUM", "DRUM-X"};   /* in their places) */
         uint32_t last = 0xFFu, r = 0, n = 0;
         ok = NENG_SHOWN == NELEM(ORDER);
         for (i = 0; ok && i < NENG_SHOWN; i++)

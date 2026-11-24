@@ -96,6 +96,7 @@ static const char *const N_ENGNAME[] = {"ANALOG", FELUCCA_FM4 ? "DIGITAL" : "-",
                                              "DRUM-X",
                                              "SUPERSAW",   /* 15 ((techno-engines): the engines appended since) */
                                              "ACID",       /* 16 */
+                                             "MINI",       /* 17 */
 };
 _Static_assert(sizeof N_ENGNAME / sizeof N_ENGNAME[0] == NENGINES, "N_ENGNAME: a name per engine");
 

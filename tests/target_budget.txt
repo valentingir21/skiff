@@ -76,7 +76,7 @@ track_insert 3
 ins_drive 280
 ins_swept 228
 ins_filter 74
-strum_tick 139
+strum_tick 155
 strum_flush 531
 mix_spread 143
 esync_coef 0
@@ -92,3 +92,5 @@ lpan_mix 91
 drum_smp 139
 ssaw_render 509
 acid_render 336
+fmini_render 228
+fmini_block 72

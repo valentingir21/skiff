@@ -95,3 +95,4 @@ acid_render 336
 fmini_render 228
 fmini_block 72
 hoover_render 584
+indus_render 92

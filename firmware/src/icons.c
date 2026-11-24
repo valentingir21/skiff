@@ -306,6 +306,7 @@ static uint32_t engine_icon(const char *name)
         {"ACID", ICON_SLIDE},                 /* (techno-engines) */
         {"MINI", ICON_CUTOFF},                 /* (techno-engines) */
         {"HOOVER", ICON_W_PWM},                 /* (techno-engines) */
+        {"INDUS", ICON_FOLD},                 /* (techno-engines) */
         {"FM6", ICON_MOD},                    /* (symbol_modular: six operators patched; a glyph of its own wanted) */
     };
     uint32_t i;

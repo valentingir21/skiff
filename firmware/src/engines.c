@@ -23,6 +23,7 @@ static void *eng_part(const track_t *t);
 #include "eng_phys.c"           /* PHYS: DaisySP physical models (phys_dsp.c, MIT) */
 #include "eng_drum.c"           /* DRUM: the 8-lane kit (drum_voice.c) */
 #include "eng_drumx.c"          /* (Skiff) DRUM-X: JIANT FM's drum engine (drumx_voice.c, GPL-3.0-only) */
+#include "eng_indus.c"   /* (techno-engines) INDUS */
 #include "eng_hoover.c"  /* (techno-engines) HOOVER */
 #include "eng_mini.c"    /* (techno-engines) MINI */
 #include "eng_acid.c"    /* (techno-engines) ACID */
@@ -148,6 +149,7 @@ static const engine_t *const ENGINES[NENGINES] = {
     &ENG_ACID,                /* 16 (techno-engines) */
     &ENG_MINI,                /* 17 (techno-engines) */
     &ENG_HOOVER,              /* 18 (techno-engines) */
+    &ENG_INDUS,               /* 19 (techno-engines) */
 };
 
 /* a track's engine number as an index (the audio paths: a compare, cheaper than % NENGINES; a bad number: 0) */
@@ -204,6 +206,9 @@ static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
     13,                          /* SLICE */
 #endif
     18,                          /* HOOVER (techno-engines: SLICE's place) */
+#if FELUCCA_INDUS
+    19,                          /* INDUS (techno-engines: before the drums, which stay last) */
+#endif
     10,                          /* DRUM */
     14,                          /* DRUM-X */
 };
@@ -213,7 +218,8 @@ static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
 static int eng_ok(uint32_t e)
 {
     return e < NENGINES && (FELUCCA_FM4 || e != ENGI_DIGITAL) && (FELUCCA_SLICE || e != ENGI_SLICE) &&
-           (FELUCCA_LOFI || e != ENGI_LOFI) && (FELUCCA_VOICE || e != ENGI_VOICE) && (FELUCCA_WHEEL || e != ENGI_WHEEL);
+           (FELUCCA_LOFI || e != ENGI_LOFI) && (FELUCCA_VOICE || e != ENGI_VOICE) && (FELUCCA_WHEEL || e != ENGI_WHEEL) &&
+           (FELUCCA_INDUS || e != ENGI_INDUS);
 }
 /* (techno-engines) an engine left out of this build (LOFI VOICE WHEEL SLICE: core.h), named by a stored sound (a
  * project, a user preset, a song entry, the editor): 1. DIGITAL is not one (its sounds convert to FM6, as ever) */

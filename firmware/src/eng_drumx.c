@@ -159,6 +159,29 @@ static const preset_t DRUMX_PRESETS[] = {
     {"TRIBAL KIT", {64, 64, 64, 64, 60, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 35), TAG(PT_DRUM)},
     {"LASER KIT", {64, 64, 70, 64, 64, 10, 0, 10}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 30, 25), TAG(PT_DRUM)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
     {"KT INDUS", {80, 58, 90, 60, 80, 50, 70, 90}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 40), TAG(PT_DRUM)},
+    /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
+    {"KT DX BERLIN", {60, 58, 50, 64, 50, 10, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 10, 50), TAG(PT_DRUM)},
+    {"KT DX DUB", {50, 54, 40, 64, 40, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 40, 90), TAG(PT_DRUM)},
+    {"KT DX MINIML", {70, 70, 80, 30, 70, 20, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 30, 20), TAG(PT_DRUM)},
+    {"KT DX METAL", {90, 60, 100, 60, 90, 90, 110, 110}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 10, 40), TAG(PT_DRUM)},
+    {"KT DX TRIBAL", {64, 60, 70, 64, 50, 20, 20, 60}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 40), TAG(PT_DRUM)},
+    {"KT DX GLITCH", {80, 70, 90, 40, 80, 80, 40, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 50, 30), TAG(PT_DRUM)},
+    {"KT DX HARD", {70, 60, 100, 50, 90, 30, 40, 127}, {0, 100, 127, 100}, 0, 0, FX(90, 0, 0, 15), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
+    {"KT DX SCHRNZ", {80, 66, 110, 40, 110, 50, 60, 127}, {0, 100, 127, 100}, 0, 0, FX(110, 0, 0, 10), MORE({P_DTYPE, 4}), TAG(PT_DRUM)},
+    {"KT DX ACID", {60, 64, 80, 50, 70, 30, 0, 30}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 20), TAG(PT_DRUM)},
+    {"KT DX TRIBE", {70, 54, 100, 64, 60, 40, 60, 110}, {0, 100, 127, 100}, 0, 0, FX(90, 0, 10, 30), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
+    {"KT DX DETROI", {50, 68, 70, 60, 70, 10, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 40), TAG(PT_DRUM)},
+    {"KT DX GABBER", {90, 50, 127, 50, 100, 80, 100, 127}, {0, 100, 127, 100}, 0, 0, FX(127, 0, 0, 10), MORE({P_DTYPE, 2}), TAG(PT_DRUM)},
+    {"KT DX ELECTR", {30, 46, 40, 64, 30, 90, 30, 50}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 60, 40), TAG(PT_DRUM)},
+    {"KT DX CLICK2", {90, 70, 100, 20, 80, 30, 60, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 40, 30), TAG(PT_DRUM)},
+    {"KT DX LOW", {60, 40, 50, 64, 50, 20, 0, 60}, {0, 100, 127, 100}, 0, 0, FX(40, 0, 10, 60), TAG(PT_DRUM)},
+    {"KT DX FM", {80, 70, 100, 50, 60, 127, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 30, 40), TAG(PT_DRUM)},
+    {"KT DX BOOM", {40, 50, 40, 64, 40, 0, 0, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 90), TAG(PT_DRUM)},
+    {"KT DX TRBL2", {64, 80, 90, 50, 70, 20, 0, 30}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 20, 30), TAG(PT_DRUM)},
+    {"KT DX SCIFI", {100, 70, 110, 60, 80, 100, 40, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 50, 50), TAG(PT_DRUM)},
+    {"KT DX DIRTY", {64, 60, 90, 60, 80, 20, 60, 127}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 0, 20), TAG(PT_DRUM)},
+    {"KT DX WOOD", {40, 60, 40, 50, 20, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 40), TAG(PT_DRUM)},
+    {"KT DX METAL2", {100, 90, 120, 40, 100, 60, 40, 60}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 30), TAG(PT_DRUM)},
 };
 
 /* (Skiff phase 9) the factory kits a preset loads as the project's kit (ui.c apply_preset_to), 8 lanes as dx_kit has
@@ -238,7 +261,7 @@ static const dx_lane_t DX_KITS[][8] = {
         {DX_MODE(DXW_SINE, DXF_LP, 0) | DXM_SINE << 5, {70, 127, 50, 0, 40}, {80, 127, 60, 0, 60}},   /* BELL */
     },
 };
-static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 4};   /* ((techno-presets) KT INDUS: INDUSTRIAL's kit) */
+static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 4, 1, 2, 3, 1, 7, 6, 1, 4, 3, 7, 5, 4, 8, 3, 4, 6, 2, 7, 8, 1, 7, 4};   /* ((techno-presets) KT INDUS: INDUSTRIAL's kit) */
 _Static_assert(sizeof DRUMX_PKIT == NELEM(DRUMX_PRESETS), "a kit (or none) per DRUM-X preset");
 _Static_assert(NELEM(DRUMX_PRESETS) <= 64u, "its favourites end before THEME CUSTOM's colours (ui.c CPAL_COLS)");
 _Static_assert(sizeof DX_KITS[0] == sizeof dx_kit, "a factory kit is a kit");

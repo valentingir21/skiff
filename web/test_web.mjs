@@ -463,11 +463,11 @@ function mockTables() {
     const m0 = E.makeMockDevice({ auto: false }), ph = m0.tables.ENG[9], dr = m0.tables.ENG[10];
     m0.stop();
     ok(ph.name === "PHYS" && ph.edit[0].names.join() === "MODAL,STRNG,MEMB,SYMP" && ph.edit[0].max === 3 &&
-       ph.presets.length === 11 && !ph.presets.some((p) => p.name === "RAIN" || p.name === "DRUM KIT"),
-       "editor: PHYS models MODAL STRNG MEMB SYMP (no DUST, no DRUM), 11 presets");
+       ph.presets.length === 46 && !ph.presets.some((p) => p.name === "RAIN" || p.name === "DRUM KIT"),
+       "editor: PHYS models MODAL STRNG MEMB SYMP (no DUST, no DRUM), 46 presets");
     ok(dr.name === "DRUM" && dr.edit.map((d) => d.label).join() === "KIT,PITCH,TONE,DECAY,SNAP,ACCENT,KICK,DRIVE" &&
-       dr.presets.length === 15 && dr.presets[0].name === "DRUM KIT",   /* ((techno-presets) + KT HARD, KT HARDTECH) */
-       "editor: DRUM engine 10 (KIT PITCH TONE DECAY SNAP ACCENT KICK DRIVE), DRUM KIT first of 15");
+       dr.presets.length === 32 && dr.presets[0].name === "DRUM KIT",   /* ((techno-presets) + KT HARD, KT HARDTECH; (techno-presets-v2) the second bank) */
+       "editor: DRUM engine 10 (KIT PITCH TONE DECAY SNAP ACCENT KICK DRIVE), DRUM KIT first of 32");
   }
   const dj = DESC;
   if (!existsSync(dj)) { console.log("editor: mock tables == firmware (no build/host/desc.json)        skip"); return; }

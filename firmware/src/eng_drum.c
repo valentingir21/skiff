@@ -482,6 +482,24 @@ static const preset_t DRUM_PRESETS[] = {
     {"PERC KIT", {DK_PERC, 64, 64, 64, 64, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 24), TAG(PT_DRUM)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
     {"KT HARD", {5, 60, 100, 50, 100, 127, 0, 90}, {0, 100, 127, 100}, 0, 0, FX(40, 0, 0, 15), TAG(PT_DRUM)},
     {"KT HARDTECH", {DK_TIGHT, 62, 90, 40, 110, 127, 0, 110}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 0, 10), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
+    /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
+    {"KT BERLIN", {10, 50, 50, 110, 60, 110, 1, 40}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 0, 90), TAG(PT_DRUM)},
+    {"KT DETROIT", {6, 64, 110, 50, 90, 110, 0, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 0, 40), TAG(PT_DRUM)},
+    {"KT SCHRANZ", {5, 66, 110, 40, 120, 127, 0, 127}, {0, 100, 127, 100}, 0, 0, FX(80, 0, 0, 10), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
+    {"KT HARDGROOV", {11, 64, 90, 60, 100, 120, 0, 80}, {0, 100, 127, 100}, 0, 0, FX(50, 0, 0, 20), TAG(PT_DRUM)},
+    {"KT MINIMAL", {10, 70, 60, 30, 80, 90, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 30), TAG(PT_DRUM)},
+    {"KT GABBER", {5, 50, 120, 60, 127, 127, 0, 127}, {0, 100, 127, 100}, 0, 0, FX(120, 0, 0, 10), MORE({P_DTYPE, 4}), TAG(PT_DRUM)},
+    {"KT DUB", {9, 56, 40, 64, 30, 90, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 40, 80), TAG(PT_DRUM)},
+    {"KT TRIBE", {6, 60, 90, 70, 90, 120, 0, 100}, {0, 100, 127, 100}, 0, 0, FX(70, 0, 10, 30), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
+    {"KT ACID HSE", {8, 64, 110, 40, 110, 100, 0, 70}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 0, 20), TAG(PT_DRUM)},
+    {"KT LOFI 55", {7, 60, 50, 70, 50, 100, 1, 60}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 30), MORE({P_DTYPE, 3}), TAG(PT_DRUM)},
+    {"KT TIGHT DRY", {10, 72, 90, 20, 110, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 0), TAG(PT_DRUM)},
+    {"KT INDUS HRD", {9, 48, 110, 68, 100, 127, 0, 120}, {0, 100, 127, 100}, 0, 0, FX(100, 0, 0, 60), MORE({P_DTYPE, 2}), TAG(PT_DRUM)},
+    {"KT RAVE 90S", {5, 70, 100, 56, 90, 110, 0, 50}, {0, 100, 127, 100}, 0, 0, FX(40, 0, 20, 40), TAG(PT_DRUM)},
+    {"KT PERC DRY", {11, 70, 80, 40, 90, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 0), TAG(PT_DRUM)},
+    {"KT DEEP VERB", {9, 48, 70, 64, 50, 100, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 30, 110), TAG(PT_DRUM)},
+    {"KT HARD 909", {5, 60, 110, 50, 120, 127, 0, 110}, {0, 100, 127, 100}, 0, 0, FX(100, 0, 0, 20), MORE({P_DTYPE, 2}), TAG(PT_DRUM)},
+    {"KT TRIBAL", {11, 56, 70, 90, 70, 110, 1, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 60), TAG(PT_DRUM)},
 };
 
 static const engine_t ENG_DRUM = {

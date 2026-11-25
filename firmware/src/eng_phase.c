@@ -303,9 +303,36 @@ static const preset_t PHASE_PRESETS[] = {
     /* (Skiff) for the themes: CRYPT (dungeon synth), NEON (synthwave), QUARK (particles) */
     {"NEUTRINO", {3, 0, 20, 70, 0, 0, 0, 0}, {0, 80, 0, 75}, 0, 0, FX(0, 10, 75, 55), TAG(PT_PLUCK)},
     /* (Skiff phase 9) more for every engine: basses, kits */
-    {"PD BASS", {0, 0, 50, 80, 4, 0, 60, 0}, {0, 60, 60, 25}, 0, 1, FX(5, 0, 5, 10), TAG(PT_BASS)},
+    {"PD BASS", {0, 0, 70, 80, 4, 0, 100, 0}, {0, 60, 60, 25}, 0, 1, FX(5, 0, 5, 10), TAG(PT_BASS)},
     {"BS PD FOLD", {1, 0, 50, 80, 4, 0, 80, 60}, {0, 60, 70, 22}, 0, 1, FX(40, 0, 10, 6), TAG(PT_BASS)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
     {"LD PD SCREAM", {5, 0, 90, 50, 8, 0, 0, 40}, {0, 70, 100, 40}, 0, 1, FX(60, 20, 40, 30), MORE({P_DTYPE, 1}, {P_LRATE, 90}, {P_LD_FLT, 6}), TAG(PT_LEAD)},
+    /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
+    {"PL PD RESO", {5, 0, 70, 70, 0, 0, 0, 0}, {0, 62, 0, 54}, 0, 0, FX(0, 20, 60, 40), TAG(PT_PLUCK)},
+    {"PL PD BELL", {6, 3, 90, 40, 0, 1, 0, 0}, {0, 70, 0, 64}, 0, 0, FX(0, 20, 50, 60), TAG(PT_PLUCK)},
+    {"ST PD STAB", {0, 1, 60, 80, 10, 0, 40, 0}, {0, 60, 0, 46}, 0, 0, FX(10, 40, 50, 50), TAG(PT_KEYS)},
+    {"ST PD HARD", {2, 0, 90, 50, 0, 0, 20, 80}, {0, 58, 0, 40}, 0, 0, FX(60, 0, 40, 40), MORE({P_DTYPE, 1}), TAG(PT_KEYS)},
+    {"ST PD ORGAN", {3, 0, 40, 10, 0, 0, 60, 0}, {0, 62, 60, 40}, 0, 0, FX(0, 70, 30, 50), TAG(PT_KEYS)},
+    {"BS PD RESO", {5, 0, 60, 90, 0, 0, 80, 0}, {0, 58, 40, 20}, 0, 1, FX(20, 0, 10, 5), TAG(PT_BASS)},
+    {"BS PD SUB", {3, 0, 20, 20, 0, 0, 127, 0}, {0, 64, 110, 20}, 0, 1, FX(0, 0, 0, 0), TAG(PT_BASS)},
+    {"LD PD RING", {0, 1, 80, 30, 20, 1, 0, 20}, {0, 70, 110, 40}, 0, 1, FX(30, 0, 40, 30), MORE({P_GLIDE, 16}), TAG(PT_LEAD)},
+    {"LD PD SQUARE", {1, 2, 100, 40, 12, 0, 30, 0}, {0, 70, 110, 40}, 0, 1, FX(20, 20, 50, 30), MORE({P_LRATE, 86}, {P_LD_PIT, 8}, {P_LFADE, 70}), TAG(PT_LEAD)},
+    {"PA PD CHOIR", {3, 6, 50, 20, 14, 0, 0, 0}, {90, 90, 120, 100}, 0, 0, FX(0, 90, 30, 110), MORE({P_LRATE, 20}, {P_SPRD, 110}), TAG(PT_PAD)},
+    {"PA PD DARK", {7, 0, 30, 40, 0, 0, 40, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 90, 20, 120), MORE({P_LRATE, 10}, {P_LD_SHP, 20}), TAG(PT_PAD)},
+    {"DR PD FOLD", {0, 0, 60, 20, 0, 0, 60, 70}, {110, 90, 127, 110}, 0, 0, FX(20, 40, 20, 115), MORE({P_LRATE, 6}, {P_LD_SHP, 30}), TAG(PT_PAD)},
+    {"LD PD SYNC", {7, 5, 100, 70, 0, 0, 0, 30}, {0, 70, 110, 40}, 0, 1, FX(30, 0, 40, 30), TAG(PT_LEAD)},
+    {"BS PD SAW", {0, 0, 70, 90, 0, 0, 60, 0}, {0, 56, 30, 20}, 0, 1, FX(20, 0, 5, 5), TAG(PT_BASS)},
+    {"BS PD RING", {1, 0, 60, 60, 20, 1, 60, 0}, {0, 60, 60, 24}, 0, 1, FX(30, 0, 5, 5), TAG(PT_BASS)},
+    {"ST PD BELL", {6, 0, 90, 60, 0, 0, 0, 0}, {0, 64, 0, 56}, 0, 0, FX(0, 40, 50, 60), TAG(PT_KEYS)},
+    {"PA PD WIDE", {0, 0, 40, 20, 30, 0, 0, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 110, 30, 110), MORE({P_SPRD, 127}), TAG(PT_PAD)},
+    {"PA PD RESO", {5, 0, 30, 0, 0, 0, 0, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 90, 30, 115), MORE({P_LRATE, 12}, {P_LD_SHP, 40}), TAG(PT_PAD)},
+    {"FX PD ZAP", {5, 0, 127, 64, 0, 0, 0, 60}, {0, 70, 0, 60}, 0, 0, FX(30, 0, 90, 50), MORE({P_ED_PIT, 63}), TAG(PT_FX)},
+    {"PL PD PULSE", {2, 0, 100, 60, 0, 0, 0, 0}, {0, 54, 0, 46}, 0, 0, FX(0, 20, 60, 40), TAG(PT_PLUCK)},
+    {"DR PD RESO", {5, 5, 40, 0, 0, 0, 40, 40}, {110, 90, 127, 110}, 0, 0, FX(20, 40, 20, 120), MORE({P_LRATE, 4}, {P_LD_SHP, 50}), TAG(PT_PAD)},
+    {"PL PD FOLD", {0, 0, 80, 60, 0, 0, 0, 90}, {0, 56, 0, 46}, 0, 0, FX(10, 20, 60, 40), TAG(PT_PLUCK)},
+    {"ST PD RING", {1, 2, 70, 50, 20, 1, 0, 0}, {0, 62, 0, 50}, 0, 0, FX(10, 30, 50, 60), TAG(PT_KEYS)},
+    {"PA PD SAW", {0, 1, 70, 10, 0, 0, 30, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 100, 30, 110), MORE({P_LRATE, 16}, {P_LD_SHP, 30}), TAG(PT_PAD)},
+    {"FX PD SWEEP", {5, 0, 0, 0, 0, 0, 0, 40}, {0, 90, 127, 60}, 0, 0, FX(20, 40, 40, 100), MORE({P_LRATE, 4}, {P_LWAVE, 2}, {P_LD_SHP, 63}), TAG(PT_FX)},
+    {"DR PD CHOIR", {3, 6, 50, 20, 0, 0, 40, 0}, {110, 90, 127, 110}, 0, 0, FX(0, 70, 30, 120), MORE({P_LRATE, 6}, {P_LD_SHP, 20}), TAG(PT_PAD)},
 };
 
 static const engine_t ENG_PHASE = {

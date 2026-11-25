@@ -1449,11 +1449,11 @@ static int test_preset_tags(void)
     bad += check("every factory sound the browser shows has a type", ok);
     {   /* (phase 9) and a name of its own: a type's list mixes the engines (two WINDs read as one sound twice); the
          * retired DIGITAL of a FELUCCA_FM4 build keeps its names (PAD, MARIMBA: FM6's, PHYS's) */
-        const char *nm[256];
+        const char *nm[1024];   /* ((techno-presets-v2) the second bank: ~590 sounds) */
         uint32_t n = 0, j;
         for (r = 0, ok = 1; r < NENG_SHOWN; r++)
             for (e = eng_vis(r), k = 0; k < ENGINES[e]->npresets; k++)
-                if (preset_orig(ENGINES[e], k) == k && n < 256u && !(FELUCCA_FM4 && e == ENGI_DIGITAL)) {
+                if (preset_orig(ENGINES[e], k) == k && n < 1024u && !(FELUCCA_FM4 && e == ENGI_DIGITAL)) {
                     for (j = 0; j < n; j++)
                         if (str_eq(nm[j], ENGINES[e]->presets[k].name)) {
                             printf("ui:   %s twice\n", nm[j]);
@@ -1461,7 +1461,7 @@ static int test_preset_tags(void)
                         }
                     nm[n++] = ENGINES[e]->presets[k].name;
                 }
-        bad += check("  every one its own name, across the engines", ok && n > 100u && n < 256u);
+        bad += check("  every one its own name, across the engines", ok && n > 100u && n < 1024u);
     }
     up_store(30, "Mine");
     preset_pos(&all);

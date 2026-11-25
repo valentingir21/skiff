@@ -446,10 +446,31 @@ static const preset_t GRAIN_PRESETS[] = {
     /* (Skiff) for the themes: CRYPT (dungeon synth), NEON (synthwave), QUARK (particles) */
     {"QUARK CLOUD", {2, 70, 6, 124, 12, 120, 70, 115}, {50, 90, 120, 95}, 0, 0, FX(0, 30, 45, 85), TAG(PT_PAD)},
     /* (Skiff phase 9) more for every engine: basses, kits */
-    {"PIANO HAZE", {0, 20, 100, 80, 0, 50, 20, 90}, {70, 90, 120, 100}, 0, 0, FX(0, 50, 30, 90), TAG(PT_PAD)},
+    {"PIANO HAZE", {0, 20, 100, 80, -12, 50, 20, 70}, {70, 90, 120, 100}, 0, 0, FX(0, 50, 30, 90), TAG(PT_PAD)},
     {"SAX DRONE", {3, 60, 120, 90, -12, 20, 10, 80}, {90, 90, 127, 100}, 0, 0, FX(0, 40, 20, 90), TAG(PT_PAD)},
     {"SCATTER", {2, 64, 40, 70, 12, 50, 0, 110}, {0, 70, 100, 50}, 0, 0, FX(0, 20, 45, 60), TAG(PT_FX)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
     {"DR GRAIN", {3, 60, 120, 96, -12, 60, 20, 60}, {100, 90, 127, 110}, 0, 0, FX(15, 40, 20, 115), TAG(PT_PAD)},
+    /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
+    {"PA GRAIN AIR", {2, 30, 110, 70, 12, 60, 20, 110}, {100, 90, 120, 110}, 0, 0, FX(0, 60, 30, 115), TAG(PT_PAD)},
+    {"PA GRN DARK", {2, 40, 120, 70, -12, 30, 10, 70}, {100, 90, 127, 110}, 0, 0, FX(10, 40, 20, 120), TAG(PT_PAD)},
+    {"PL GRAIN", {0, 10, 20, 60, 0, 10, 10, 100}, {0, 60, 0, 50}, 0, 0, FX(0, 20, 60, 50), TAG(PT_PLUCK)},
+    {"FX STUTTER", {0, 64, 10, 127, 0, 0, 0, 127}, {0, 70, 100, 30}, 0, 0, FX(10, 0, 40, 30), TAG(PT_FX)},
+    {"DR GRAIN SAX", {3, 80, 127, 40, -24, 80, 40, 40}, {110, 90, 127, 110}, 0, 0, FX(20, 40, 20, 120), TAG(PT_PAD)},
+    {"ST GRAIN", {0, 0, 40, 90, 0, 20, 0, 110}, {0, 58, 0, 46}, 0, 0, FX(0, 30, 50, 60), TAG(PT_KEYS)},
+    {"LD GRN FLUTE", {2, 50, 60, 110, 0, 10, 30, 110}, {10, 70, 120, 50}, 0, 1, FX(0, 40, 50, 60), MORE({P_LRATE, 80}, {P_LD_PIT, 8}), TAG(PT_LEAD)},
+    {"PA GRN SHIMR", {2, 60, 90, 120, 24, 80, 30, 127}, {100, 90, 120, 110}, 0, 0, FX(0, 80, 60, 127), TAG(PT_PAD)},
+    {"DR GRN CLOUD", {0, 64, 110, 70, 0, 127, 60, 60}, {110, 90, 127, 110}, 0, 0, FX(10, 50, 30, 127), TAG(PT_PAD)},
+    {"FX GRN SCATR", {3, 64, 6, 60, 0, 127, 127, 120}, {0, 80, 60, 70}, 0, 0, FX(0, 20, 70, 60), TAG(PT_FX)},
+    {"PL GRN FLUTE", {2, 20, 30, 80, 0, 10, 10, 110}, {0, 62, 0, 52}, 0, 0, FX(0, 30, 60, 60), TAG(PT_PLUCK)},
+    {"ST GRN SAX", {3, 30, 50, 100, 0, 30, 10, 100}, {0, 62, 0, 48}, 0, 0, FX(20, 30, 50, 50), TAG(PT_KEYS)},
+    {"LD GRN SAX", {3, 40, 80, 80, 0, 20, 20, 90}, {10, 70, 120, 50}, 0, 1, FX(30, 20, 50, 50), MORE({P_GLIDE, 20}), TAG(PT_LEAD)},
+    {"FX GRN FREEZ", {0, 90, 110, 70, 12, 0, 0, 80}, {60, 90, 127, 100}, 0, 0, FX(0, 60, 40, 120), TAG(PT_FX)},
+    {"PA GRN SAX", {3, 20, 110, 70, 0, 60, 10, 100}, {100, 90, 120, 110}, 0, 0, FX(0, 60, 30, 115), TAG(PT_PAD)},
+    {"DR GRN FLUTE", {2, 80, 127, 40, -24, 100, 40, 70}, {110, 90, 127, 110}, 0, 0, FX(0, 60, 30, 127), TAG(PT_PAD)},
+    {"FX GRN REV", {0, 100, 90, 80, 0, 60, 127, 90}, {60, 90, 127, 100}, 0, 0, FX(0, 40, 50, 110), TAG(PT_FX)},
+    {"PL GRN SAX", {3, 10, 20, 70, 0, 10, 10, 110}, {0, 58, 0, 48}, 0, 0, FX(10, 20, 60, 50), TAG(PT_PLUCK)},
+    {"ST GRN FLUTE", {2, 10, 50, 100, 12, 30, 0, 110}, {0, 60, 0, 50}, 0, 0, FX(0, 40, 60, 70), TAG(PT_KEYS)},
+    {"FX GRN CRACK", {3, 64, 0, 40, 0, 127, 127, 127}, {0, 80, 127, 50}, 0, 0, FX(20, 0, 20, 40), TAG(PT_FX)},
 };
 
 static const engine_t ENG_GRAIN = {

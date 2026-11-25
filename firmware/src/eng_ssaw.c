@@ -103,15 +103,29 @@ static void ssaw_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const 
 
 static const preset_t SSAW_PRESETS[] = {
     /* name, {DETUNE, MIX, CUTOFF, RES, HPF, DRIVE, KEYTRK, SUB}, {A D S R}, fenv, mono, sends, more, type */
-    {"LD HARD SAW", {80, 100, 118, 10, 64, 20, 64, 30}, {2, 72, 112, 58}, 6, 0, FX(10, 60, 45, 55), MORE({P_SPRD, 110}), TAG(PT_LEAD)},
-    {"LD SS TRANCE", {64, 90, 108, 18, 64, 0, 72, 0}, {4, 74, 110, 62}, 10, 0, FX(0, 70, 55, 65), MORE({P_SPRD, 110}), TAG(PT_LEAD)},
-    {"LD SS ANTHEM", {96, 115, 116, 10, 64, 10, 64, 40}, {2, 76, 115, 64}, 4, 0, FX(5, 90, 60, 70), MORE({P_SPRD, 127}), TAG(PT_LEAD)},
-    {"LD SS HTECH", {76, 100, 104, 22, 64, 70, 64, 50}, {0, 70, 115, 40}, 12, 0, FX(60, 40, 35, 30), MORE({P_DTYPE, 1}, {P_SPRD, 100}), TAG(PT_LEAD)},
-    {"LD SS PLUCK", {60, 90, 50, 35, 64, 0, 64, 0}, {0, 70, 0, 56}, 50, 0, FX(0, 60, 70, 50), MORE({P_SPRD, 100}), TAG(PT_PLUCK)},
+    {"LD HARD SAW", {80, 100, 80, 50, 64, 60, 64, 60}, {0, 64, 90, 30}, 30, 0, FX(30, 10, 30, 30), MORE({P_SPRD, 80}, {P_DTYPE, 1}), TAG(PT_LEAD)},
+    {"LD SS SKY", {50, 90, 70, 60, 64, 0, 110, 0}, {10, 74, 110, 70}, 10, 0, FX(0, 70, 55, 65), MORE({P_SPRD, 110}, {P_LRATE, 92}, {P_LD_PIT, 10}, {P_LFADE, 80}), TAG(PT_LEAD)},
+    {"LD SS ANTHEM", {127, 127, 118, 10, 64, 10, 64, 20}, {30, 76, 115, 76}, 4, 0, FX(0, 120, 70, 100), MORE({P_SPRD, 127}), TAG(PT_LEAD)},
+    {"LD SS SCREAM", {80, 110, 96, 80, 100, 110, 64, 0}, {0, 70, 115, 40}, 0, 0, FX(90, 30, 30, 30), MORE({P_DTYPE, 4}, {P_SPRD, 80}), TAG(PT_LEAD)},
+    {"PL SS TRANCE", {60, 90, 50, 35, 64, 0, 64, 0}, {0, 70, 0, 56}, 50, 0, FX(0, 60, 70, 50), MORE({P_SPRD, 100}), TAG(PT_PLUCK)},
     {"ST SS STAB", {72, 100, 96, 25, 64, 15, 64, 0}, {0, 68, 0, 52}, 30, 0, FX(10, 80, 55, 60), MORE({P_SPRD, 120}), TAG(PT_KEYS)},
     {"PA SS WIDE", {90, 110, 85, 8, 70, 0, 50, 0}, {80, 90, 118, 98}, 4, 0, FX(0, 110, 30, 105), MORE({P_SPRD, 127}, {P_LRATE, 30}, {P_LD_FLT, 8}), TAG(PT_PAD)},
     {"PA SS DARK", {84, 100, 52, 20, 80, 0, 40, 0}, {60, 90, 118, 96}, 12, 0, FX(0, 90, 25, 110), MORE({P_SPRD, 127}, {P_LRATE, 22}, {P_LD_FLT, 14}), TAG(PT_PAD)},
-    {"BS SUPERSAW", {40, 70, 60, 30, 32, 30, 64, 90}, {0, 64, 90, 22}, 30, 1, FX(30, 0, 10, 5), TAG(PT_BASS)},
+    {"BS SS OFFBT", {30, 60, 90, 50, 32, 60, 64, 127}, {0, 52, 0, 24}, 30, 1, FX(20, 0, 10, 5), TAG(PT_BASS)},
+    /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
+    {"PL SS SHORT", {40, 70, 80, 20, 72, 0, 80, 0}, {0, 52, 0, 44}, 30, 0, FX(0, 40, 80, 40), MORE({P_SPRD, 90}), TAG(PT_PLUCK)},
+    {"PL SS DARK", {70, 100, 28, 40, 60, 0, 40, 20}, {0, 66, 0, 62}, 40, 0, FX(0, 70, 60, 92), MORE({P_SPRD, 110}), TAG(PT_PLUCK)},
+    {"ST SS HARD", {70, 100, 90, 20, 80, 90, 64, 40}, {0, 60, 10, 40}, 24, 0, FX(70, 20, 40, 30), MORE({P_DTYPE, 1}, {P_SPRD, 90}), TAG(PT_KEYS)},
+    {"PA SS SWELL", {90, 110, 70, 10, 70, 0, 50, 0}, {112, 90, 120, 108}, 30, 0, FX(0, 110, 30, 115), MORE({P_SPRD, 127}, {P_LRATE, 14}, {P_LD_SHP, 30}), TAG(PT_PAD)},
+    {"DR SS TENSE", {127, 127, 40, 60, 90, 40, 30, 60}, {120, 90, 127, 120}, 10, 0, FX(20, 60, 20, 120), MORE({P_SPRD, 127}, {P_LRATE, 4}, {P_LD_FLT, 30}), TAG(PT_PAD)},
+    {"LD SS DETUNE", {127, 110, 127, 10, 100, 0, 64, 0}, {0, 70, 115, 50}, 0, 0, FX(0, 0, 40, 40), TAG(PT_LEAD)},
+    {"LD SS FILTER", {70, 100, 60, 80, 64, 20, 64, 0}, {0, 70, 115, 50}, 0, 0, FX(10, 40, 50, 50), MORE({P_SPRD, 100}, {P_LRATE, 80}, {P_LSYNC, 7}, {P_LD_FLT, 30}), TAG(PT_LEAD)},
+    {"ST SS SCHRNZ", {80, 100, 110, 20, 90, 120, 64, 30}, {0, 50, 0, 30}, 10, 0, FX(120, 0, 20, 20), MORE({P_DTYPE, 4}), TAG(PT_KEYS)},
+    {"BS SS REESE", {110, 120, 20, 90, 30, 100, 64, 80}, {0, 64, 120, 30}, 6, 1, FX(40, 30, 0, 10), TAG(PT_BASS)},
+    {"FX SS RISER", {127, 127, 30, 50, 64, 30, 64, 0}, {120, 90, 127, 90}, 63, 0, FX(20, 90, 40, 100), MORE({P_SPRD, 127}, {P_ED_PIT, 63}, {P_ED_SHP, 63}), TAG(PT_FX)},
+    {"PL SS SQUISH", {50, 80, 30, 110, 64, 20, 64, 0}, {0, 58, 0, 48}, 50, 0, FX(10, 40, 60, 40), MORE({P_SPRD, 90}), TAG(PT_PLUCK)},
+    {"LD SS FOLD", {60, 90, 110, 20, 80, 40, 64, 20}, {0, 70, 110, 40}, 0, 0, FX(100, 30, 40, 40), MORE({P_SPRD, 80}, {P_DTYPE, 2}), TAG(PT_LEAD)},
+    {"DR SS FLANGE", {127, 127, 60, 30, 64, 0, 40, 30}, {110, 90, 127, 110}, 0, 0, FX(0, 0, 20, 127), MORE({P_SPRD, 127}, {P_ITYPE, 7}, {P_IA, 10}, {P_IB, 127}), TAG(PT_PAD)},
 };
 
 static const engine_t ENG_SSAW = {

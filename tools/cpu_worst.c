@@ -12,7 +12,8 @@
  * Worst case with ENGINE: T1 ENGINE's heaviest preset at its cap (asked last: the budget steals from the others), the
  * five others the heaviest of PHASE, GRAIN, PHYS, FM6 and DRUM-X (8 notes or lanes each), every send at 100, REVERB
  * HALL, DELAY PING, CHORUS PHASER; the voices that sound (16 at most) counted, then each track alone with that many,
- * split as fx.c mix_split does (the bus effects and master on core 0) -> the busier core's load. */
+ * split as fx.c mix_split does (the bus effects and master on core 0) -> the busier core's load.
+ * (Gir) RUMBLE=1: the kits' RUMBLE on (DRUM's and DRUM-X's tracks), at its heaviest. */
 #include "../tests/c1_host.h"
 #define main hostsim_main
 #include "../tests/hostsim.c"
@@ -63,6 +64,13 @@ static void setup(const part_t *P)
             trk[p].p[P_EQ_MID] = 80;
             trk[p].p[P_EQ_HIGH] = 100;
             trk[p].p[P_DEPTH] = 40;
+        }
+        if (getenv("RUMBLE") && (P[p].e == ENGI_DRUM || P[p].e == ENGI_DRUMX)) {   /* ((Gir) RUMBLE=1: every kit's RUMBLE
+                                                         * on at its heaviest (tuned, full drive, ducked) */
+            trk[p].p[P_RB_MIX] = 127;
+            trk[p].p[P_RB_TUNE] = 9;
+            trk[p].p[P_RB_DRIVE] = 127;
+            trk[p].p[P_RB_DUCK] = 64;
         }
     }
     for (i = 0; i < NPART; i++) {

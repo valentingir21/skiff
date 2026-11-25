@@ -14,9 +14,12 @@ la hardtech et le hardgroove.
   - **MINI** : un Minimoog, d'après FMini-1, avec ses trois oscillateurs sur des pages à eux.
   - **HOOVER** : le lead rave « Mentasm ».
   - **INDUS** : métal et machines, avec un CUTOFF résonant.
+- **Un RUMBLE sur le kick** de DRUM et DRUM-X : la queue grave et saturée de la hard techno, qui roule entre les kicks.
+  C'est une petite reverb qui ne reçoit que le kick, filtrée, saturée, accordée et ductée sous chaque coup. Pages
+  EDIT › RUMBLE et RUMBLE 2 ; réglé dans 25 kits, dont les 5 kits KT RMB. À 0, il ne calcule rien.
 - **Un mixer techno** : par piste, un isolateur 3 bandes (LOW, MID et HIGH, de KILL à +6 dB) et un réglage **DEPTH**
   (devant ↔ au fond). C'est la page GLO › EQ ; les CC 24 à 27 le pilotent en MIDI.
-- **Une banque techno** d'environ 480 sons, rangés par catégorie : plucks PL, stabs ST, basses BS, leads LD, pads PA,
+- **Une banque techno** de 466 sons, rangés par catégorie : plucks PL, stabs ST, basses BS, leads LD, pads PA,
   drones DR, effets FX, percussions PC et kits KT. Chaque son est vérifié contre les doublons, sur son niveau et sur le
   CPU.
 - **À l'écran** : « Gir 1.0 », au démarrage et dans MENU › ABOUT. L'identité technique de l'installateur ne change

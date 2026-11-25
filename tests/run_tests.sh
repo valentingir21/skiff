@@ -404,6 +404,8 @@ if [ -f build/gen/felucca_tables.h ]; then
     # (techno-mixer) the isolator and DEPTH: off bit for bit, flat at 0 dB, KILL and +6 dB, no click, stored and kept
     $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/eq_test" tests/eq_test.c -lm
     run "(techno-mixer) the isolator and DEPTH: off untouched, flat, KILL / +6 dB, no click, DEPTH, stored" "$OUT/eq_test"
+    $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/rumble_test" tests/rumble_test.c -lm
+    run "(Gir) the kick's RUMBLE: off bit for bit, ducked, each value, tuned, the tail, DRUM-X, stored" "$OUT/rumble_test"
     $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/knobs_test" tests/knobs_test.c -lm
     run "(techno-engines) the techno engines' knobs: each acts in a preset, no level jump, no clipping; CC74 CC71" \
         "$OUT/knobs_test" build/knobs_check.md

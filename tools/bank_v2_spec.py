@@ -49,8 +49,6 @@ AN("PL SQR BLIP", (1, 0, 0, 0, 92, 8, 0, 100), (0, 50, 0, 46), 8, 0, (0, 0, 40, 
    "blip carré très court, pour les motifs clairsemés de minimal", "C4-C6, notes isolées", "S05")
 AN("PL SINE DROP", (3, 0, 0, 0, 127, 0, 0, 64), (0, 54, 0, 50), 0, 0, (0, 0, 52, 46), (("ED_PIT", 24),), MIN,
    "goutte : sinus court dont la hauteur tombe d'un ton", "C4-C6", "S05")
-AN("PL ACID PLK", (0, 0, 0, 0, 34, 112, 44, 72), (0, 58, 0, 40), 52, 0, (28, 0, 58, 18), (("DTYPE", 1),), ACI,
-   "pluck acid : résonance au bord du sifflement, drive, delay", "A2-A4, 1/16", "S02")
 AN("PL SYNC PLK", (5, 34, 96, 0, 92, 16, 10, 64), (0, 62, 0, 50), 18, 0, (0, 15, 50, 30), (("ED_SHP", 56),), TE,
    "pluck hard-sync : l'enveloppe balaie la scie synchronisée (« piou »)", "A3-A5", "S13")
 AN("PL SINE KEYS", (3, 20, 64, 0, 90, 0, 0, 64), (0, 78, 20, 64), 10, 0, (0, 80, 45, 40),
@@ -115,10 +113,6 @@ AN("LD SCREECH", (5, 60, 127, 0, 100, 92, 90, 80), (0, 70, 110, 30), 10, 1, (90,
    "screech industriel : sync résonante saturée, vibrato rapide", "A3-A5", "S60", replace="LD HOOVER")
 AN("LD WHISTLE", (3, 0, 0, 20, 127, 0, 0, 64), (10, 70, 120, 50), 0, 1, (0, 20, 60, 60), (('LRATE', 80), ('LD_PIT', 10), ('LFADE', 70), ('GLIDE', 30)),
    DUB, "sifflet : sinus + un souffle, vibrato qui arrive, glide", "A4-A5", "S68", replace="LD ACID")
-AN("BS NOISE SUB", (3, 0, 0, 100, 80, 20, 60, 0), (0, 64, 100, 24), 0, 1, (60, 0, 5, 5), (("DTYPE", 4),), IND,
-   "sub industriel : sinus + bruit saturés dans la FUZZ", "A1-A2", "S47", replace="BS FUZZ")
-AN("LD SQR WOB", (1, 6, 64, 0, 60, 80, 40, 64), (0, 70, 110, 30), 0, 1, (50, 0, 40, 30), (('LRATE', 80), ('LSYNC', 5), ('LD_FLT', 30), ('DTYPE', 1)),
-   HT, "lead carré au filtre qui bat à la noire (LFO calé sur le tempo), drive", "A2-A4", "S61", replace="LD HARDTECH")
 AN("BS LFO 1/8", (0, 10, 64, 0, 50, 80, 20, 64), (0, 64, 110, 24), 0, 1, (30, 0, 10, 6), (('LRATE', 80), ('LSYNC', 6), ('LWAVE', 2), ('LD_FLT', 40)),
    HT, "basse au filtre balayé en 1/8 par le LFO calé sur le tempo (wobble techno)", "A1-A2, notes tenues", "S51", replace="BS HARDTECH")
 TR("SYNC LEAD", (9, 5, 0, 0, 1, 82, 60, 64), (2, 70, 100, 40), 18, 1, (0, 10, 40, 25), (), "Skiff 2.7",
@@ -197,18 +191,12 @@ SS("LD SS ANTHEM", (127, 127, 118, 10, 64, 10, 64, 20), (30, 76, 115, 76), 4, 0,
 SS("PA SS SWELL", (90, 110, 70, 10, 70, 0, 50, 0), (112, 90, 120, 108), 30, 0, (0, 110, 30, 115),
    (("SPRD", 127), ("LRATE", 14), ("LD_SHP", 30)), HTR, "nappe trance qui gonfle lentement, le désaccord respire",
    "accords A2-A4", "S80")
-SS("BS SS OFFBT", (30, 60, 90, 50, 32, 60, 64, 127), (0, 52, 0, 24), 30, 1, (20, 0, 10, 5), (), HTR,
-   "basse supersaw de contretemps : courte, sub au maximum", "A1-A2, 1/8 contretemps", "S44",
-   replace="BS SUPERSAW")
 SS("DR SS TENSE", (127, 127, 40, 60, 90, 40, 30, 60), (120, 90, 127, 120), 10, 0, (20, 60, 20, 120),
    (("SPRD", 127), ("LRATE", 4), ("LD_FLT", 30)), IND, "nappe de tension : supersaw fermé et résonant, sub, lent",
    "A1-A3", "S82")
 
 # ================================================================================================================= ACID
 # E: WAVE (0 SAW 1 SQR 2 SAW+SUB 3 SQR+SUB) CUTOFF RES ENV MOD DECAY ACCENT TUNE SLIDE
-AC("BS 303 TEAR", (0, 100, 100, 100, 20, 120, 0, 30), (0, 100, 127, 10), 0, 1, (127, 0, 20, 8),
-   (("DTYPE", 4), ("DTONE", 16)), ACI, "303 déchiré : FUZZ, filtre plus ouvert, décroissance courte", "A1-A2",
-   "S42", replace="BS 303 HARD")
 AC("BS 303 SQLCH", (1, 30, 127, 127, 20, 127, 0, 45), (0, 100, 127, 10), 0, 1, (10, 0, 30, 10), (), ACI,
    "303 squelch en carré : résonance au maximum, accents violents", "A1-A2", "S42", replace="BS 303 SQLCH")
 AC("BS PHUTURE", (0, 10, 112, 127, 127, 95, 0, 60), (0, 100, 127, 14), 0, 1, (10, 0, 90, 40), (), ACI,
@@ -279,19 +267,12 @@ MI("FX UFO", (60, 60, 40, 0, 70, 80, 0, 0), (40, 90, 127, 90), 0, 0, (0, 40, 50,
 
 # =============================================================================================================== HOOVER
 # E: DIVE D.TIME PWM DETUNE CUTOFF RES SUB DRIVE
-HV("LD GABBER HV", (110, 80, 110, 90, 112, 18, 70, 120), (0, 70, 115, 40), 0, 1, (127, 0, 15, 20),
-   (('DTYPE', 4),), HTK, "hoover gabber : plongée de deux octaves, désaccord énorme, FUZZ", "A2-A4",
-   "S63", replace="LD GABBER HV")
 HV("LD HOOV HARD", (90, 40, 127, 60, 127, 20, 127, 80), (0, 70, 115, 45), 0, 1, (90, 0, 20, 30), (('DTYPE', 1), ('LRATE', 80), ('LSYNC', 8), ('LD_AMP', 100)),
    HTK, "hoover hardtech haché en 1/16 (LFO calé sur le tempo), saturé, sans chorus", "A2-A4", "S63", replace="LD HOOV HARD")
 AN("PA GATE SQR", (1, 12, 64, 0, 70, 30, 0, 64), (20, 80, 120, 60), 0, 0, (0, 60, 40, 80), (("LRATE", 80), ("LSYNC", 6), ("LWAVE", 3), ("LD_AMP", 127)),
    HTR, "pad gaté en 1/8 : carrés hachés par le LFO synchronisé au tempo", "accords A3-A5", "S86", replace="PA SSAW")
 TR("TURBO SYNC", (9, 14, 0, 3, 0, 110, 28, 64), (2, 72, 105, 45), 20, 1, (6, 15, 55, 30), (("GLIDE", 24), ("LRATE", 86), ("LFADE", 90), ("LD_PIT", 8)),
    "Skiff 2.7", "son d'origine retouché : sync plus haute, plus brillant", "", "", replace="TURBO SYNC", tag="PT_LEAD")
-HV("LD HOOV TRNC", (16, 50, 70, 24, 116, 10, 20, 20), (8, 72, 112, 64), 0, 0, (10, 100, 80, 80),
-   (('SPRD', 120), ('LRATE', 90), ('LD_PIT', 16), ('LFADE', 80)), HTR,
-   "hoover de hard trance : plongée courte, brillant, vibrato qui arrive", "accords A3-A5", "S63",
-   replace="LD HOOV TRNC")
 HV("LD HOOV ACID", (20, 60, 80, 30, 40, 110, 40, 60), (0, 66, 60, 30), 50, 1, (30, 10, 40, 30), (('SPRD', 80), ('DTYPE', 1)),
    HTK, "hoover acid : filtre résonant qui claque, petite plongée", "A2-A4", "S66")
 HV("ST HOOV DIVE", (127, 70, 90, 50, 100, 10, 30, 40), (0, 70, 0, 60), 0, 0, (80, 90, 90, 60), (("SPRD", 120),),
@@ -319,8 +300,6 @@ IN("FX LASER", (64, 0, 0, 0, 20, 127, 60, 0), (0, 64, 0, 56), 0, 0, (10, 0, 60, 
    "laser : sinus qui tombe de 4 octaves en un éclair", "A4-A6", "S93")
 IN("FX ZAP IND", (90, 60, 0, 0, 40, 100, 48, 0), (0, 58, 0, 50), 0, 0, (20, 0, 50, 40), (("IN_CUT", 127),), DET,
    "zap des débuts de la techno : FM qui tombe vite", "A3-A5", "S96")
-IN("FX CLANK", (113, 120, 40, 20, 60, 40, 40, 100), (0, 60, 0, 56), 0, 0, (30, 0, 30, 80), (("IN_CUT", 120),), IND,
-   "clank métallique : FM inharmonique, anneau, résonance", "A2-A4", "S98")
 IN("FX ROBOT", (40, 30, 127, 0, 40, 0, 60, 0), (0, 70, 127, 50), 0, 0, (20, 0, 40, 40),
    (("IN_CUT", 110), ("LRATE", 88), ("LD_SHP", 40)), IND, "voix de robot : modulation en anneau qui grésille",
    "A2-A4, tenu", "S98")
@@ -399,8 +378,6 @@ PH("PL PD BELL", (6, 3, 90, 40, 0, 1, 0, 0), (0, 70, 0, 64), 0, 0, (0, 20, 50, 6
    "pluck cloche CZ (RTRI en anneau)", "A4-A6", "S09")
 PH("ST PD STAB", (0, 1, 60, 80, 10, 0, 40, 0), (0, 60, 0, 46), 0, 0, (10, 40, 50, 50), (), DET,
    "stab CZ : scie dont la brillance tombe vite, sub", "accords A3-A5", "S20")
-PH("ST PD HARD", (2, 0, 90, 50, 0, 0, 20, 80), (0, 58, 0, 40), 0, 0, (60, 0, 40, 40), (("DTYPE", 1),), HT,
-   "stab CZ replié et saturé", "accords A2-A4", "S28")
 PH("ST PD ORGAN", (3, 0, 40, 10, 0, 0, 60, 0), (0, 62, 60, 40), 0, 0, (0, 70, 30, 50), (), HG,
    "orgue CZ (double sinus), court", "accords A3-A5", "S23")
 PH("BS PD RESO", (5, 0, 60, 90, 0, 0, 80, 0), (0, 58, 40, 20), 0, 1, (20, 0, 10, 5), (), ACI,
@@ -456,8 +433,6 @@ TR("PA TRIO NTCH", (0, 0, 12, 20, 3, 60, 80, 64), (90, 90, 120, 100), 0, 0, (0, 
    "accords A2-A4", "S80")
 TR("DR TRIO RING", (13, 0, 31 - 24, 20, 1, 50, 80, 64), (110, 90, 127, 110), 0, 0, (20, 40, 30, 115),
    (("LRATE", 6), ("LD_FLT", 30)), IND, "drone en anneau, passe-bande résonant qui erre", "A1-A3, tenu", "S82")
-TR("FX TRIO ZAP", (9, 24, 0, 0, 0, 110, 40, 64), (0, 64, 0, 56), 40, 0, (20, 0, 80, 50), (("ED_PIT", 63),), DET,
-   "zap sync : la hauteur et la sync tombent en un éclair", "A3-A5", "S96")
 TR("PC NOISE SNR", (8, 0, 0, 0, 1, 90, 30, 64), (0, 52, 0, 46), 20, 0, (20, 0, 10, 40), (), HG,
    "snare de bruit chip, passe-bande", "C3-C5", "S120")
 
@@ -490,8 +465,6 @@ PY("PL MARIMBA", (0, 70, 60, 50, 30, 100, 0, 30), (0, 100, 127, 40), 0, 0, (0, 0
    "marimba modale : lames accordées", "A3-A5", "S08")
 PY("PL STEEL", (0, 110, 110, 60, 20, 110, 0, 20), (0, 100, 127, 50), 0, 0, (0, 20, 60, 60), (), IND,
    "pluck d'acier : partiels inharmoniques, court", "A3-A5", "S09")
-PY("BS BONGO", (2, 100, 50, 60, 40, 100, 70, 20), (0, 100, 127, 50), 0, 1, (20, 0, 10, 20), (), HG,
-   "basse de bongo accordé : la peau, sa hauteur qui tombe (bongo pitché à la Setaoc Mass)", "A1-A2", "S52")
 PY("BS STRING", (1, 40, 60, 100, 30, 127, 0, 0), (0, 100, 127, 40), 0, 1, (10, 0, 10, 10), (), DUB,
    "basse de corde pincée, ronde", "A1-A2", "S44")
 PY("PC CONGA", (2, 127, 110, 40, 100, 110, 0, 60), (0, 100, 127, 40), 0, 0, (0, 0, 10, 30), (), HG,
@@ -536,8 +509,6 @@ NZ("PC SHAKER", (1, 0, 127, 0, 0, 127, 0, 0), (0, 52, 0, 40), 0, 0, (0, 0, 10, 2
    "shaker : poussière dense très courte", "C4-C6", "S116")
 NZ("PC CLAP NZ", (0, 30, 90, 50, 0, 90, 0, 0), (0, 52, 0, 56), 0, 0, (20, 0, 10, 70), (), TE,
    "clap de bruit : impulsions + bruit, passe-bande", "C3-C4", "S120")
-NZ("LD LFSR", (2, 0, 127, 0, 127, 112, 0, 70), (0, 70, 110, 40), 0, 1, (20, 0, 40, 30), (("GLIDE", 14),), MIN,
-   "lead numérique 8 bits (registre très court)", "A3-A5", "S69")
 NZ("PA NOISE", (0, 80, 60, 120, 127, 0, 50, 0), (100, 90, 127, 110), 0, 0, (0, 60, 30, 120), (), TE,
    "nappe de bruit accordé : passe-bande étroit sur chaque note de l'accord", "accords A3-A5", "S87")
 NZ("DR RADIO", (2, 0, 60, 60, 64, 90, 90, 100), (110, 90, 127, 110), 0, 0, (20, 40, 30, 115),
@@ -565,8 +536,6 @@ DM("KT TRIBE", (6, 60, 90, 70, 90, 120, 0, 100), (0, 100, 127, 100), 0, 0, (70, 
    HTK, "kit hardtek / tribe : kick saturé « whack », toms", "beat 150-180", "S110")
 DM("KT ACID HSE", (8, 64, 110, 40, 110, 100, 0, 70), (0, 100, 127, 100), 0, 0, (20, 0, 0, 20), (), ACI,
    "kit acid house (modèle 77)", "beat 4/4", "S114")
-DM("KT LOFI 55", (7, 60, 50, 70, 50, 100, 1, 60), (0, 100, 127, 100), 0, 0, (30, 0, 10, 30), (("DTYPE", 3),),
-   HG, "kit boîte à rythmes 55 sale (CRUSH)", "beat lo-fi", "S112")
 
 # =============================================================================================================== DRUM-X
 # E: MORPH PITCH COLOR DECAY NOISE FM FOLD DRIVE; kit = DX_KITS + 1
@@ -726,8 +695,6 @@ IN("PC KICK ZAP", (64, 30, 0, 0, 40, 127, 40, 0), (0, 62, 0, 50), 0, 0, (60, 0, 
 IN("DR FACTORY", (55, 80, 40, 80, 60, 0, 60, 60), (110, 90, 127, 110), 0, 0, (40, 30, 40, 120),
    (("IN_CUT", 70), ("LRATE", 70), ("LD_AMP", 60)), IND, "usine : machine qui ronronne et cogne", "A1-A3, tenu",
    "S83")
-IN("BS RING IND", (32, 0, 80, 0, 40, 0, 60, 40), (0, 64, 100, 24), 0, 1, (40, 0, 5, 10), (("IN_CUT", 90),), IND,
-   "basse en anneau (une octave dessous) métallique", "A1-A2", "S46")
 IN("LD FM IND", (77, 100, 0, 0, 40, 0, 60, 60), (0, 70, 115, 40), 0, 1, (40, 0, 40, 30),
    (("IN_CUT", 110), ("LRATE", 60), ("LD_SHP", 30)), IND, "lead FM métallique dont l'indice ondule", "A3-A5", "S60")
 # ---------------------------------------------------------------------------------------------------------- FM6
@@ -780,8 +747,6 @@ PY("PL KOTO", (3, 100, 110, 40, 30, 110, 0, 40), (0, 100, 127, 50), 0, 0, (0, 20
    "koto : corde pincée + cordes sympathiques en quinte", "A3-A5", "S10")
 PY("PL HARP", (1, 64, 110, 100, 30, 100, 0, 0), (0, 100, 127, 80), 0, 0, (0, 30, 40, 80), (), MEL,
    "harpe : corde brillante et longue", "A3-A5", "S10")
-PY("PL PIZZ", (1, 64, 80, 20, 40, 127, 0, 30), (0, 100, 127, 24), 0, 0, (0, 20, 40, 50), (), TE,
-   "pizzicato : corde très amortie", "A3-A5", "S10")
 PY("LD BLOW", (0, 70, 70, 100, 20, 80, 90, 0), (30, 100, 127, 60), 0, 1, (0, 30, 50, 60), (("GLIDE", 20),), DUB,
    "lead soufflé : lames modales tenues par le souffle", "A3-A5", "S68")
 PY("PA SYMP", (3, 60, 70, 120, 64, 60, 80, 0), (80, 100, 127, 100), 0, 0, (0, 40, 30, 115), (), MEL,
@@ -837,9 +802,6 @@ AN("PA FLANGE", (0, 16, 64, 0, 70, 20, 0, 64), (90, 90, 120, 100), 0, 0, (0, 0, 
 AN("BS FOLD", (2, 0, 0, 0, 127, 0, 0, 64), (0, 64, 110, 24), 0, 1, (0, 0, 5, 5),
    (('ITYPE', 3), ('IA', 110), ('IB', 80), ('IC', 127)), HT, "basse triangle repliée par l'insert FOLD (grondement)",
    "A1-A2", "S47")
-AN("PA AUTOPAN", (0, 8, 64, 0, 60, 10, 0, 64), (80, 90, 120, 100), 0, 0, (0, 0, 30, 100),
-   (('M1SRC', 1), ('M1DST', 5), ('M1AMT', 63), ('LRATE', 40)), MEL, "nappe de scies qui tourne de gauche à droite (LFO sur le PAN)",
-   "accords A3-A5", "S85")
 AN("LD THIN HP", (0, 10, 64, 0, 127, 0, 30, 64), (0, 70, 110, 40), 0, 1, (20, 0, 50, 40),
    (("ITYPE", 9), ("IA", 90), ("IB", 70), ("IC", 127)), HTR, "lead fin, coupé dans le bas par un passe-haut résonant",
    "A3-A5", "S62")
@@ -874,12 +836,7 @@ HV("ST HOOV FLNG", (40, 60, 90, 44, 96, 20, 30, 20), (0, 66, 0, 50), 10, 0, (10,
    (("ITYPE", 7), ("IA", 60), ("IB", 110), ("IC", 120)), RAV, "stab hoover au flanger", "accords A3-A5", "S24")
 HV("BS HOOV FOLD", (30, 50, 80, 30, 80, 20, 90, 30), (0, 62, 80, 24), 0, 1, (20, 0, 10, 5),
    (("ITYPE", 3), ("IA", 90), ("IB", 60)), HTK, "basse hoover repliée", "A1-A2", "S51")
-HV("FX HOOV GATE", (60, 80, 110, 60, 110, 20, 50, 40), (0, 80, 127, 60), 0, 0, (30, 80, 40, 60),
-   (("LRATE", 80), ("LSYNC", 10), ("LD_AMP", 127), ("SPRD", 110)), HTK, "hoover haché en 1/32 (roulement)",
-   "A2-A4, tenu", "S63")
 # -------------------------------------------------------------------------------------------------------- ACID
-AC("BS 303 CRUSH", (2, 40, 100, 80, 50, 90, 0, 45), (0, 100, 127, 10), 0, 1, (10, 0, 30, 10),
-   (('ITYPE', 5), ('IA', 24), ('IB', 30), ('IC', 120)), ACI, "303 écrasé (6 bits) : acid lo-fi", "A1-A2", "S42")
 AC("BS 303 PHASR", (0, 30, 100, 80, 60, 80, 0, 45), (0, 100, 127, 12), 0, 1, (0, 0, 30, 20),
    (("ITYPE", 6), ("IA", 60), ("IB", 120), ("IC", 110)), ACI, "303 au phaser", "A1-A2", "S42")
 AC("LD 303 FOLD", (0, 50, 110, 80, 60, 100, 0, 45), (0, 100, 127, 16), 0, 1, (20, 0, 60, 30),
@@ -967,16 +924,10 @@ GR("PL GRN SAX", (3, 10, 20, 70, 0, 10, 10, 110), (0, 58, 0, 48), 0, 0, (10, 20,
 GR("ST GRN FLUTE", (2, 10, 50, 100, 12, 30, 0, 110), (0, 60, 0, 50), 0, 0, (0, 40, 60, 70), (), DUB,
    "stab de flûte granulaire, une octave au-dessus", "accords A3-A5", "S21")
 # --------------------------------------------------------------------------------------------------------- PHYS
-PY("PC BELL PHYS", (0, 75, 110, 100, 20, 110, 0, 20), (0, 100, 127, 80), 0, 0, (0, 20, 30, 70), (), DET,
-   "cloche modale accordée", "C4-C5", "S119")
-PY("PC SNARE PHY", (2, 0, 127, 30, 127, 127, 0, 127), (0, 100, 127, 30), 0, 0, (20, 0, 10, 40), (), TE,
-   "snare de peau : membrane frappée au bord, beaucoup de frappe", "C3-C4", "S120")
 PY("BS MEMB 808", (2, 0, 30, 100, 0, 110, 60, 0), (0, 100, 127, 80), 0, 1, (30, 0, 0, 10), (), DET,
    "basse de peau à la 808 : membrane grave dont la hauteur tombe", "A1-A2", "S45")
 PY("LD STR BOW", (1, 70, 100, 120, 20, 127, 127, 0), (40, 100, 127, 60), 0, 1, (0, 40, 40, 70),
    (("LRATE", 80), ("LD_PIT", 8), ("LFADE", 60)), MEL, "violon synthétique : corde frottée, vibrato", "A4-A6", "S68")
-PY("PC CLAVES", (0, 64, 127, 10, 20, 127, 0, 50), (0, 100, 127, 10), 0, 0, (0, 0, 10, 20), (), HG,
-   "claves : deux bâtons, très court et aigu", "C5-C6", "S119")
 # -------------------------------------------------------------------------------------------------------- NOISE
 NZ("FX SCRATCH", (1, 0, 90, 60, 64, 110, 100, 30), (0, 70, 60, 50), 0, 0, (20, 0, 20, 40),
    (("LRATE", 90), ("LD_FLT", 30)), DUB, "grattement de vinyle", "A3, tenu", "S100")

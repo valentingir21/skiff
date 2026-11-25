@@ -3074,9 +3074,30 @@ static int test_edit_cycle(void)
 #endif
     {   /* #97: a DRUM track's lane levels on EDIT > LANES ((Skiff U3, R6) one page: KNOB 1 the lane, KNOB 2 its level;
          * N5: VOICE and VOICE 2 change nothing on the hits, not there) */
-        static const char *const CYC_K[] = {"EDIT 1", "EDIT 2", "LANES", "LANE MIX", "EDIT 1"};
+        static const char *const CYC_K[] = {"EDIT 1", "EDIT 2", "RUMBLE", "RUMBLE 2", "LANES", "LANE MIX", "EDIT 1"};
         set_engine_of(TSEL, ENGI_DRUM);
-        bad += check("EDIT cycle (DRUM): EDIT 1 EDIT 2 LANES (2.0) LANE MIX, EDIT 1", engine_cycle(CYC_K, NELEM(CYC_K)));
+        bad += check("EDIT cycle (DRUM): EDIT 1 EDIT 2 (Gir) RUMBLE RUMBLE 2, LANES (2.0) LANE MIX, EDIT 1",
+                     engine_cycle(CYC_K, NELEM(CYC_K)));
+        go_title("RUMBLE"); frame();                 /* ((Gir) the kick's RUMBLE: its values on the knobs */
+        ok = str_eq(page_desc(cur_page(), 0, &vp)->label, "RUMBLE") && vp == &TSEL->p[P_RB_MIX] &&
+             str_eq(page_desc(cur_page(), 1, &vp)->label, "R.TUNE") && str_eq(page_desc(cur_page(), 3, &vp)->label, "R.DRIVE");
+        TSEL->p[P_RB_MIX] = 0;
+        turn(EN_K1, 5);
+        turn(EN_K2, -20);
+        ok &= TSEL->p[P_RB_MIX] == 5 && TSEL->p[P_RB_TUNE] == -1;
+        {
+            char v[8];
+            const char *u;
+            param_format(&TP[P_RB_TUNE], -1, v, &u);
+            ok &= str_eq(v, "OFF");
+            param_format(&TP[P_RB_TUNE], 9, v, &u);
+            ok &= str_eq(v, "A");
+        }
+        go_title("RUMBLE 2"); frame();
+        ok &= str_eq(page_desc(cur_page(), 0, &vp)->label, "R.TONE") && str_eq(page_desc(cur_page(), 1, &vp)->label, "R.DUCK") &&
+              !page_desc(cur_page(), 2, &vp);
+        bad += check("(Gir) RUMBLE: KNOB 1 RUMBLE, 2 R.TUNE (down to OFF; A by name), 4 R.DRIVE; RUMBLE 2: R.TONE R.DUCK", ok);
+        set_engine_of(TSEL, ENGI_DRUM);
         go_title("LANES"); frame();
         ok = TSEL->p[P_LN5] == 127;
         turn(EN_K1, 5 - (int32_t)ui.lane);
@@ -3108,7 +3129,7 @@ static int test_edit_cycle(void)
                      str_eq(cur_page()->title, "EDIT 1") && !memcmp(ui.msg, "NO LANES ON ", 12));
     }
     {   /* (Skiff phase 7, 8) DRUM-X: its lane levels, and SOUND, the sheet of a sound of the project's kit (ui_dx.c) */
-        static const char *const CYC_X[] = {"EDIT 1", "EDIT 2", "SOUND", "LANE MIX", "EDIT 1"};   /* ((U3) LANES: the
+        static const char *const CYC_X[] = {"EDIT 1", "EDIT 2", "RUMBLE", "RUMBLE 2", "SOUND", "LANE MIX", "EDIT 1"};   /* ((U3) LANES: the
                                                                                                 * sheet's LEVL) */
         static dx_lane_t keep[DV_NLANE];
         uint32_t pr;
@@ -3116,7 +3137,8 @@ static int test_edit_cycle(void)
         memcpy(keep, dx_kit, sizeof keep);
         set_engine_of(TSEL, ENGI_DRUMX);
         go_title("EDIT 1"); ui.fam_last[FAM_EDIT] = ui.page;   /* (EDIT reopens its last page: from the first) */
-        bad += check("EDIT cycle (DRUM-X): EDIT 1 EDIT 2 SOUND (2.0) LANE MIX, EDIT 1", engine_cycle(CYC_X, NELEM(CYC_X)));
+        bad += check("EDIT cycle (DRUM-X): EDIT 1 EDIT 2 (Gir) RUMBLE RUMBLE 2, SOUND (2.0) LANE MIX, EDIT 1",
+                     engine_cycle(CYC_X, NELEM(CYC_X)));
         ui_prefs |= PREF_BPM_LOCK;                    /* (SELECT: the pages, the sheet's rows) */
         dx_ui_lane = DV_KICK; dx_ui_win = 0;
         go_title("SOUND"); frame();
@@ -3153,11 +3175,11 @@ static int test_edit_cycle(void)
         turn(EN_SELECT, -3);
         ok &= str_eq(cur_page()->title, "SOUND") && dx_ui_win == 0u;
         turn(EN_SELECT, -1);
-        ok &= str_eq(cur_page()->title, "EDIT 2");
+        ok &= str_eq(cur_page()->title, "RUMBLE 2");
         turn(EN_SELECT, 1);
         ok &= str_eq(cur_page()->title, "SOUND") && dx_ui_win == 0u;
         bad += check("SELECT past the sheet's foot: (2.0) LANE MIX on the sheet's sound, nothing after it (U3); back: the "
-                     "sheet's foot; up past its top: EDIT 2; on: its top", ok);
+                     "sheet's foot; up past its top: (Gir) RUMBLE 2; on: its top", ok);
         key_down(13); frame(); key_up(13); frame();   /* (the first C is key 7: 13 is F#, HAT CL) */
         bad += check("a key struck on the track picks the sound edited (HAT CL)", dx_ui_lane == DV_HATC && str_eq(page_head(), "SOUND CH"));
         ui.fam_last[FAM_EDIT] = ui.page;
@@ -8480,8 +8502,8 @@ static int test_u4(void)
         TSEL->engine = TSEL->eng_req;
         go_page(GR_DXSND); frame();
         page_pos(ti);
-        bad += check("#7 the sheets show where they are: FM6 OPERATOR 3/6, ALL OPS 4/6, DRUM-X SOUND 3/4 ((2.0) LANE MIX "
-                     "after it)", ok && str_eq(ti, "3/4"));
+        bad += check("#7 the sheets show where they are: FM6 OPERATOR 3/6, ALL OPS 4/6, DRUM-X SOUND 5/6 ((2.0) LANE MIX "
+                     "after it, (Gir) RUMBLE RUMBLE 2 before)", ok && str_eq(ti, "5/6"));
     }
     ui_power_on();                                      /* F7: no silent dead ends */
     ui_prefs |= PREF_BPM_LOCK;                          /* (SELECT: the pages) */

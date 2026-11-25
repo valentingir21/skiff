@@ -171,6 +171,9 @@ enum {                          /* per-track parameters */
                                                 * +6 dB) and DEPTH (front .. back), fx.c eq_*: the mix's, kept over sound
                                                 * loads; stored ids 166..169 (a project from before: 64 64 64 0, as
                                                 * without them) */
+    P_RB_MIX, P_RB_TUNE, P_RB_DECAY, P_RB_DRIVE, P_RB_TONE, P_RB_DUCK,   /* (Gir, rumble) DRUM's and DRUM-X's kick RUMBLE
+                                                * (rumble.c): its level (0: off), note (-1 OFF), DECAY DRIVE TONE DUCK;
+                                                * the sound's; stored ids 170..175 (a sound from before: RUMBLE 0) */
     P_E0, P_E1, P_E2, P_E3, P_E4, P_E5, P_E6, P_E7,
     P_COUNT
 };

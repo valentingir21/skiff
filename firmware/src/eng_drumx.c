@@ -89,6 +89,8 @@ static void drumx_note_on(track_t *t, voice_t *v)
     v->env = 1 << 24;                                    /* the ADSR held at full from here (eng_drum.c: a key-off
                                                           * before the first block must not end a fresh voice) */
     dx_trigger(&L->x);
+    if (lane == DV_KICK)                                 /* ((Gir) the RUMBLE ducks: rumble.c) */
+        rb_hit(t);
     if (lane == DV_HATC)                                 /* a closed hat chokes the open one */
         dx_choke(&K[DV_HATO].x);
 }
@@ -101,7 +103,7 @@ static int32_t drumx_amp(track_t *t, voice_t *v, int32_t adsr)
     (void)adsr;
     if (!v->active)                                      /* (taken for another part: env_tick ended it) */
         return 0;
-    if (!L || (!L->x.live && !L->x.trig)) {
+    if (!L || (!L->x.live && !L->x.trig && !(((uint32_t)v->s[0] & 7u) == DV_KICK && rb_keep(t)))) {   /* ((Gir) RUMBLE) */
         v->active = v->gate = 0;
         v->stage = 0;
         v->env = 0;
@@ -116,7 +118,7 @@ static void drumx_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const
     const int16_t *p = t->p;
     drumx_lane_t *L = drumx_lane_of(t, v);
     uint32_t lane = (uint32_t)v->s[0] & (DV_NLANE - 1u), i;
-    int32_t y[CTL], drv = p[P_E7], g = 0, mk = 0;
+    int32_t y[CTL], rb[CTL], drv = p[P_E7], g = 0, mk = 0, on = lane == DV_KICK && p[P_RB_MIX] > 0;
     vmod_t ml;
     if (!L)
         return;
@@ -125,8 +127,11 @@ static void drumx_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const
         n = CTL;
     dx_run(&dx_kit[lane], &L->x, p[P_E0], L->st * 16 + (p[P_E1] - 64) * 3, p[P_E3] - 64, p[P_E2] - 64, p[P_E4] - 64,
            p[P_E6], p[P_E5], y, n);
+    if (on)                                              /* ((Gir) the kick's RUMBLE: rumble.c) */
+        rb_run(t, y, rb, n);
     if ((drum_mute[(uint32_t)(t - trk) % NTRK] >> lane) & 1u)
-        return;                                          /* ((1.3) a muted lane rings on unheard, as DRUM's) */
+        n = 0;                                           /* ((1.3) a muted lane rings on unheard, as DRUM's; (Gir) one
+                                                          * way out, at the end: the loops' cost stays countable) */
     if (drv > 0) {                                       /* DRV: x1..x4 into the soft clip, the level kept (Q12) */
         g = 4096 + drv * 3 * 4096 / 127;
         mk = (int32_t)((19661u << 15) / (uint32_t)softclip((19661 * g) >> 12));
@@ -137,6 +142,8 @@ static void drumx_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const
             s = (softclip((s * g) >> 12) * mk) >> 15;
         out[i] += voice_amp2(soft_knee(s + (s >> 2), 24000), m, i);
     }
+    for (i = 0; on && i < n; i++)
+        out[i] += voice_amp2(rb[i], m, i);
 }
 
 /* {MRPH, TUNE, TONE, DECY, NOIS, FM, FOLD, DRV} */
@@ -182,6 +189,9 @@ static const preset_t DRUMX_PRESETS[] = {
     {"KT DX DIRTY", {64, 60, 90, 60, 80, 20, 60, 127}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 0, 20), TAG(PT_DRUM)},
     {"KT DX WOOD", {40, 60, 40, 50, 20, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 40), TAG(PT_DRUM)},
     {"KT DX METAL2", {100, 90, 120, 40, 100, 60, 40, 60}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 30), TAG(PT_DRUM)},
+    /* (Gir) kits made for the RUMBLE (RB_KITS below) */
+    {"KT RMB INDUS", {80, 56, 90, 50, 80, 50, 80, 110}, {0, 100, 127, 100}, 0, 0, FX(50, 0, 0, 20), TAG(PT_DRUM)},
+    {"KT RMB WAREH", {64, 58, 70, 50, 60, 20, 20, 60}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 10, 30), TAG(PT_DRUM)},
 };
 
 /* (Skiff phase 9) the factory kits a preset loads as the project's kit (ui.c apply_preset_to), 8 lanes as dx_kit has
@@ -261,10 +271,38 @@ static const dx_lane_t DX_KITS[][8] = {
         {DX_MODE(DXW_SINE, DXF_LP, 0) | DXM_SINE << 5, {70, 127, 50, 0, 40}, {80, 127, 60, 0, 60}},   /* BELL */
     },
 };
-static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 4, 1, 2, 3, 1, 7, 6, 1, 4, 3, 7, 5, 4, 8, 3, 4, 6, 2, 7, 8, 1, 7, 4};   /* ((techno-presets) KT INDUS: INDUSTRIAL's kit) */
+static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 4, 1, 2, 3, 1, 7, 6, 1, 4, 3, 7, 5, 4, 8, 3, 4, 6, 2, 7, 8, 1, 7, 4, 4, 1};   /* ((techno-presets) KT INDUS: INDUSTRIAL's
+                                                                                          * kit; (Gir) KT RMB INDUS, WAREH) */
 _Static_assert(sizeof DRUMX_PKIT == NELEM(DRUMX_PRESETS), "a kit (or none) per DRUM-X preset");
 _Static_assert(NELEM(DRUMX_PRESETS) <= 64u, "its favourites end before THEME CUSTOM's colours (ui.c CPAL_COLS)");
 _Static_assert(sizeof DX_KITS[0] == sizeof dx_kit, "a factory kit is a kit");
+
+/* (Gir) the kits with a RUMBLE (rumble.c): its style, R.TUNE R.DECAY R.DRIVE R.TONE R.DUCK, and each kit's
+ * {preset (DRUM-X's + 128), style, RUMBLE}; every other kit (the classic ones: STD, 80, 10, 66, 55, 77, DEEP ..) RUMBLE 0 */
+enum { RS_HARD, RS_SCHRANZ, RS_INDUS, RS_DEEP, RS_GROOVE, RS_RAVE, RS_GABBER };
+static const int8_t RB_STYLE[][5] = {
+    {9, 84, 70, 50, 60}, {9, 70, 100, 60, 44}, {9, 96, 110, 40, 72}, {9, 106, 30, 34, 86},
+    {9, 60, 50, 60, 40}, {9, 80, 80, 70, 56}, {9, 60, 127, 70, 34},
+};
+static const uint8_t RB_KITS[][3] = {
+    {13, RS_HARD, 64}, {14, RS_HARD, 74}, {15, RS_DEEP, 92}, {17, RS_SCHRANZ, 78}, {18, RS_GROOVE, 54},
+    {20, RS_GABBER, 97}, {22, RS_GROOVE, 48}, {25, RS_INDUS, 78}, {26, RS_RAVE, 83}, {28, RS_DEEP, 88},
+    {29, RS_HARD, 122}, {31, RS_HARD, 84}, {32, RS_SCHRANZ, 98}, {33, RS_DEEP, 88},
+    {128 + 10, RS_INDUS, 103}, {128 + 11, RS_DEEP, 91}, {128 + 14, RS_INDUS, 89}, {128 + 17, RS_HARD, 67},
+    {128 + 18, RS_SCHRANZ, 97}, {128 + 20, RS_GROOVE, 57}, {128 + 22, RS_GABBER, 80}, {128 + 25, RS_DEEP, 86},
+    {128 + 30, RS_RAVE, 68}, {128 + 33, RS_INDUS, 127}, {128 + 34, RS_HARD, 86},
+};
+/* a kit preset's RUMBLE into the values p (ui.c preset_fill: the others stay at their defaults, RUMBLE 0) */
+static void rb_preset_fill(int16_t *p, uint32_t dx, uint32_t pi)
+{
+    uint32_t i, k;
+    for (i = 0; i < NELEM(RB_KITS); i++)
+        if (RB_KITS[i][0] == pi + dx * 128u) {
+            p[P_RB_MIX] = RB_KITS[i][2];
+            for (k = 0; k < 5u; k++)
+                p[P_RB_TUNE + k] = RB_STYLE[RB_KITS[i][1]][k];
+        }
+}
 
 static const engine_t ENG_DRUMX = {
     .name = "DRUM-X",

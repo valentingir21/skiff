@@ -111,7 +111,6 @@ static const preset_t SSAW_PRESETS[] = {
     {"ST SS STAB", {72, 100, 96, 25, 64, 15, 64, 0}, {0, 68, 0, 52}, 30, 0, FX(10, 80, 55, 60), MORE({P_SPRD, 120}), TAG(PT_KEYS)},
     {"PA SS WIDE", {90, 110, 85, 8, 70, 0, 50, 0}, {80, 90, 118, 98}, 4, 0, FX(0, 110, 30, 105), MORE({P_SPRD, 127}, {P_LRATE, 30}, {P_LD_FLT, 8}), TAG(PT_PAD)},
     {"PA SS DARK", {84, 100, 52, 20, 80, 0, 40, 0}, {60, 90, 118, 96}, 12, 0, FX(0, 90, 25, 110), MORE({P_SPRD, 127}, {P_LRATE, 22}, {P_LD_FLT, 14}), TAG(PT_PAD)},
-    {"BS SS OFFBT", {30, 60, 90, 50, 32, 60, 64, 127}, {0, 52, 0, 24}, 30, 1, FX(20, 0, 10, 5), TAG(PT_BASS)},
     /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
     {"PL SS SHORT", {40, 70, 80, 20, 72, 0, 80, 0}, {0, 52, 0, 44}, 30, 0, FX(0, 40, 80, 40), MORE({P_SPRD, 90}), TAG(PT_PLUCK)},
     {"PL SS DARK", {70, 100, 28, 40, 60, 0, 40, 20}, {0, 66, 0, 62}, 40, 0, FX(0, 70, 60, 92), MORE({P_SPRD, 110}), TAG(PT_PLUCK)},

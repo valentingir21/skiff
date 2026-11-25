@@ -208,7 +208,6 @@ static const preset_t ANALOG_PRESETS[] = {
     {"SUB SAW", {6, 0, 80, 0, 70, 22, 6, 64}, {0, 60, 110, 22}, 20, 1, FX(0, 0, 5, 10), TAG(PT_BASS)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
     {"LD PORTA UNI", {0, 24, 64, 0, 60, 70, 10, 64}, {2, 70, 115, 50}, 40, 1, FX(0, 40, 55, 60), MORE({P_VOICE, 3}, {P_GLIDE, 60}, {P_DETUNE, 60}), TAG(PT_LEAD)},
     {"LD OLDSKOOL", {1, 14, 64, 0, 80, 40, 20, 64}, {0, 70, 100, 40}, 20, 1, FX(10, 20, 50, 30), MORE({P_GLIDE, 20}), TAG(PT_LEAD)},
-    {"LD SQR WOB", {1, 6, 64, 0, 60, 80, 40, 64}, {0, 70, 110, 30}, 0, 1, FX(50, 0, 40, 30), MORE({P_LRATE, 80}, {P_LSYNC, 5}, {P_LD_FLT, 30}, {P_DTYPE, 1}), TAG(PT_LEAD)},
     {"LD SCHRANZ", {0, 30, 64, 0, 80, 50, 100, 64}, {0, 70, 110, 30}, 20, 1, FX(127, 20, 15, 20), MORE({P_VOICE, 3}, {P_DTYPE, 4}, {P_LRATE, 88}, {P_LD_FLT, 30}), TAG(PT_LEAD)},
     {"LD SQUEAL", {4, 20, 64, 0, 127, 127, 0, 64}, {0, 70, 110, 40}, 0, 1, FX(0, 0, 60, 40), MORE({P_LRATE, 108}, {P_LD_PIT, 20}, {P_LD_SHP, 40}), TAG(PT_LEAD)},
     {"PL SAW TECH", {0, 10, 64, 0, 36, 50, 8, 64}, {0, 66, 0, 56}, 56, 0, FX(0, 20, 62, 44), MORE({P_SPRD, 70}), TAG(PT_PLUCK)},
@@ -220,7 +219,6 @@ static const preset_t ANALOG_PRESETS[] = {
     {"BS REESE DRK", {0, 30, 64, 0, 56, 20, 40, 40}, {0, 64, 127, 30}, 6, 1, FX(35, 15, 0, 8), MORE({P_LRATE, 24}, {P_LD_FLT, 10}, {P_DTYPE, 4}), TAG(PT_BASS)},
     {"BS SUB CLEAN", {2, 0, 0, 0, 60, 0, 12, 0}, {0, 64, 127, 18}, 0, 1, FX(0, 0, 0, 0), TAG(PT_BASS)},
     {"BS LFO 1/8", {0, 10, 64, 0, 50, 80, 20, 64}, {0, 64, 110, 24}, 0, 1, FX(30, 0, 10, 6), MORE({P_LRATE, 80}, {P_LSYNC, 6}, {P_LWAVE, 2}, {P_LD_FLT, 40}), TAG(PT_BASS)},
-    {"BS NOISE SUB", {3, 0, 0, 100, 80, 20, 60, 0}, {0, 64, 100, 24}, 0, 1, FX(60, 0, 5, 5), MORE({P_DTYPE, 4}), TAG(PT_BASS)},
     {"BS ROLLING", {1, 8, 64, 0, 50, 60, 20, 64}, {0, 50, 0, 18}, 50, 1, FX(20, 0, 15, 5), TAG(PT_BASS)},
     {"BS DONK", {1, 0, 0, 0, 30, 116, 20, 64}, {0, 54, 0, 30}, 58, 1, FX(20, 0, 10, 10), MORE({P_ED_PIT, 6}), TAG(PT_BASS)},
     {"PA DARK", {4, 10, 64, 6, 44, 20, 0, 40}, {96, 92, 115, 100}, 8, 0, FX(0, 70, 25, 105), MORE({P_LRATE, 26}, {P_LD_FLT, 12}, {P_LD_SHP, 30}, {P_SPRD, 100}), TAG(PT_PAD)},
@@ -235,7 +233,6 @@ static const preset_t ANALOG_PRESETS[] = {
     /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
     {"PL SQR BLIP", {1, 0, 0, 0, 92, 8, 0, 100}, {0, 50, 0, 46}, 8, 0, FX(0, 0, 40, 30), TAG(PT_PLUCK)},
     {"PL SINE DROP", {3, 0, 0, 0, 127, 0, 0, 64}, {0, 54, 0, 50}, 0, 0, FX(0, 0, 52, 46), MORE({P_ED_PIT, 24}), TAG(PT_PLUCK)},
-    {"PL ACID PLK", {0, 0, 0, 0, 34, 112, 44, 72}, {0, 58, 0, 40}, 52, 0, FX(28, 0, 58, 18), MORE({P_DTYPE, 1}), TAG(PT_PLUCK)},
     {"PL SYNC PLK", {5, 34, 96, 0, 92, 16, 10, 64}, {0, 62, 0, 50}, 18, 0, FX(0, 15, 50, 30), MORE({P_ED_SHP, 56}), TAG(PT_PLUCK)},
     {"PL SINE KEYS", {3, 20, 64, 0, 90, 0, 0, 64}, {0, 78, 20, 64}, 10, 0, FX(0, 80, 45, 40), MORE({P_ED_PIT, 4}), TAG(PT_PLUCK)},
     {"PL NZ TICK", {2, 0, 0, 112, 104, 60, 0, 127}, {0, 42, 0, 40}, 30, 0, FX(0, 0, 50, 35), TAG(PT_PLUCK)},
@@ -282,7 +279,6 @@ static const preset_t ANALOG_PRESETS[] = {
     {"ST PHASER", {0, 14, 64, 0, 70, 40, 10, 64}, {0, 62, 20, 48}, 30, 0, FX(0, 20, 50, 60), MORE({P_ITYPE, 6}, {P_IA, 50}, {P_IB, 120}, {P_IC, 100}), TAG(PT_KEYS)},
     {"PA FLANGE", {0, 16, 64, 0, 70, 20, 0, 64}, {90, 90, 120, 100}, 0, 0, FX(0, 0, 30, 110), MORE({P_ITYPE, 7}, {P_IA, 30}, {P_IB, 120}, {P_IC, 110}), TAG(PT_PAD)},
     {"BS FOLD", {2, 0, 0, 0, 127, 0, 0, 64}, {0, 64, 110, 24}, 0, 1, FX(0, 0, 5, 5), MORE({P_ITYPE, 3}, {P_IA, 110}, {P_IB, 80}, {P_IC, 127}), TAG(PT_BASS)},
-    {"PA AUTOPAN", {0, 8, 64, 0, 60, 10, 0, 64}, {80, 90, 120, 100}, 0, 0, FX(0, 0, 30, 100), MORE({P_M1SRC, 1}, {P_M1DST, 5}, {P_M1AMT, 63}, {P_LRATE, 40}), TAG(PT_PAD)},
     {"LD THIN HP", {0, 10, 64, 0, 127, 0, 30, 64}, {0, 70, 110, 40}, 0, 1, FX(20, 0, 50, 40), MORE({P_ITYPE, 9}, {P_IA, 90}, {P_IB, 70}, {P_IC, 127}), TAG(PT_LEAD)},
     {"FX BITFALL", {0, 30, 64, 0, 100, 20, 30, 64}, {0, 110, 0, 100}, 30, 0, FX(20, 0, 60, 80), MORE({P_ED_PIT, 63}, {P_ITYPE, 5}, {P_IA, 16}, {P_IB, 30}), TAG(PT_FX)},
     {"BS DROP", {3, 0, 0, 0, 127, 0, 40, 0}, {0, 80, 60, 40}, 0, 1, FX(30, 0, 5, 10), MORE({P_M1SRC, 9}, {P_M1DST, 1}, {P_M1AMT, 63}, {P_EG2_DEC, 76}), TAG(PT_BASS)},

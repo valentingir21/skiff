@@ -374,7 +374,6 @@ static const preset_t TRIO_PRESETS[] = {
     {"LD CHIP", {10, 12, 0, 0, 0, 110, 10, 30}, {0, 70, 110, 40}, 0, 1, FX(0, 0, 90, 30), MORE({P_LRATE, 96}, {P_LD_PIT, 24}, {P_LFADE, 60}), TAG(PT_LEAD)},
     {"PA TRIO NTCH", {0, 0, 12, 20, 3, 60, 80, 64}, {90, 90, 120, 100}, 0, 0, FX(0, 90, 30, 110), MORE({P_LRATE, 10}, {P_LD_FLT, 30}, {P_SPRD, 110}), TAG(PT_PAD)},
     {"DR TRIO RING", {13, 0, 7, 20, 1, 50, 80, 64}, {110, 90, 127, 110}, 0, 0, FX(20, 40, 30, 115), MORE({P_LRATE, 6}, {P_LD_FLT, 30}), TAG(PT_PAD)},
-    {"FX TRIO ZAP", {9, 24, 0, 0, 0, 110, 40, 64}, {0, 64, 0, 56}, 40, 0, FX(20, 0, 80, 50), MORE({P_ED_PIT, 63}), TAG(PT_FX)},
     {"PC NOISE SNR", {8, 0, 0, 0, 1, 90, 30, 64}, {0, 52, 0, 46}, 20, 0, FX(20, 0, 10, 40), TAG(PT_DRUM)},
     {"BS TRIO NTCH", {0, 0, -12, 10, 3, 60, 80, 20}, {0, 52, 0, 20}, 20, 1, FX(20, 0, 10, 5), TAG(PT_BASS)},
     {"ST TRIO MAJ7", {4, 4, 11, 4, 0, 110, 20, 64}, {0, 72, 30, 60}, 20, 0, FX(0, 100, 60, 70), TAG(PT_KEYS)},

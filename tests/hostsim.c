@@ -121,6 +121,11 @@ static void host_preset_values(track_t *t, uint32_t e, uint32_t pi, const preset
     if (e == ENGI_MINI)                           /* ((techno-engines) MINI: its patch, its oscillators: ui.c preset_fill) */
         mini_preset_fill(t->p, pi);
 #endif
+    if (e == ENGI_DRUM || e == ENGI_DRUMX) {      /* ((Gir) a kit's RUMBLE, the others' off: ui.c preset_fill) */
+        for (i = P_RB_MIX; i <= P_RB_DUCK; i++)
+            t->p[i] = TP[i].def;
+        rb_preset_fill(t->p, e == ENGI_DRUMX, pi);
+    }
 }
 static void host_preset_req(track_t *t, uint32_t e, uint32_t pi)
 {

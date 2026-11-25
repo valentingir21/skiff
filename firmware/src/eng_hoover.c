@@ -102,11 +102,9 @@ static const preset_t HOOVER_PRESETS[] = {
     {"LD MENTASM", {50, 74, 90, 44, 104, 15, 40, 10}, {2, 70, 115, 55}, 0, 1, FX(10, 110, 30, 45), MORE({P_SPRD, 110}, {P_GLIDE, 24}), TAG(PT_LEAD)},
     {"LD HOOV HARD", {90, 40, 127, 60, 127, 20, 127, 80}, {0, 70, 115, 45}, 0, 1, FX(90, 0, 20, 30), MORE({P_DTYPE, 1}, {P_LRATE, 80}, {P_LSYNC, 8}, {P_LD_AMP, 100}), TAG(PT_LEAD)},
     {"LD HOOV DARK", {44, 80, 80, 40, 70, 25, 70, 20}, {2, 72, 115, 60}, 10, 1, FX(20, 100, 25, 60), MORE({P_SPRD, 110}, {P_GLIDE, 24}), TAG(PT_LEAD)},
-    {"LD GABBER HV", {110, 80, 110, 90, 112, 18, 70, 120}, {0, 70, 115, 40}, 0, 1, FX(127, 0, 15, 20), MORE({P_DTYPE, 4}), TAG(PT_LEAD)},
     {"LD RAVE HV", {36, 66, 70, 34, 100, 12, 20, 0}, {4, 72, 110, 55}, 0, 0, FX(0, 90, 50, 50), MORE({P_SPRD, 120}), TAG(PT_LEAD)},
     {"ST HOOVER", {40, 60, 90, 44, 96, 20, 30, 20}, {0, 68, 0, 50}, 20, 0, FX(15, 90, 55, 55), MORE({P_SPRD, 120}), TAG(PT_KEYS)},
     {"BS HOOVER", {30, 64, 60, 30, 70, 15, 90, 40}, {0, 64, 100, 22}, 0, 1, FX(30, 40, 10, 5), TAG(PT_BASS)},
-    {"LD HOOV TRNC", {16, 50, 70, 24, 116, 10, 20, 20}, {8, 72, 112, 64}, 0, 0, FX(10, 100, 80, 80), MORE({P_SPRD, 120}, {P_LRATE, 90}, {P_LD_PIT, 16}, {P_LFADE, 80}), TAG(PT_LEAD)},
     /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
     {"LD HOOV ACID", {20, 60, 80, 30, 40, 110, 40, 60}, {0, 66, 60, 30}, 50, 1, FX(30, 10, 40, 30), MORE({P_SPRD, 80}, {P_DTYPE, 1}), TAG(PT_LEAD)},
     {"ST HOOV DIVE", {127, 70, 90, 50, 100, 10, 30, 40}, {0, 70, 0, 60}, 0, 0, FX(80, 90, 90, 60), MORE({P_SPRD, 120}), TAG(PT_KEYS)},
@@ -119,7 +117,6 @@ static const preset_t HOOVER_PRESETS[] = {
     {"DR HOOVER", {127, 127, 127, 80, 80, 40, 80, 60}, {110, 90, 127, 110}, 0, 0, FX(30, 100, 20, 120), MORE({P_LRATE, 6}, {P_LD_FLT, 20}), TAG(PT_PAD)},
     {"ST HOOV FLNG", {40, 60, 90, 44, 96, 20, 30, 20}, {0, 66, 0, 50}, 10, 0, FX(10, 0, 50, 60), MORE({P_ITYPE, 7}, {P_IA, 60}, {P_IB, 110}, {P_IC, 120}), TAG(PT_KEYS)},
     {"BS HOOV FOLD", {30, 50, 80, 30, 80, 20, 90, 30}, {0, 62, 80, 24}, 0, 1, FX(20, 0, 10, 5), MORE({P_ITYPE, 3}, {P_IA, 90}, {P_IB, 60}), TAG(PT_BASS)},
-    {"FX HOOV GATE", {60, 80, 110, 60, 110, 20, 50, 40}, {0, 80, 127, 60}, 0, 0, FX(30, 80, 40, 60), MORE({P_LRATE, 80}, {P_LSYNC, 10}, {P_LD_AMP, 127}, {P_SPRD, 110}), TAG(PT_FX)},
 };
 
 static const engine_t ENG_HOOVER = {

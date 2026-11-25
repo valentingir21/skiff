@@ -675,6 +675,8 @@ static int page_visible(uint32_t i)
     if (PAGES[i].graph == GR_SLICES)
         return 0;
 #endif
+    if (PAGES[i].fam == FAM_EDIT && (id == P_RB_MIX || id == P_RB_TONE))   /* ((Gir) RUMBLE: a kit's) */
+        return drum_engine(TSEL->eng_req % NENGINES);
     if (PAGES[i].fam == FAM_EDIT && id >= P_MN_R1 && id <= P_MN_FMODE)   /* ((techno-engines) MINI's oscillators) */
         return TSEL->eng_req % NENGINES == ENGI_MINI;
     return !(PAGES[i].fam == FAM_EDIT && PAGES[i].id[0] >= P_FM1_ATK &&
@@ -2042,6 +2044,8 @@ static void preset_fill(int16_t *p, const engine_t *e, uint32_t pi)
     }
     if (e == &ENG_MINI)                               /* ((techno-engines) MINI: its patch, its oscillators) */
         mini_preset_fill(p, pi);
+    if (e == &ENG_DRUM || e == &ENG_DRUMX)            /* ((Gir) a kit's RUMBLE: eng_drumx.c) */
+        rb_preset_fill(p, e == &ENG_DRUMX, pi);
 }
 /* preset pi of the engine the track asked for: the sound only (not the steps, not param_kept) */
 static void apply_preset_to(track_t *t, uint32_t pi)

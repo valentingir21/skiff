@@ -770,7 +770,7 @@ static void song_lists(int playing)
 #define E_FM (FELUCCA_FM4 ? ENGI_DIGITAL : ENGI_FM6)
 
 enum { S_HOME, S_HOME_IDLE, S_MESSAGE, S_MESSAGE_KEY, S_MESSAGE_NOFILE, S_PRESETS, S_PRESETS_NOFAV, S_USER, S_PROJECT, S_LANES,
-       S_STEP, S_PATTERN, S_CHANCE, S_MOTION, S_DRUM, S_DRUM_HAND, S_DRUM_CYM, S_MIXER, S_MIXER_PAN, S_MIXER_EQ,
+       S_STEP, S_PATTERN, S_CHANCE, S_MOTION, S_DRUM, S_DRUM_HAND, S_DRUM_CYM, S_MIXER, S_MIXER_PAN, S_MIXER_EQ, S_RUMBLE, S_RUMBLE_2,
        S_ENV, S_MOD_ENV, S_LFO, S_MOD, S_FX, S_SLICER, S_DLY, S_SCL, S_CHORD, S_CHORD_WIDE, S_CHORD_OFF, S_CHORD_KIT, S_ARP, S_VOICE, S_GLOBAL, S_CHORUS,
        S_EDIT_ANALOG, S_EDIT_DIGITAL, S_OP_ENV, S_EDIT_WHEEL, S_EDIT_SAMPLE, S_EDIT_GRAIN, S_EDIT_PHYS,
        S_ALG1, S_ALG2, S_ALG3, S_ALG4, S_ALG5, S_ALG6, S_ALG7, S_ALG8, S_OP_LEVEL,
@@ -818,7 +818,7 @@ enum { S_HOME, S_HOME_IDLE, S_MESSAGE, S_MESSAGE_KEY, S_MESSAGE_NOFILE, S_PRESET
        S_MOCK_HOME, S_MOCK_PRESETS, S_MOCK_SEQ, S_MOCK_DRUM, S_MOCK_MIXER, S_MOCK_DIALOG, S_MOCK_MENU, S_COUNT };
 static const char *const S_NAME[S_COUNT] = {"home", "home_idle", "message", "message_key", "message_nofile", "presets", "presets_nofav", "user",
     "project", "lanes", "step", "pattern", "chance", "motion", "drum",
-    "drum_hand", "drum_cym", "mixer", "mixer_pan", "mixer_eq", "env", "mod_env", "lfo", "mod", "fx", "slicer", "dly", "scl", "chord", "chord_wide", "chord_off", "chord_kit", "arp",
+    "drum_hand", "drum_cym", "mixer", "mixer_pan", "mixer_eq", "rumble", "rumble_2", "env", "mod_env", "lfo", "mod", "fx", "slicer", "dly", "scl", "chord", "chord_wide", "chord_off", "chord_kit", "arp",
     "voice", "global", "chorus", "edit_analog", FELUCCA_FM4 ? "edit_digital" : "edit_fm6", "op_env", "edit_wheel", "edit_sample",
     "edit_grain", "edit_phys", "alg_1", "alg_2", "alg_3", "alg_4", "alg_5", "alg_6", "alg_7", "alg_8", "op_level", "fm6_alg_01", "fm6_alg_05", "fm6_alg_22", "fm6_alg_32", "confirm_seq", "confirm_project", "confirm_load", "confirm_user",
     "confirm_motion", "confirm_erase", "menu", "menu_speaker", "about", "about_rec", "about_credits", "about_end", "uboot", "calibration", "splash",
@@ -1129,6 +1129,20 @@ static void setup(int s)
         ui.page = (uint8_t)i;
         sel_set(1);
         trk[1].p[P_EQ_LOW] = 0; trk[1].p[P_EQ_MID] = 40; trk[1].p[P_EQ_HIGH] = 127; trk[1].p[P_DEPTH] = 90;
+        break;
+    }
+    case S_RUMBLE:                               /* ((Gir) EDIT > RUMBLE, RUMBLE 2 of a DRUM track: KT HARD's */
+    case S_RUMBLE_2: {
+        uint32_t i;
+        const char *ti = s == S_RUMBLE ? "RUMBLE" : "RUMBLE 2";
+        sel_set(3);
+        TSEL->eng_req = TSEL->engine = ENGI_DRUM;
+        TSEL->p[P_RB_MIX] = 64; TSEL->p[P_RB_TUNE] = 9; TSEL->p[P_RB_DECAY] = 84; TSEL->p[P_RB_DRIVE] = 70;
+        TSEL->p[P_RB_TONE] = 50; TSEL->p[P_RB_DUCK] = 60;
+        for (i = 0; i < NPAGES && strcmp(PAGES[i].title, ti); i++)
+            ;
+        ui.home = 0;
+        ui.page = (uint8_t)i;
         break;
     }
     case S_MIXER_PAN:                            /* PAN just turned, the ends of each knob, OFF, armed while stopped */

@@ -216,6 +216,7 @@ static void step_to_grid(step_t *s)
     }
 }
 
+#include "rumble.c"             /* ((Gir) the kick's RUMBLE, DRUM's and DRUM-X's) */
 static drum_lane_t *drum_kit_of(const track_t *t)
 {
     return t >= &trk[0] && t < &trk[NPART] ? (drum_lane_t *)eng_part(t) : 0;   /* (Skiff: the shared area, engines.c) */
@@ -294,6 +295,8 @@ static void drum_note_on(track_t *t, voice_t *v)
                                                           * a key-off before the first block (zero-length MIDI
                                                           * notes) would end a fresh voice at env 0 in env_tick */
     dv_trigger(&L->v);
+    if (lane == DV_KICK)                                 /* ((Gir) the RUMBLE ducks) */
+        rb_hit(t);
     if (lane == DV_HATC && K[DV_HATO].v.live)            /* a closed hat chokes the open one */
         dv_choke(&K[DV_HATO].v);
 }
@@ -306,7 +309,9 @@ static int32_t drum_amp(track_t *t, voice_t *v, int32_t adsr)
     (void)adsr;
     if (!v->active)                                      /* (taken for another part: env_tick ended it) */
         return 0;
-    if (!L || (drum_user(t->p) ? v->s[6] == 1 : !L->v.live && !L->v.trig)) {   /* ((#35) a user kit's: its sample over) */
+    if (!L || (drum_user(t->p) ? v->s[6] == 1 : !L->v.live && !L->v.trig &&
+                                                 !(((uint32_t)v->s[0] & 7u) == DV_KICK && rb_keep(t)))) {   /* ((Gir) the
+                                                       * kick's: on while its RUMBLE sounds) */   /* ((#35) a user kit's: its sample over) */
         v->active = v->gate = 0;
         v->stage = 0;
         v->env = 0;
@@ -411,7 +416,7 @@ static void drum_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const 
     dv_param_t k;
     int32_t y[CTL], mb[CTL], acc = clamp(p[P_E5] * v->vel * 4, 0, 65536), drv = p[P_E7], g = 0, mk = 0;   /* acc Q16 */
     uint32_t ln = (uint32_t)v->s[0] & (DV_NLANE - 1u), i, r;
-    int again;
+    int again, rbon = ln == DV_KICK && p[P_RB_MIX] > 0;
     vmod_t ml;
     if (!L)
         return;
@@ -441,8 +446,11 @@ static void drum_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const 
     again = L->v.trig && L->v.live;                      /* (2.1.1) struck again while it rings */
     dv_run(&L->c, &L->v, mb, y, n);
     drum_declick(L, y, n, again);
+    if (rbon)                                            /* ((Gir) the RUMBLE, from the kick: its own sum below; mb */
+        rb_run(t, y, mb, n);                             /* is free again) */
     if ((drum_mute[(uint32_t)(t - trk) % NTRK] >> ln) & 1u)
-        return;                                          /* ((1.3) a muted lane rings on unheard) */
+        n = 0;                                           /* ((1.3) a muted lane rings on unheard; (Gir) one way out, at
+                                                          * the end: the loops' cost stays countable) */
     if (drv > 0) {                                       /* DRV: x1..x4 into the soft clip, the level kept (Q12) */
         g = 4096 + drv * 3 * 4096 / 127;
         mk = (int32_t)((19661u << 15) / (uint32_t)softclip((19661 * g) >> 12));
@@ -453,6 +461,8 @@ static void drum_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const 
             s = (softclip((s * g) >> 12) * mk) >> 15;
         out[i] += voice_amp2(soft_knee(s + (s >> 2), 24000), m, i);
     }
+    for (i = 0; rbon && i < n; i++)
+        out[i] += voice_amp2(mb[i], m, i);
 }
 
 /* the GM drum map, the first C (key 7) is the kick (C2, 36) */
@@ -492,7 +502,6 @@ static const preset_t DRUM_PRESETS[] = {
     {"KT DUB", {9, 56, 40, 64, 30, 90, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 40, 80), TAG(PT_DRUM)},
     {"KT TRIBE", {6, 60, 90, 70, 90, 120, 0, 100}, {0, 100, 127, 100}, 0, 0, FX(70, 0, 10, 30), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
     {"KT ACID HSE", {8, 64, 110, 40, 110, 100, 0, 70}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 0, 20), TAG(PT_DRUM)},
-    {"KT LOFI 55", {7, 60, 50, 70, 50, 100, 1, 60}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 30), MORE({P_DTYPE, 3}), TAG(PT_DRUM)},
     {"KT TIGHT DRY", {10, 72, 90, 20, 110, 100, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 0, 0), TAG(PT_DRUM)},
     {"KT INDUS HRD", {9, 48, 110, 68, 100, 127, 0, 120}, {0, 100, 127, 100}, 0, 0, FX(100, 0, 0, 60), MORE({P_DTYPE, 2}), TAG(PT_DRUM)},
     {"KT RAVE 90S", {5, 70, 100, 56, 90, 110, 0, 50}, {0, 100, 127, 100}, 0, 0, FX(40, 0, 20, 40), TAG(PT_DRUM)},
@@ -500,6 +509,10 @@ static const preset_t DRUM_PRESETS[] = {
     {"KT DEEP VERB", {9, 48, 70, 64, 50, 100, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 30, 110), TAG(PT_DRUM)},
     {"KT HARD 909", {5, 60, 110, 50, 120, 127, 0, 110}, {0, 100, 127, 100}, 0, 0, FX(100, 0, 0, 20), MORE({P_DTYPE, 2}), TAG(PT_DRUM)},
     {"KT TRIBAL", {11, 56, 70, 90, 70, 110, 1, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 60), TAG(PT_DRUM)},
+    /* (Gir) kits made for the RUMBLE (rumble.c; their RUMBLE values: eng_drumx.c RB_KITS) */
+    {"KT RMB HARD", {4, 54, 96, 40, 110, 127, 0, 100}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 0, 8), MORE({P_DTYPE, 2}), TAG(PT_DRUM)},
+    {"KT RMB SCHRZ", {7, 70, 120, 30, 127, 127, 0, 120}, {0, 100, 127, 100}, 0, 0, FX(100, 0, 0, 6), MORE({P_DTYPE, 4}), TAG(PT_DRUM)},
+    {"KT RMB DEEP", {11, 46, 50, 70, 40, 100, 1, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 10, 30), TAG(PT_DRUM)},
 };
 
 static const engine_t ENG_DRUM = {

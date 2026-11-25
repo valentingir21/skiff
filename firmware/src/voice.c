@@ -683,6 +683,7 @@ static void engine_block(track_t *t)
         t->engine = eng_idx(t->eng_req);
         memset(eng_part(t), 0, eng_size(t));          /* (Skiff) the part's shared engine area, the new engine's now: from
                                                        * zero, as at power-on (engines.c eng_mem; a light track's eng_lite) */
+        rb_of(t)->on = 0;                             /* ((Gir) the RUMBLE from silence: rumble.c) */
         t->xf_on = 0;
         t->nmono = 0;
         t->mono_note = 0;

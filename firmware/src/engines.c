@@ -48,6 +48,7 @@ typedef union {
     gr_part_t grain;
     drum_lane_t drum[DV_NLANE];
     drumx_lane_t drumx[DV_NLANE];
+    uint8_t drum_rb[RB_OFS + sizeof(rb_t)];   /* ((Gir) the lanes, then the kick's RUMBLE: rumble.c) */
     ssaw_vc_t ssaw[NVOICE];         /* (techno-engines) SUPERSAW */
     acid_vc_t acid[ACID_NVC];       /* (techno-engines) ACID */
     hoover_vc_t hoover[NVOICE];     /* (techno-engines) HOOVER */
@@ -61,7 +62,8 @@ typedef union {
 } eng_mem_t;
 static eng_mem_t eng_mem[NHEAVY] __attribute__((section(".pool")));
 /* (Skiff phase 6) a light track's area (the tracks past NHEAVY): the engines it may play, no PHYS, no GRAIN (their
- * accessors give it none: a heavy engine forced there is silent); DRUM's lanes the biggest, 1.8 KB */
+ * accessors give it none: a heavy engine forced there is silent); DRUM's lanes the biggest, 1.8 KB
+ * ((Gir) a light track's RUMBLE: rumble.c rb_lite, in .bss) */
 typedef union {
     drum_lane_t drum[DV_NLANE];
     drumx_lane_t drumx[DV_NLANE];
@@ -77,6 +79,7 @@ typedef union {
 #endif
 } eng_lite_t;
 static eng_lite_t eng_lite[NTRK - NHEAVY] __attribute__((section(".pool")));
+_Static_assert(sizeof(eng_mem_t) >= RB_OFS + sizeof(rb_t), "a heavy part's area holds its kit and RUMBLE");
 static void *eng_part(const track_t *t)
 {
     uint32_t k = (uint32_t)(t - trk) % NPART;

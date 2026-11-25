@@ -228,6 +228,9 @@ static const param_desc_t TP[P_COUNT] = {
     [P_IN_CUT] = PD("CUTOFF", F_PCT, -1, 127, -1),   /* ((techno-engines) INDUS: eng_indus.c; -1 a moment only) */
     [P_EQ_LOW] = PD("LOW", F_EQ, 0, 127, 64), [P_EQ_MID] = PD("MID", F_EQ, 0, 127, 64),   /* ((techno-mixer) the */
     [P_EQ_HIGH] = PD("HIGH", F_EQ, 0, 127, 64), [P_DEPTH] = PD("DEPTH", F_PCT, 0, 127, 0),   /* isolator, DEPTH: fx.c) */
+    [P_RB_MIX] = PD("RUMBLE", F_PCT, 0, 127, 0), [P_RB_TUNE] = PD("R.TUNE", F_NOTE, -1, 11, 9),   /* ((Gir) the kick's */
+    [P_RB_DECAY] = PD("R.DECAY", F_PCT, 0, 127, 80), [P_RB_DRIVE] = PD("R.DRIVE", F_PCT, 0, 127, 60),   /* RUMBLE: */
+    [P_RB_TONE] = PD("R.TONE", F_PCT, 0, 127, 50), [P_RB_DUCK] = PD("R.DUCK", F_PCT, 0, 127, 64),   /* rumble.c) */
 };
 
 static const param_desc_t GP[G_COUNT] = {
@@ -512,7 +515,7 @@ static void param_format(const param_desc_t *d, int32_t v, char *val, const char
         *unit = "BPM";
         break;
     case F_NOTE:
-        str_cpy(val, N_NOTE[v % 12], 6);
+        str_cpy(val, v < 0 ? "OFF" : N_NOTE[v % 12], 6);   /* ((Gir) R.TUNE's -1) */
         break;
     case F_ONOFF:
         str_cpy(val, N_ONOFF[v ? 1 : 0], 6);
@@ -613,6 +616,8 @@ static const page_t PAGES[] = {
     {"FOLLOW", FAM_SCL, SC_TRACK, GR_FOLLOW, {P_FOLLOW, P_FMODE, P_FNOTE, 0xFF}},   /* (2.1) again: the chord follow */
     {"EDIT 1", FAM_EDIT, SC_ENGINE, GR_NONE, {P_E0, P_E1, P_E2, P_E3}},
     {"EDIT 2", FAM_EDIT, SC_ENGINE, GR_NONE, {P_E4, P_E5, P_E6, P_E7}},
+    {"RUMBLE", FAM_EDIT, SC_TRACK, GR_NONE, {P_RB_MIX, P_RB_TUNE, P_RB_DECAY, P_RB_DRIVE}},   /* ((Gir) DRUM, DRUM-X: */
+    {"RUMBLE 2", FAM_EDIT, SC_TRACK, GR_NONE, {P_RB_TONE, P_RB_DUCK, 0xFF, 0xFF}},              /* the kick's, rumble.c) */
     {"OPERATOR", FAM_EDIT, SC_TRACK, GR_FMOP, {0xFF, 0xFF, 0xFF, 0xFF}},   /* (FM6 LAB) FM6 only: an operator's values */
     {"ALL OPS", FAM_EDIT, SC_TRACK, GR_FMALL, {0xFF, 0xFF, 0xFF, 0xFF}},   /* (FM6 LAB) FM6 only: the voice's (ui_fm6.c) */
     {"LANES", FAM_EDIT, SC_TRACK, GR_LANES, {0xFF, 0xFF, 0xFF, 0xFF}},   /* DRUM only: LANE, its LEVEL TUNE DECAY

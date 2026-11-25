@@ -321,8 +321,9 @@ static int cc_map_test(void)
         uint32_t m = MIDI_CC_ENG[e], k;
         for (k = 0; k < 2u; k++) {
             uint32_t n = (m >> (k ? 0 : 4)) & 15u;
-            const param_desc_t *d = n ? &ENGINES[e]->edit[n - 1u] : 0;
-            ok &= n <= 8u && (!d || (d->fmt != F_ENUM && d->max - d->min >= 24));
+            const param_desc_t *d = n == 9u ? &TP[P_IN_CUT] : n ? &ENGINES[e]->edit[n - 1u] : 0;   /* ((techno-engines) 9:
+                                                         * INDUS's CUTOFF, a common parameter) */
+            ok &= (n <= 8u || (n == 9u && e == ENGI_INDUS)) && (!d || (d->fmt != F_ENUM && d->max - d->min >= 24));
         }
     }
     bad += check("every engine's CC74 / CC71 target is a continuous EDIT value (or none)", ok);

@@ -17,10 +17,11 @@ synths and drums, patterns and songs, live performance, and a screen that shows 
 > **This fork: Skiff techno** (branch `techno-engines-v2`, by valentingir21). The same Skiff, its effects, sequencer and
 > screens unchanged, tuned for techno, hard techno, industrial, hard trance and hardtech: a techno preset bank, and five
 > engines in place of WHEEL, VOICE, LOFI and SLICE (left out of the build; their sounds load as ANALOG): **SUPERSAW**
-> (the JP-8000's, polyphonic), **ACID** (a TB-303: accent, slide; its filter Open303's by Robin Schmidt through X0X and
-> Skiff Atlatl), **MINI** (a Minimoog: Skiff Atlatl's FMINI by LIkst4, from FMini-1 by Guilherme Ruppert), **HOOVER**
-> (the rave "Mentasm" lead) and **INDUS** (metal and machines). Skiff is by illuminus5, built on Felucca by Hügelton
-> Instruments; credits and licences in [LICENSING.md](LICENSING.md).
+> (the JP-8000's, polyphonic), **ACID** (the TB-303 voice and acid pattern generator of ATEK303 by Javier Melgar /
+> Animatek, after Open303 by Robin Schmidt: the step's ACC accents, SLD slides; the generator in SEQ's tools),
+> **MINI** (a Minimoog: FMini-1's by Guilherme Ruppert, first ported by Skiff Atlatl's LIkst4; its oscillators on pages
+> of their own), **HOOVER** (the rave "Mentasm" lead) and **INDUS** (metal and machines, a resonant CUTOFF). Skiff is
+> by illuminus5, built on Felucca by Hügelton Instruments; credits and licences in [LICENSING.md](LICENSING.md).
 
 <p align="center"><b>New in 2.7:</b> the Screen tab goes full screen, works the FM-1 from the page (mouse, touch or
 keyboard) and comes to the SMK-37, the editor's Sequencer as a piano roll, SYNC OUT for Pocket Operators, and fixes: the phaser's squeal, the

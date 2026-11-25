@@ -217,7 +217,8 @@ static const uint8_t MIDI_CC_MAP[][2] = {
     {5, P_GLIDE}, {7, P_LEVEL}, {10, P_PAN}, {71, MCC_RES}, {72, P_REL}, {73, P_ATK}, {74, MCC_CUT}, {75, P_DEC},
     {91, P_REV}, {93, P_CHOR}, {94, P_DLY},
 };
-/* per engine (ENGINES[] order): CC74's E index + 1 in the high nibble, CC71's in the low one, 0 = none */
+/* per engine (ENGINES[] order): CC74's E index + 1 in the high nibble, CC71's in the low one, 0 = none ((techno-engines)
+ * 9: INDUS's CUTOFF, P_IN_CUT) */
 static const uint8_t MIDI_CC_ENG[NENGINES] = {
     0x56, 0x00, 0x30, FELUCCA_LOFI ? 0x80 : 0x00,     /* ANALOG CUT RES, -, PHASE DCW, LOFI TONE ((techno-engines) left
                                                        * out: none), */
@@ -229,7 +230,7 @@ static const uint8_t MIDI_CC_ENG[NENGINES] = {
     0x23,                                             /* ACID (techno-engines) */
     0x12,                                             /* MINI (techno-engines) */
     0x56,                                             /* HOOVER (techno-engines) */
-    0x80,                                             /* INDUS (techno-engines) */
+    0x98,                                             /* INDUS (techno-engines): CUTOFF (P_IN_CUT), RES */
 };
 /* a CC sets parameter id of track t as a knob would: 0..127 over its range */
 static void midi_cc_set(track_t *t, uint32_t id, uint32_t value)
@@ -297,7 +298,7 @@ static uint32_t cc_out_of(const track_t *t, uint32_t id)
             return ml_tab[3u * i + 1u];
     for (i = 0; i < NELEM(MIDI_CC_MAP) && !c; i++) {
         uint32_t p = MIDI_CC_MAP[i][1], n = p == MCC_CUT ? e >> 4 : e & 15u;
-        if ((p >= MCC_CUT ? n && P_E0 + n - 1u == id : p == id))
+        if ((p >= MCC_CUT ? n && (n == 9u ? P_IN_CUT : P_E0 + n - 1u) == id : p == id))
             c = MIDI_CC_MAP[i][0];
     }
     for (j = 0; c && ml_tab && j < ML_N; j++)
@@ -327,7 +328,7 @@ static void __attribute__((noinline)) midi_cc_map(track_t *t, uint32_t cc, uint3
         e = MIDI_CC_ENG[eng_idx(t->eng_req)] >> (id == MCC_CUT ? 4 : 0) & 15u;
         if (!e)
             return;
-        id = P_E0 + e - 1u;
+        id = e == 9u ? P_IN_CUT : P_E0 + e - 1u;      /* ((techno-engines) 9: INDUS's CUTOFF, a common parameter) */
     }
     midi_cc_set(t, id, value);
 }

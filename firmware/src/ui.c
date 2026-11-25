@@ -675,6 +675,8 @@ static int page_visible(uint32_t i)
     if (PAGES[i].graph == GR_SLICES)
         return 0;
 #endif
+    if (PAGES[i].fam == FAM_EDIT && id >= P_MN_R1 && id <= P_MN_FMODE)   /* ((techno-engines) MINI's oscillators) */
+        return TSEL->eng_req % NENGINES == ENGI_MINI;
     return !(PAGES[i].fam == FAM_EDIT && PAGES[i].id[0] >= P_FM1_ATK &&
              PAGES[i].id[0] <= P_FM4_LEVEL) || (FELUCCA_FM4 && TSEL->eng_req % NENGINES == ENGI_DIGITAL);
 }
@@ -1713,6 +1715,7 @@ static void load_begin(track_t *t, uint32_t what)
 
 static void load_end(track_t *t)
 {
+    mini_forget(trk_index(t));                    /* ((techno-engines) MINI: its oscillators as loaded, eng_mini.c) */
     if (--undo_depth)
         return;
     if (load_mo & 1u) {                           /* a sound load: the motion on the common parameters stays */
@@ -1858,6 +1861,7 @@ static int undo_swap(undo_t *c)
         memcpy(v, fm6_patch[tr], FP_SIZE);
         fm6_set_patch(tr, c->fm6);
         fm6_slot[tr] = c->fm6_slot;               /* (fm6_poll: the patch stays) */
+        mini_forget(tr);                          /* ((techno-engines) MINI: its oscillators as they were) */
         fm6_own_ok &= (uint8_t)~(1u << tr);
         memcpy(c->fm6, v, FP_SIZE);
         c->fm6_slot = sl;
@@ -2036,6 +2040,8 @@ static void preset_fill(int16_t *p, const engine_t *e, uint32_t pi)
         for (i = 0; i < NELEM(pr->more) && pr->more[i].id; i++)   /* ((Skiff) its LFO, GLIDE, ..: core.h) */
             p[pr->more[i].id] = pr->more[i].v;
     }
+    if (e == &ENG_MINI)                               /* ((techno-engines) MINI: its patch, its oscillators) */
+        mini_preset_fill(p, pi);
 }
 /* preset pi of the engine the track asked for: the sound only (not the steps, not param_kept) */
 static void apply_preset_to(track_t *t, uint32_t pi)

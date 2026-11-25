@@ -117,6 +117,10 @@ static void host_preset_values(track_t *t, uint32_t e, uint32_t pi, const preset
     if (e == ENGI_DRUMX && pi < NELEM(DRUMX_PKIT) && DRUMX_PKIT[pi])   /* ((Skiff phase 9) its kit: ui.c apply_preset_to) */
         memcpy(dx_kit, DX_KITS[DRUMX_PKIT[pi] - 1u], sizeof dx_kit);
     fm6_track_loaded(t);                          /* FM6: the preset's patch (ui.c apply_preset_to) */
+#ifdef ENGI_MINI
+    if (e == ENGI_MINI)                           /* ((techno-engines) MINI: its patch, its oscillators: ui.c preset_fill) */
+        mini_preset_fill(t->p, pi);
+#endif
 }
 static void host_preset_req(track_t *t, uint32_t e, uint32_t pi)
 {

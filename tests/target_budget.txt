@@ -39,7 +39,7 @@ dv_out 35
 dv_metal_mix 16
 slice_render 453
 slc_rev 120
-fm1_alnk0_irq 1266
+fm1_alnk0_irq 3169
 fm1_timer5_irq 21078
 events_block 821
 keyboard_block 1244
@@ -91,8 +91,8 @@ lpan_render 11
 lpan_mix 91
 drum_smp 139
 ssaw_render 509
-acid_render 336
-fmini_render 228
+acid_render 31403
+fmini_render 250
 fmini_block 72
 hoover_render 584
-indus_render 92
+indus_render 166

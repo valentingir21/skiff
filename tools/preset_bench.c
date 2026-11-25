@@ -62,18 +62,34 @@ static double phrase_pluck(void)
         note(i, 0.5, A[i % 8u] - (i >= 16u ? 4u : 0u), i % 4u == 0u ? 120 : 90);
     return 32;
 }
-static double phrase_acid(void)
+/* the 303 line: note (0 rest), accent, slide into the next */
+static const struct { uint8_t n, acc, sl; } ACID_LINE[16] = {
+    {33, 1, 0}, {33, 0, 0}, {45, 0, 1}, {33, 0, 0}, {36, 1, 0}, {0, 0, 0}, {43, 0, 1}, {45, 1, 0},
+    {33, 0, 0}, {40, 0, 1}, {33, 1, 0}, {45, 0, 0}, {31, 0, 1}, {33, 1, 1}, {45, 0, 0}, {48, 1, 0}};
+static double phrase_acid(void)                   /* (other engines' ACID basses: the line as notes, accents loud) */
 {
-    /* note (0 rest), accent, slide into the next */
-    static const struct { uint8_t n, acc, sl; } S[16] = {
-        {33, 1, 0}, {33, 0, 0}, {45, 0, 1}, {33, 0, 0}, {36, 1, 0}, {0, 0, 0}, {43, 0, 1}, {45, 1, 0},
-        {33, 0, 0}, {40, 0, 1}, {33, 1, 0}, {45, 0, 0}, {31, 0, 1}, {33, 1, 1}, {45, 0, 0}, {48, 1, 0}};
     uint32_t r, i;
     for (r = 0; r < 2u; r++)
         for (i = 0; i < 16u; i++)
-            if (S[i].n)
-                note(r * 16.0 + i, S[i].sl ? 1.25 : 0.55, S[i].n, S[i].acc ? 127 : 80);
+            if (ACID_LINE[i].n)
+                note(r * 16.0 + i, ACID_LINE[i].sl ? 1.25 : 0.55, ACID_LINE[i].n, ACID_LINE[i].acc ? 127 : 80);
     return 32;
+}
+/* ((techno-engines) ACID: the line as the sequencer's steps, ACC and SLD, GATE 50 %: the 303's accent and slide come
+ * from the steps, as on the unit. Two passes, then the transport stops) */
+static int seq_line;
+static void acid_steps(track_t *t)
+{
+    uint32_t i;
+    for (i = 0; i < 16u; i++) {
+        uint8_t nt = ACID_LINE[i].n;
+        put_step(t, i, nt ? 1u : 0u, &nt, nt ? ST_NOTE : ST_REST,
+                 (ACID_LINE[i].acc ? SF_ACCENT : 0u) | (ACID_LINE[i].sl ? SF_SLIDE : 0u));
+    }
+    t->p[P_SLEN] = 16;
+    t->p[P_SDIV] = 2;                             /* 1/16 */
+    t->p[P_SGATE] = 64;
+    transport_req = 1;
 }
 static double phrase_bass(int rumble)
 {
@@ -142,8 +158,10 @@ static double make_phrase(uint32_t e, const preset_t *p)
     const char *n = p->name;
     nev = 0;
 #ifdef ENGI_ACID
-    if (e == ENGI_ACID)                           /* ((techno-engines) the 303: its line, accents and slides) */
-        return phrase_acid();
+    if (e == ENGI_ACID) {                         /* ((techno-engines) the 303: its line on the sequencer) */
+        seq_line = 1;
+        return 32;
+    }
 #endif
     (void)e;
     if (!strncmp(n, "BS", 2))
@@ -197,6 +215,8 @@ static void render(const char *path, uint32_t e, uint32_t pi)
     song.g[G_BPM] = (int16_t)BPM;
     host_preset(t, e, pi);
     t->p[P_AMODE] = 0;                            /* (no arp: the phrase plays the notes) */
+    if (seq_line)
+        acid_steps(t);
     wav_hdr(w, frames);
     for (f = 0; f < frames; f += CTL) {
         double now = (double)f / FS;
@@ -207,6 +227,8 @@ static void render(const char *path, uint32_t e, uint32_t pi)
                 input_off(t, ev[k].note);
             k++;
         }
+        if (seq_line && now >= 32 * step_s() && song.playing)
+            transport_req = 2;
         mix_block(o, CTL);
         for (i = 0; i < CTL; i++) {
             int32_t l = o[2 * i], r = o[2 * i + 1], a = l < 0 ? -l : l, b = r < 0 ? -r : r;
@@ -216,6 +238,8 @@ static void render(const char *path, uint32_t e, uint32_t pi)
         }
     }
     fclose(w);
+    seq_line = 0;
+    nev = 0;
     printf("%-8s %2u %-13s peak %5d  rms %5.0f  %s\n", ENGINES[e]->name, pi, p->name, peak,
            sqrt(ss / (2.0 * frames)), voices_free() ? "free" : "STILL SOUNDING");
 }

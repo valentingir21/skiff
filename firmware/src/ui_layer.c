@@ -1204,6 +1204,13 @@ static void layer_seq(void)
             continue;
         n[0] = W_NOTE[p];
         str_cpy(nm, TL_NAME[p], sizeof nm);
+#ifdef ENGI_ACID
+        if (tl_acid(TSEL, p)) {                         /* ((techno-engines) ACID's generator: ui_tools.c) */
+            str_cpy(nm, TL_ACID_NAME[p - TL_LCLR], sizeof nm);
+            lcell(LC_X(p % 4u), 4 + 32 * (int32_t)(p / 4u), 28, n, p == TL_LCLR ? ICON_PROB : ICON_W_SH, nm, st);
+            continue;
+        }
+#endif
         if (p >= TL_LCLR) {                             /* the lane's: "CLR BD" */
             str_cpy(nm + str_len(nm), " ", 2);
             str_cpy(nm + str_len(nm), drum_lane_abbr(TSEL, ui.lane), sizeof nm - str_len(nm));

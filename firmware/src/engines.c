@@ -49,7 +49,7 @@ typedef union {
     drum_lane_t drum[DV_NLANE];
     drumx_lane_t drumx[DV_NLANE];
     ssaw_vc_t ssaw[NVOICE];         /* (techno-engines) SUPERSAW */
-    acid_vc_t acid[NVOICE];         /* (techno-engines) ACID */
+    acid_vc_t acid[ACID_NVC];       /* (techno-engines) ACID */
     hoover_vc_t hoover[NVOICE];     /* (techno-engines) HOOVER */
     fm6_note_t fm6[FM6_POLY];
 #if FELUCCA_WHEEL
@@ -66,7 +66,7 @@ typedef union {
     drum_lane_t drum[DV_NLANE];
     drumx_lane_t drumx[DV_NLANE];
     ssaw_vc_t ssaw[NVOICE];         /* (techno-engines) SUPERSAW */
-    acid_vc_t acid[NVOICE];         /* (techno-engines) ACID */
+    acid_vc_t acid[ACID_NVC];       /* (techno-engines) ACID */
     hoover_vc_t hoover[NVOICE];     /* (techno-engines) HOOVER */
     fm6_note_t fm6[FM6_POLY];
 #if FELUCCA_WHEEL
@@ -206,11 +206,12 @@ static const uint8_t ENGINE_ORDER[NENG_SHOWN] = {
     13,                          /* SLICE */
 #endif
     18,                          /* HOOVER (techno-engines: SLICE's place) */
-#if FELUCCA_INDUS
-    19,                          /* INDUS (techno-engines: before the drums, which stay last) */
-#endif
     10,                          /* DRUM */
     14,                          /* DRUM-X */
+#if FELUCCA_INDUS
+    19,                          /* INDUS (techno-engines: the next white key after the drums, which keep Skiff 2.7's
+                                  * keys (13, 14); INIT moves to G5) */
+#endif
 };
 
 /* the engines one can pick (engine 1 only with FELUCCA_FM4), in ENGINE_ORDER: eng_ok(e), the n-th of them

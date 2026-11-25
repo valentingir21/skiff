@@ -399,6 +399,11 @@ if [ -f build/gen/felucca_tables.h ]; then
     run "(2.5) DELAY MODE: MONO bit for bit as 2.2, STEREO sides, PING crossing, feedback, corners, a change, stereo chorus, sends; demos" "$OUT/stdelay_test" build/fx_demo
     $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/regress" tests/regress.c -lm
     run "regression: golden renders, health, voices, CPU budget" "$OUT/regress" tests/golden.txt tests/cpu_baseline.txt
+    # (techno-engines) every knob of SUPERSAW ACID MINI HOOVER INDUS swept over every preset, and CC74 / CC71: each moves
+    # the sound, no jump in the level, no clipping (tests/knobs_test.c; the table: build/knobs_check.md)
+    $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/knobs_test" tests/knobs_test.c -lm
+    run "(techno-engines) the techno engines' knobs: each acts in a preset, no level jump, no clipping; CC74 CC71" \
+        "$OUT/knobs_test" build/knobs_check.md
     # (Skiff 1.3) the second core (MENU > CPU 2 CORES: fx.c mix_block, tests/c1_host.h): a thread renders the tracks
     # handed to it, bit for bit; a FELUCCA_CPU2=0 build (none of it) gives the same golden renders
     $CC -O2 -w -Ibuild/gen -Ifirmware/src -DC1_HOST -DVOICES_2CORE=8 -pthread -o "$OUT/regress_c1" tests/regress.c -lm

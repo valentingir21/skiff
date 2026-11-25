@@ -1,196 +1,342 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
-/* (techno-engines) ACID: a TB-303 voice. Written for Skiff; its filter is skiff-atlatl's ACID (LIkst4, GPL-3.0-only:
- * firmware/src/flt.c fl_acid), itself Open303's TeeBeeFilter (Robin Schmidt, MIT) in its TB_303 mode as X0X's
- * bass303.c runs it (charlesvestal/fm1-x0x, GPL-3.0-only): four one-poles that load each other (the diode ladder's
- * 18 dB/oct-ish slope), the resonance fed back through a high-pass (the bass stays when it rings: CHAR moves it, 63 ~
- * the 303's 150 Hz), a 44 Hz high-pass before it, the input soft-clipped (it squelches instead of running away), b0 and
- * k glided across the block. Its tables (ACID_B0 ACID_K ACID_R) are computed as atlatl's tools/gen_flt_tables.py does.
- *   the oscillator  WAVE SAW or SQR (dsp.c: polyBLEP), the 303's two
- *   the filter env  its own (not the track's ADSR): every struck note restarts it at the top, it falls with DECAY
- *                   (30 ms .. 2.5 s, exponential); ENV MOD how far it opens the filter (up to ~6 octaves)
- *   ACCENT          a note at velocity 118 or more is accented: a sequencer step's ACC plays at 127, a normal one at 96
- *                   (the sequencer is untouched: the 303's accent from what Skiff sends). An accented note's filter
- *                   envelope falls at the shortest DECAY (the 303's) and lifts the level by ACCENT with it (the 303's
- *                   accented VCA); it also charges the accent capacitor (~60 ms up, ~250 ms down) that opens the filter
- *                   by ACCENT: one accent half charges it, accents close together pile up (the 303's "wow": the 4th of
- *                   four 1/16 accents ~1.8 times the first's sweep)
- *   SLIDE           the track's GLIDE in GL MODE TIME (the presets: ~60 ms whatever the interval) on LEG: a SLD step or
- *                   an overlapping key glides there and does not restart the envelope (voice.c mono_play: no note_on)
- *   DRIVE           a soft clip after the filter (hardtech acid)
- * One voice (engine_t.poly: a 303 is monophonic; POLY plays it as one voice too). State in the part's engine area
- * (acid_vc_t: the filter's ten states, the envelope, the accent). */
+/* (techno-engines) ACID: a TB-303 voice, the ATEK303 voice in integers.
+ * The voice is ATEK303's (animatek/FM1-Animatek, atek303/app/dsp/atek_voice.c, GPL-3.0-or-later, Copyright (C) 2026
+ * Javier Melgar (Animatek); "the TB-303 voice of the ATEK303 VCV Rack module"), its Open303 parts by Robin Schmidt
+ * (MIT, LICENSES/MIT-Open303.txt). ATEK303 runs it in single-precision float, which Skiff has not on the chip: here the
+ * same equations in fixed point, their laws worked out once by tools/gen_acid_tables.py (acid/eng_acid_tables.h).
+ * Piece by piece, as atek_voice.c has them:
+ *   the oscillator  ATEK's: a polyBLEP ramp and a comparator square (pulse width 44 %), the ramp's reset rounded (20 us),
+ *                   the square's edges slewed (5 us), both AC-coupled (the droop: 15 Hz, 60 Hz), run at 4x. WAVE SAW or
+ *                   SQR, and two of ATEK's layer recipes, SAW+SUB and SQR+SUB (a sine an octave down at 50 %)
+ *   the filter      ATEK's diode ladder: four cells, a soft diode (1.2 tanh(x / 1.2)) in every one, the first cell's
+ *                   capacitor 33/18 of the others', the resonance fed back through a 150 Hz high-pass, +6 dB of drive,
+ *                   its b0 and feedback law Open303's (the measured TB-303 mapping); at 4x, a 44 Hz high-pass in front
+ *   Open303         the filter envelope (a pure decay: DECAY 200 ms .. 2.5 s as the schematic's, an accented note 200 ms),
+ *                   ENV MOD's log pot and Open303's measured cutoff mapping (CUTOFF 314 .. 2394 Hz), the accent's 15 ms RC
+ *                   into the cutoff, the amp envelope (1.23 s decay while held, released in 1 ms, an accented note in
+ *                   50 ms) with the filter envelope added to it (the 303's accented VCA), its 200 Hz de-click, then the
+ *                   fixed allpass (14 Hz), high-pass (24 Hz) and notch (7.5 Hz); the OTA's soft headroom; the output's
+ *                   soft saturation
+ *   ATEK's module   accent accumulation (two charges, 100 ms and 450 ms, each accent adds 0.55: close accents open more:
+ *                   the 303's "wow"), the slide in the pitch domain (an exponential glide, SLIDE its time constant,
+ *                   ATEK's default 120 ms)
+ * Departures, on purpose: integers; the 12th-order elliptic anti-aliasing filter of Open303 is two half-band decimators
+ * here (4x -> 2x -> 1x, 19 and 51 taps, flat to 18 kHz, what folds back below 18 kHz under -70 dB: the same job for a
+ * tenth of the multiplies); the coefficients follow the cutoff from tables (1/32 octave, linear between) instead of the
+ * formulas a sample; ATEK's analog drift and the rest of its layer list are left out; the parameters are read once a
+ * block (32 samples; ATEK: 16).
+ * Skiff's side: the accent is the sequencer step's ACC (seq_accent[], set by seq.c as the step plays), never the
+ * velocity: a key played hard does not accent. A SLD step (or overlapping keys: the presets are LEGATO) slides there
+ * without restarting the envelopes. The voice's envelopes are its own (engine_t.ownenv: the track's ADSR does not
+ * shape it; the 303 has none). One voice (a 303 is monophonic). State in the part's engine area (acid_vc_t). */
 #define ENGI_ACID 16u            /* engines.c ENGINES[] (append-only) */
-static const char *const N_ACID_WAVE[] = {"SAW", "SQR"};
+static const char *const N_ACID_WAVE[] = {"SAW", "SQR", "SAW+SUB", "SQR+SUB"};
+#include "acid/eng_acid_tables.h"
 
+#define ACID_SUB 16              /* the sub-block the decimators work on (output samples) */
 typedef struct {
-    int32_t y[4], fx, fy, li, lo;   /* the ladder's stages, the feedback high-pass, the input's and the output's high-pass */
-    int32_t bq, kq;                 /* b0 and k a block ago (0: none yet) */
-    int32_t env;                    /* the filter envelope, Q24 */
-    int32_t cap;                    /* the accent capacitor, Q24 */
-    int32_t acc;                    /* this note accented */
+    uint32_t ph, phs;                       /* the oscillator's phase (at ACID_OS x), the sub's */
+    int32_t lp, hy, hx;                     /* the wave's edge filter and AC coupling (Q16) */
+    int32_t h1x, h1y;                       /* the 44 Hz high-pass in front of the ladder */
+    int32_t y1, y2, y3, y4, fb, fbp;        /* the ladder's cells, the feedback's high-pass */
+    int32_t d2[ACID_HB2_N - 1];             /* the decimator's history */
+    int32_t apx, apy, hpx, hpy, nx1, nx2, ny1, ny2, cx1, cx2, cy1, cy2;   /* allpass, high-pass, notch, de-click */
+    int32_t ne, ce;                         /* the notch's and the de-click's rounding error, fed back (their poles
+                                             * sit by 1: a dropped residue would build up as DC) */
+    int32_t env, envc;                      /* the filter envelope (Q31) and its factor a sample */
+    int32_t rc2;                            /* the accent's RC (Q16) */
+    int32_t amp, relc;                      /* the amp envelope (Q31), its release factor */
+    int32_t accg;                           /* this note's accent (Q16, 0: none) */
+    int32_t accf, accs;                     /* the accent's two charges (Q16) */
+    int32_t slew;                           /* the sliding pitch, 1/16 semitone Q8 */
+    int32_t lcs;                            /* CUTOFF, smoothed (log2 Hz, Q16) */
+    uint8_t trig, gate, note, ampon, wave;
 } acid_vc_t;
 
-/* computed as atlatl's tools/gen_flt_tables.py (Open303's TeeBeeFilter at 44.1 kHz, every 8th cutoff index 0..1024,
- * 20 Hz .. ~17.8 kHz over 9.8 octaves, held below 12 kHz): b0 Q16, k Q8 at RESO 1; RESO 0..127 -> Open303's skew,
- * Q12; DECAY 0..127 -> the envelope's factor a block (32 samples), Q16, tau 30 ms .. 2.5 s */
-static const uint16_t ACID_B0[129] = {
-    159, 166, 174, 182, 190, 198, 208, 217, 227, 238, 249, 261, 274, 287, 301, 316,
-    331, 347, 364, 382, 401, 421, 442, 465, 488, 513, 539, 566, 595, 625, 657, 690,
-    725, 762, 801, 842, 885, 931, 978, 1029, 1081, 1137, 1195, 1256, 1320, 1387, 1458, 1532,
-    1610, 1692, 1778, 1868, 1962, 2061, 2164, 2273, 2386, 2505, 2629, 2759, 2894, 3036, 3184, 3339,
-    3500, 3668, 3843, 4025, 4215, 4412, 4617, 4831, 5052, 5281, 5519, 5765, 6020, 6283, 6555, 6836,
-    7126, 7424, 7731, 8046, 8370, 8702, 9042, 9389, 9745, 10108, 10477, 10854, 11236, 11624, 12018, 12416,
-    12818, 13224, 13633, 14044, 14457, 14871, 15285, 15698, 16110, 16520, 16927, 17331, 17730, 18124, 18512, 18893,
-    19267, 19633, 19989, 20337, 20674, 21000, 21314, 21617, 21906, 22057, 22057, 22057, 22057, 22057, 22057, 22057,
-    22057,
-};
-static const uint16_t ACID_K[129] = {
-    4369, 4370, 4371, 4372, 4373, 4375, 4376, 4377, 4379, 4380, 4382, 4383, 4385, 4387, 4389, 4391,
-    4393, 4395, 4397, 4400, 4403, 4405, 4408, 4411, 4415, 4418, 4422, 4426, 4430, 4434, 4438, 4443,
-    4448, 4453, 4459, 4465, 4471, 4478, 4485, 4492, 4499, 4508, 4516, 4525, 4535, 4545, 4555, 4567,
-    4579, 4591, 4604, 4618, 4633, 4649, 4665, 4682, 4701, 4720, 4741, 4762, 4785, 4809, 4835, 4862,
-    4890, 4920, 4952, 4986, 5022, 5059, 5099, 5142, 5186, 5234, 5284, 5337, 5393, 5453, 5516, 5583,
-    5654, 5730, 5809, 5894, 5984, 6079, 6181, 6288, 6403, 6524, 6653, 6790, 6936, 7092, 7257, 7432,
-    7619, 7818, 8030, 8255, 8495, 8751, 9023, 9313, 9621, 9949, 10298, 10669, 11063, 11482, 11926, 12397,
-    12895, 13421, 13976, 14560, 15173, 15814, 16482, 17175, 17890, 18283, 18283, 18283, 18283, 18283, 18283, 18283,
-    18283,
-};
-static const uint16_t ACID_R[128] = {
-    0, 101, 199, 295, 389, 480, 570, 657, 742, 826, 907, 986, 1064, 1140, 1214, 1286,
-    1357, 1426, 1493, 1559, 1623, 1686, 1747, 1807, 1865, 1922, 1978, 2033, 2086, 2138, 2188, 2238,
-    2286, 2334, 2380, 2425, 2469, 2512, 2554, 2595, 2635, 2674, 2712, 2750, 2786, 2822, 2856, 2890,
-    2924, 2956, 2988, 3018, 3049, 3078, 3107, 3135, 3162, 3189, 3215, 3241, 3266, 3290, 3314, 3337,
-    3360, 3382, 3404, 3425, 3446, 3466, 3486, 3505, 3524, 3542, 3560, 3578, 3595, 3611, 3628, 3644,
-    3659, 3674, 3689, 3704, 3718, 3732, 3745, 3759, 3771, 3784, 3796, 3808, 3820, 3831, 3843, 3854,
-    3864, 3875, 3885, 3895, 3905, 3914, 3923, 3932, 3941, 3950, 3958, 3966, 3974, 3982, 3990, 3997,
-    4005, 4012, 4019, 4026, 4032, 4039, 4045, 4051, 4057, 4063, 4069, 4075, 4080, 4086, 4091, 4096,
-};
-static const uint16_t ACID_DCY[128] = {
-    63970, 64023, 64074, 64124, 64171, 64218, 64262, 64305, 64347, 64388, 64427, 64464, 64501, 64536, 64570, 64603,
-    64634, 64665, 64695, 64723, 64751, 64778, 64803, 64828, 64852, 64876, 64898, 64920, 64941, 64961, 64981, 65000,
-    65018, 65036, 65053, 65069, 65085, 65100, 65115, 65130, 65144, 65157, 65170, 65182, 65194, 65206, 65217, 65228,
-    65239, 65249, 65259, 65268, 65277, 65286, 65295, 65303, 65311, 65319, 65326, 65333, 65340, 65347, 65353, 65360,
-    65366, 65371, 65377, 65382, 65388, 65393, 65398, 65402, 65407, 65411, 65416, 65420, 65424, 65428, 65431, 65435,
-    65438, 65442, 65445, 65448, 65451, 65454, 65457, 65459, 65462, 65465, 65467, 65469, 65472, 65474, 65476, 65478,
-    65480, 65482, 65484, 65486, 65487, 65489, 65491, 65492, 65494, 65495, 65496, 65498, 65499, 65500, 65502, 65503,
-    65504, 65505, 65506, 65507, 65508, 65509, 65510, 65511, 65512, 65513, 65513, 65514, 65515, 65516, 65516, 65517,
-};
-#define ACID_ACC_DCY 54          /* an accented note's DECAY (tau ~200 ms: the 303's shortest) */
-
+#define ACID_NVC 2                /* one voice plays (engine_t.poly 1); a second state for the one a steal fades out */
 static acid_vc_t *acid_vc(const track_t *t, const voice_t *v)
 {
-    return &((acid_vc_t *)eng_part(t))[(uint32_t)(v - t->v) % NVOICE];
+    return &((acid_vc_t *)eng_part(t))[(uint32_t)(v - t->v) % ACID_NVC];
+}
+
+static inline int32_t mulq31(int32_t a, int32_t b) { return (int32_t)(((int64_t)a * b + (1 << 30)) >> 31); }   /* (rounded:
+                                                 * the one-poles near 1 would turn a floor's bias into DC) */
+static inline int32_t acid_diode(int32_t x)             /* 1.2 tanh(x / 1.2), Q16 */
+{
+    int32_t a = x < 0 ? -x : x, i = a >> ACID_DIODE_SHIFT, y;
+    y = i >= ACID_DIODE_N ? ACID_DIODE[ACID_DIODE_N]
+                          : ACID_DIODE[i] + (((ACID_DIODE[i + 1] - ACID_DIODE[i]) * (a & 1023)) >> 10);
+    return x < 0 ? -y : y;
+}
+static inline int32_t acid_tanh(int32_t x)              /* tanh(x), Q16 */
+{
+    int32_t a = x < 0 ? -x : x, i = a >> 11, y;
+    y = i >= 256 ? ACID_TANH[256] : ACID_TANH[i] + (((ACID_TANH[i + 1] - ACID_TANH[i]) * (a & 2047)) >> 11);
+    return x < 0 ? -y : y;
+}
+
+/* an accent from the sequencer (ACC), taken by the note it belongs to: set_accent_and_decay; a struck note (strike)
+ * also adds to the charges (at_gate: a gate going up), a slide into an accented note does not (its auto legato) */
+static void acid_accent(track_t *t, acid_vc_t *A, int strike)
+{
+    uint32_t k = (uint32_t)(t - trk) % NTRK;
+    int32_t acc = seq_accent[k];
+    seq_accent[k] = 0;
+    if (acc) {
+        int32_t base = t->p[P_E5] * 516, amt = (A->accf + A->accs) >> 1, a;   /* (516: 127 -> 65532) */
+        a = base + (int32_t)(((int64_t)base * ((amt * 52429) >> 16)) >> 16);   /* x (1 + 0.8 x the charges) */
+        A->accg = a > 65536 ? 65536 : a;
+        if (strike) {
+            A->accf = A->accf + 36045 > 65536 ? 65536 : A->accf + 36045;      /* + 0.55 each */
+            A->accs = A->accs + 36045 > 65536 ? 65536 : A->accs + 36045;
+        }
+        A->envc = (int32_t)ACID_MAINC[0];                                       /* the 303's shortest decay */
+        A->relc = 973695;                                                       /* 50 ms */
+    } else {
+        A->accg = 0;
+        A->envc = (int32_t)ACID_MAINC[clamp(t->p[P_E4], 0, 127)];
+        A->relc = 48147818;                                                     /* 1 ms */
+    }
 }
 
 static void acid_note_on(track_t *t, voice_t *v)
 {
     acid_vc_t *A = acid_vc(t, v);
-    if (!v->env_out) {                                /* from silence: a clean filter */
-        int32_t cap = A->cap;
+    if (!v->env_out) {                                /* from silence: clean states (the accent's charges live on) */
+        int32_t f = A->accf, s = A->accs;
         memset(A, 0, sizeof *A);
-        A->cap = cap;                                 /* (the accent's charge lives on between notes, as the 303's) */
+        A->accf = f;
+        A->accs = s;
     }
-    A->env = 1 << 24;                                 /* a struck note: the envelope from the top (a slide: no note_on) */
-    A->acc = v->vel >= 118u;
+    acid_accent(t, A, 1);
+    A->env = 0x7FFFFFFF;                              /* the filter envelope from the top */
+    A->amp = 0x7FFFFFFF;                              /* the amp envelope: attack 0 */
+    A->ampon = 1;
+    A->trig = 1;
+    A->gate = 1;
+    A->note = v->note;
 }
 
-/* Open303's filter on n samples of b (the level x 4, as atlatl's flt.c), cutoff index ci 0..1024, RESO 0..127, CHAR
- * 0..127: atlatl's fl_acid without its BLEND */
-static void acid_filter(acid_vc_t *A, int32_t *b, uint32_t n, int32_t ci, int32_t res, int32_t chr)
+static int acid_done(track_t *t, voice_t *v)
 {
-    int32_t j = clamp(ci + 104, 0, 1024), i8 = j >> 3, fr = j & 7, i9 = i8 < 128 ? i8 + 1 : 128;
-    int32_t b0 = ACID_B0[i8] + (((ACID_B0[i9] - ACID_B0[i8]) * fr) >> 3);          /* Q16 */
-    int32_t k1 = ACID_K[i8] + (((ACID_K[i9] - ACID_K[i8]) * fr) >> 3);             /* Q8, at RESO 1 */
-    int32_t r = ACID_R[clamp(res, 0, 127)], kr = (k1 * r) >> 12;                    /* Q12; Q8 */
-    int32_t g2 = (((((k1 * 16) / 17 - 4096) * r) >> 12) + 4096) * ((4096 + r) >> 1) >> 10;   /* Q12 */
-    int32_t hz = 30 + chr * chr / 40, fa = 65536 - ((hz * 598) >> 6), fb0 = (65536 + fa) >> 1;   /* FB HP, Q16 */
-    int32_t y1 = A->y[0], y2 = A->y[1], y3 = A->y[2], y4 = A->y[3], fx = A->fx, fy = A->fy, li = A->li, lo = A->lo;
-    int32_t bq = A->bq ? A->bq : b0, kq = A->bq ? A->kq : kr;
-    int32_t db = (b0 - bq) / (int32_t)n, dk = (kr - kq) / (int32_t)n;
-    uint32_t i;
-    for (i = 0; i < n; i++) {
-        int32_t x = clamp(b[i] >> 2, -32000, 32000) << 6, tt, u, o, hy;
-        bq += db;
-        kq += dk;
-        hy = x - li;                                                    /* 44.5 Hz high-pass */
-        li += (int32_t)(((int64_t)hy * 415) >> 16);
-        tt = (int32_t)(((int64_t)kq * y4) >> 8);                        /* the resonance, through its high-pass */
-        fy = (int32_t)(((int64_t)(tt - fx) * fb0 + (int64_t)fy * fa) >> 16);
-        fx = tt;
-        u = clamp(hy - fy, -60000000, 60000000);
-        u = (softclip(u >> 6) << 6) + (u & 63);                        /* the squelch */
-        y1 += (int32_t)(((int64_t)(bq << 1) * (u - y1 + y2)) >> 16);
-        y2 += (int32_t)(((int64_t)bq * (y1 - 2 * y2 + y3)) >> 16);
-        y3 += (int32_t)(((int64_t)bq * (y2 - 2 * y3 + y4)) >> 16);
-        y4 = clamp(y4 + (int32_t)(((int64_t)bq * (y3 - 2 * y4)) >> 16), -25000000, 25000000);
-        o = (int32_t)(((((int64_t)g2 * y4) >> 18) * (4096 + r)) >> 12);
-        o = clamp(o, -2000000, 2000000) << 8;
-        lo += (int32_t)(((int64_t)(o - lo) * 224) >> 16);               /* 24 Hz high-pass */
-        b[i] = clamp((o - lo) >> 8, -65000, 65000) << 2;
-    }
-    A->y[0] = y1, A->y[1] = y2, A->y[2] = y3, A->y[3] = y4, A->fx = fx, A->fy = fy, A->li = li, A->lo = lo;
-    A->bq = b0;
-    A->kq = kr;
+    const acid_vc_t *A = acid_vc(t, v);
+    return !v->gate && !A->ampon && A->amp < (1 << 17);
 }
 
 static void acid_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const vmod_t *m)
 {
     const int16_t *p = t->p;
     acid_vc_t *A = acid_vc(t, v);
-    int32_t buf[CTL], e15, c15, ci, gain, drv = p[P_E6];
-    uint32_t i, ph = v->ph[0], inc = m->inc, sq = p[P_E0] != 0;
+    int32_t b2[ACID_HB2_N - 1 + 2 * ACID_SUB], ampb[ACID_SUB];
+    int32_t r16, es16, off16, base, c16, lcx, slo, shi, e16, x16, wave, sub, sq, pw, inco;
+    int32_t b0 = 0, b0c = 0, k16 = 0, og = 0;
+    uint32_t i, j, done = 0;
     if (n > CTL)
         n = CTL;
-    A->env = (int32_t)(((int64_t)A->env * ACID_DCY[A->acc ? (p[P_E4] < ACID_ACC_DCY ? p[P_E4] : ACID_ACC_DCY)
-                                                          : clamp(p[P_E4], 0, 127)]) >> 16);
-    {   /* the accent capacitor: charged towards the envelope while the note is accented and held, then drains */
-        int32_t tg = A->acc && v->gate ? A->env : 0;
-        A->cap += (int32_t)(((int64_t)(tg - A->cap) * (tg > A->cap ? 600 : 190)) >> 16);   /* (~60 ms up, ~250 ms down) */
+    /* the gate's events: a slide (a new note, the gate held, no note-on), a release */
+    if (!A->trig && v->gate && v->note != A->note) {
+        acid_accent(t, A, 0);
+        A->note = v->note;
     }
-    e15 = A->env >> 9;
-    c15 = A->cap >> 9;
-    ci = p[P_E1] * 6 + (((e15 >> 7) * p[P_E3] * 5) >> 8) + (((c15 >> 7) * p[P_E5] * 5) >> 8) + (m->cutoff >> 5);
-    gain = 4096 + (A->acc ? (e15 * p[P_E5]) >> 11 : 0);                    /* Q12: the accent's level, the note's own */
-    for (i = 0; i < n; i++) {
-        buf[i] = (sq ? osc_pulse(ph, inc, 0x80000000u) : osc_saw(ph, inc)) << 2;
-        ph += inc;
-    }
-    acid_filter(A, buf, n, ci, p[P_E2], p[P_E7]);
-    for (i = 0; i < n; i++) {
-        int32_t s = (buf[i] >> 2) * gain >> 12;
-        if (drv)
-            s = softclip((s * (16 + drv)) >> 4);
+    if (A->gate && !v->gate)
+        A->ampon = 0;
+    A->gate = v->gate;
+    A->accf = mulq31(A->accf, 2131955645);            /* the charges drain: 100 ms, 450 ms (a block) */
+    A->accs = mulq31(A->accs, 2144023541);
+    {   /* the pitch: the note slides (ATEK's slew on the pitch, SLIDE its time constant), the host's bend / LFO on top */
+        int32_t tg = v->pitch16 << 8, p16, fine, tau = 30 + p[P_E7] * 2;   /* (the note itself: the track's GLIDE
+                                                         * does not add to SLIDE) */
+        if (A->trig)
+            A->slew = tg;
         else
-            s = soft_knee(s, 24000);
-        out[i] += voice_amp2((s * 5) >> 3, m, i);                      /* (x 1.25: level with ANALOG's basses) */
+            A->slew += (int32_t)(((int64_t)(tg - A->slew) * (47554 / tau)) >> 16);
+        p16 = (A->slew >> 8) + (m->pitch16 - v->pitch_cur);
+        fine = m->fine + p[P_E6] * 2367 / 1000 + (((A->slew & 255) * 59) >> 10);
+        inco = (int32_t)(cents_inc(clamp(p16, 0, 2047), 0, fine) / ACID_OS);
     }
-    v->ph[0] = ph;
+    /* CUTOFF (log2 Hz, 314 .. 2394), smoothed (~20 ms); ENV MOD's log pot and Open303's scaler and offset; RES */
+    base = 543596 + p[P_E1] * 192059 / 127;
+    if (A->trig && !A->lcs)
+        A->lcs = base;
+    A->lcs += (int32_t)(((int64_t)(base - A->lcs) * 2365) >> 16);
+    c16 = clamp((int32_t)(((int64_t)(A->lcs - 543541) * 22355) >> 16), 0, 65536);   /* (/ log2(2394 / 314)) */
+    x16 = p[P_E3] * 516;
+    e16 = (int32_t)(((int64_t)((x16 * (int64_t)x16) >> 16) * x16) >> 16);
+    slo = (int32_t)((247336LL * e16) >> 16) + 48297;
+    shi = (int32_t)((274897LL * e16) >> 16) + 56646;
+    es16 = (int32_t)((((int64_t)(65536 - c16) * slo) + (int64_t)c16 * shi) >> 16);
+    off16 = ((3165 * c16) >> 16) + 19293;
+    r16 = p[P_E2] * 516;
+    lcx = (m->cutoff * 4681) >> 8;                    /* the host's (LFO, matrix, ENV routings): 1/14 octave a step */
+    wave = clamp(p[P_E0], 0, 3);
+    sq = wave & 1;
+    sub = wave >> 1;
+    if (wave != A->wave)
+        A->wave = (uint8_t)wave, A->lp = A->hy = A->hx = 0;
+    pw = 1889785610;                                  /* 44 % of the turn: the square's falling edge */
+    A->trig = 0;
+
+    while (done < n) {
+        uint32_t ns = n - done < ACID_SUB ? n - done : ACID_SUB;
+        memcpy(b2, A->d2, sizeof A->d2);
+        for (i = 0; i < ns; i++) {
+            int32_t m16, tg, ampo;
+            A->env = mulq31(A->env, A->envc);
+            m16 = A->env >> 15;
+            tg = A->accg ? m16 : 0;
+            A->rc2 = tg + mulq31(A->rc2 - tg, 2144239716);                     /* 15 ms */
+            if (!(i & 3u)) {    /* the cutoff, from CUTOFF, the filter envelope and the accent: the ladder's
+                                 * coefficients every 4th sample (ATEK: every sample; the envelope moves slowly) */
+                int32_t lc, ix, fr, ks16, g16;
+                lc = A->lcs + lcx + (int32_t)(((int64_t)es16 * (m16 - off16)) >> 16) + (int32_t)(((int64_t)A->accg * A->rc2) >> 16);
+                ix = clamp(lc - ACID_LC0, 0, (ACID_NC - 1) * 2048 - 1);
+                fr = ix & 2047;
+                ix >>= 11;
+                b0 = (int32_t)ACID_B0[ix] + ((((int32_t)ACID_B0[ix + 1] - (int32_t)ACID_B0[ix]) * fr) >> 11);
+                ks16 = ((int32_t)ACID_KS[ix] + ((((int32_t)ACID_KS[ix + 1] - (int32_t)ACID_KS[ix]) * fr) >> 11)) << 6;
+                b0c = b0 + (int32_t)(((int64_t)b0 * 54613) >> 16);             /* x 33/18: the first cell's capacitor */
+                k16 = (int32_t)(((int64_t)ks16 * r16) >> 16);
+                if (k16 > 40 << 16)
+                    k16 = 40 << 16;
+                g16 = (int32_t)((((int64_t)(((int64_t)ks16 * 3855) >> 16) - 65536) * r16) >> 16) + 65536;   /* (ks / 17 - 1) r + 1 */
+                og = (int32_t)(((int64_t)g16 * (65536 + r16)) >> 15);             /* 2 x the gain compensation */
+            }
+            /* the amp envelope, the accented VCA (the filter envelope added), the de-click */
+            A->amp -= mulq31(A->amp, A->ampon ? 39590 : A->relc);
+            ampo = (A->amp >> 15) + (A->ampon ? (int32_t)(((int64_t)(29491 + 4 * A->accg) * m16) >> 16) : 0);
+            {
+                int64_t y = 213644LL * ampo + 427288LL * A->cx1 + 213644LL * A->cx2 + 2104219405LL * A->cy1 - 1031332157LL * A->cy2 + A->ce;
+                A->cx2 = A->cx1;
+                A->cx1 = ampo;
+                A->cy2 = A->cy1;
+                A->cy1 = (int32_t)(y >> 30);
+                A->ce = (int32_t)(y - ((int64_t)A->cy1 << 30));
+                ampb[i] = A->cy1;
+            }
+            /* oversampled: the oscillator, the 44 Hz high-pass, the ladder */
+            for (j = 0; j < ACID_OS; j++) {
+                uint32_t ph = A->ph += (uint32_t)inco, d = (uint32_t)inco >> 16;
+                int32_t s, x, y;
+                if (!sq) {                                                       /* the ramp */
+                    s = (int32_t)(ph >> 15) - 65536;
+                    if (d) {
+                        if (ph < (uint32_t)inco) {
+                            int32_t u = (int32_t)(ph / d);
+                            s -= u + u - (int32_t)(((int64_t)u * u) >> 16) - 65536;
+                        } else if (ph > ~(uint32_t)inco) {
+                            int32_t u = -(int32_t)(~ph / d);
+                            s -= (int32_t)(((int64_t)u * u) >> 16) + u + u + 65536;
+                        }
+                    }
+                    A->lp += mulq31(s - A->lp, ACID_LP_SAW);                     /* the reset's 20 us */
+                    A->hy = mulq31(A->hy + A->lp - A->hx, ACID_HP_SAW);          /* 15 Hz droop */
+                } else {                                                         /* the comparator's square */
+                    uint32_t tf = ph - (uint32_t)pw;
+                    s = ph < (uint32_t)pw ? 65536 : -65536;
+                    if (d) {
+                        if (ph < (uint32_t)inco) {
+                            int32_t u = (int32_t)(ph / d);
+                            s += u + u - (int32_t)(((int64_t)u * u) >> 16) - 65536;
+                        } else if (ph > ~(uint32_t)inco) {
+                            int32_t u = -(int32_t)(~ph / d);
+                            s += (int32_t)(((int64_t)u * u) >> 16) + u + u + 65536;
+                        }
+                        if (tf < (uint32_t)inco) {
+                            int32_t u = (int32_t)(tf / d);
+                            s -= u + u - (int32_t)(((int64_t)u * u) >> 16) - 65536;
+                        } else if (tf > ~(uint32_t)inco) {
+                            int32_t u = -(int32_t)(~tf / d);
+                            s -= (int32_t)(((int64_t)u * u) >> 16) + u + u + 65536;
+                        }
+                    }
+                    A->lp += mulq31(s - A->lp, ACID_LP_SQ);                      /* the edges' 5 us */
+                    A->hy = mulq31(A->hy + A->lp - A->hx, ACID_HP_SQ);           /* 60 Hz droop */
+                }
+                A->hx = A->lp;
+                s = A->hy;
+                if (sub) {                                                       /* the layer's sine, an octave down, 50 % */
+                    A->phs += (uint32_t)inco >> 1;
+                    s += osc_sine(A->phs);
+                }
+                s = -((s * 31) >> 6);                                            /* OSC_GAIN 0.484, inverted */
+                y = mulq31(s - A->h1x, ACID_HP1_B0) + mulq31(A->h1y, ACID_HP1_A);   /* 44.5 Hz */
+                A->h1x = s;
+                A->h1y = y;
+                {   /* the diode ladder */
+                    int32_t f = (int32_t)(((int64_t)k16 * acid_diode(A->y4)) >> 16);
+                    A->fb = mulq31(A->fb + f - A->fbp, ACID_FBHP);               /* 150 Hz */
+                    A->fbp = f;
+                    x = 2 * y - A->fb;                                           /* +6 dB of drive */
+                    A->y1 += (int32_t)(((int64_t)b0c * acid_diode(x - A->y1 + A->y2)) >> 24);
+                    A->y2 += (int32_t)(((int64_t)b0 * acid_diode(A->y1 - 2 * A->y2 + A->y3)) >> 24);
+                    A->y3 += (int32_t)(((int64_t)b0 * acid_diode(A->y2 - 2 * A->y3 + A->y4)) >> 24);
+                    A->y4 += (int32_t)(((int64_t)b0 * acid_diode(A->y3 - 2 * A->y4)) >> 24);
+                    if ((uint32_t)(A->y1 + (1 << 26)) > (2u << 26) || (uint32_t)(A->y4 + (1 << 26)) > (2u << 26))
+                        A->y1 = A->y2 = A->y3 = A->y4 = A->fb = A->fbp = 0;     /* (runaway) */
+                    b2[ACID_HB2_N - 1 + ACID_OS * i + j] = (int32_t)(((int64_t)og * A->y4) >> 16);
+                }
+            }
+        }
+        /* the decimator, 2x -> 1x; then at 1x the allpass (14 Hz), the high-pass (24 Hz), the notch (7.5 Hz), the OTA,
+         * the amp, the output's saturation */
+        for (i = 0; i < ns; i++) {
+            const int32_t *x = &b2[2 * i + 1 + (ACID_HB2_N - 1) / 2];
+            int64_t a = (int64_t)x[0] << 14, y;
+            int32_t s, o;
+            for (j = 0; j < NELEM(ACID_HB2); j++)
+                a += (int64_t)ACID_HB2[j] * (x[-(int32_t)(2 * j + 1)] + x[2 * j + 1]);
+            s = (int32_t)(a >> 15);
+            o = mulq31(s, -2143201968) + A->apx + mulq31(A->apy, 2143201968);
+            A->apx = s;
+            A->apy = o;
+            s = mulq31(o - A->hpx, 2143792883) + mulq31(A->hpy, 2140102118);
+            A->hpx = o;
+            A->hpy = s;
+            y = 1070930800LL * s - 2141860373LL * A->nx1 + 1070930800LL * A->nx2 + 2141860373LL * A->ny1 - 1068119777LL * A->ny2 + A->ne;
+            A->nx2 = A->nx1;
+            A->nx1 = s;
+            A->ny2 = A->ny1;
+            A->ny1 = s = (int32_t)(y >> 30);
+            A->ne = (int32_t)(y - ((int64_t)s << 30));
+            s = (acid_tanh((s * 5) / 3) * 39322) >> 16;                         /* the OTA: 0.6 tanh(x / 0.6) */
+            s = (int32_t)(((int64_t)s * ampb[i]) >> 16);
+            s = (int32_t)(((int64_t)s * 164233) >> 16);                         /* x -6 dB x 5 (the module's volts) */
+            s = 7 * acid_tanh((int32_t)(((int64_t)s * 9362) >> 16));            /* 7 tanh(x / 7) (always under 7: */
+            s = (s * 13107) >> 17;                          /* no clamp needed); / 5 (back from the volts), Q16 -> Q15 */
+            out[done + i] += voice_amp2(s, m, done + i);    /* (x 2: level with ANALOG's basses and the ACID before) */
+        }
+        memcpy(A->d2, &b2[2 * ns], sizeof A->d2);
+        done += ns;
+    }
 }
 
 static const preset_t ACID_PRESETS[] = {
-    /* name, {WAVE, CUTOFF, RES, ENV MOD, DECAY, ACCENT, DRIVE, CHAR}, {A D S R}, fenv, mono, sends, more, type */
-    {"BS 303", {0, 30, 95, 80, 60, 80, 0, 63}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 30, 10), MORE({P_GLMODE, 1}, {P_GLIDE, 26}), TAG(PT_BASS)},
-    {"BS 303 RESO", {0, 24, 118, 70, 66, 90, 0, 70}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 40, 15), MORE({P_GLMODE, 1}, {P_GLIDE, 26}), TAG(PT_BASS)},
-    {"BS 303 HARD", {0, 36, 105, 85, 52, 100, 90, 55}, {0, 100, 127, 10}, 0, 1, FX(40, 0, 25, 8), MORE({P_GLMODE, 1}, {P_GLIDE, 26}, {P_DTYPE, 1}), TAG(PT_BASS)},
-    {"BS 303 DARK", {1, 14, 90, 55, 70, 60, 10, 80}, {0, 100, 127, 14}, 0, 1, FX(0, 0, 20, 20), MORE({P_GLMODE, 1}, {P_GLIDE, 26}), TAG(PT_BASS)},
-    {"BS 303 SQLCH", {0, 20, 124, 100, 40, 110, 20, 63}, {0, 100, 127, 10}, 0, 1, FX(10, 0, 30, 10), MORE({P_GLMODE, 1}, {P_GLIDE, 26}), TAG(PT_BASS)},
-    {"BS PHUTURE", {0, 26, 112, 90, 74, 95, 15, 50}, {0, 100, 127, 14}, 0, 1, FX(10, 0, 35, 20), MORE({P_GLMODE, 1}, {P_GLIDE, 26}), TAG(PT_BASS)},
-    {"BS 303 DIST", {1, 34, 110, 90, 56, 110, 120, 60}, {0, 100, 127, 10}, 0, 1, FX(70, 0, 15, 8), MORE({P_GLMODE, 1}, {P_GLIDE, 26}, {P_DTYPE, 4}), TAG(PT_BASS)},
-    {"LD 303 TRNC", {0, 40, 100, 75, 80, 70, 0, 63}, {0, 100, 127, 20}, 0, 1, FX(0, 30, 60, 40), MORE({P_GLMODE, 1}, {P_GLIDE, 26}), TAG(PT_LEAD)},
+    /* name, {WAVE, CUTOFF, RES, ENV MOD, DECAY, ACCENT, TUNE, SLIDE}, {A D S R}, fenv, mono, sends, more, type.
+     * (the ADSR: unused, the 303's envelopes are its own) */
+    {"BS 303", {0, 30, 95, 80, 60, 80, 0, 45}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 30, 10), TAG(PT_BASS)},
+    {"BS 303 RESO", {0, 24, 118, 70, 66, 90, 0, 45}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 40, 15), TAG(PT_BASS)},
+    {"BS 303 HARD", {0, 36, 105, 85, 52, 100, 0, 30}, {0, 100, 127, 10}, 0, 1, FX(40, 0, 25, 8), MORE({P_DTYPE, 1}), TAG(PT_BASS)},
+    {"BS 303 DARK", {1, 14, 90, 55, 70, 60, 0, 45}, {0, 100, 127, 14}, 0, 1, FX(0, 0, 20, 20), TAG(PT_BASS)},
+    {"BS 303 SQLCH", {0, 20, 124, 100, 40, 110, 0, 45}, {0, 100, 127, 10}, 0, 1, FX(10, 0, 30, 10), TAG(PT_BASS)},
+    {"BS PHUTURE", {0, 26, 112, 90, 74, 95, 0, 60}, {0, 100, 127, 14}, 0, 1, FX(10, 0, 35, 20), TAG(PT_BASS)},
+    {"BS 303 DIST", {1, 34, 110, 90, 56, 110, 0, 45}, {0, 100, 127, 10}, 0, 1, FX(70, 0, 15, 8), MORE({P_DTYPE, 4}), TAG(PT_BASS)},
+    {"LD 303 TRNC", {0, 40, 100, 75, 80, 70, 0, 45}, {0, 100, 127, 20}, 0, 1, FX(0, 30, 60, 40), TAG(PT_LEAD)},
+    {"BS 303 SUB", {2, 22, 100, 70, 50, 85, 0, 45}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 20, 10), TAG(PT_BASS)},
+    {"BS 303 DUB", {3, 4, 30, 127, 10, 76, 0, 70}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 55, 30), TAG(PT_BASS)},
 };
 
 static const engine_t ENG_ACID = {
     .name = "ACID",
     .page_title = {"303", "ACCENT"},
     .edit = {
-        {"WAVE", N_ACID_WAVE, 0, 1, 0, F_ENUM, 0},
+        {"WAVE", N_ACID_WAVE, 0, 3, 0, F_ENUM, 0},
         {"CUTOFF", 0, 0, 127, 40, F_CUTOFF, 0},
         {"RES", 0, 0, 127, 90, F_PCT, 0},
         {"ENV MOD", 0, 0, 127, 70, F_PCT, 0},
         {"DECAY", 0, 0, 127, 60, F_PCT, 0},
         {"ACCENT", 0, 0, 127, 80, F_PCT, 0},
-        {"DRIVE", 0, 0, 127, 0, F_PCT, 0},
-        {"CHAR", 0, 0, 127, 63, F_PCT, 0},
+        {"TUNE", 0, -64, 63, 0, F_INT, U_CT},
+        {"SLIDE", 0, 0, 127, 45, F_PCT, 0},
     },
     .presets = ACID_PRESETS,
     .npresets = NELEM(ACID_PRESETS),
@@ -198,4 +344,6 @@ static const engine_t ENG_ACID = {
     .render = acid_render,
     .knob = {P_E1, P_E2, P_E3, P_E4},
     .poly = 1,
+    .ownenv = 1,
+    .done = acid_done,
 };

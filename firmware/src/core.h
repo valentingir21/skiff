@@ -96,7 +96,8 @@ _Static_assert(NTRK <= 8 && NPART < VOICES_1CORE && VOICES_2CORE <= NVOICE * NPA
 enum {
     F_INT, F_PCT, F_BIPCT, F_TIME, F_LFOHZ, F_CUTOFF, F_DB, F_SEMI, F_ENUM, F_BPM, F_NOTE,
     F_ONOFF, F_OCT, F_STEPS, F_ST16,  /* (Skiff U1) F_ST16: 0..127, 64 = 0, 3/16 semitone a step (DRUM's TUNE) */
-    F_SHAPE                           /* (2.5) the FILTR insert's SHAPE: LP (0) .. BP (64) .. HP (127), "30 BP" between */
+    F_SHAPE,                          /* (2.5) the FILTR insert's SHAPE: LP (0) .. BP (64) .. HP (127), "30 BP" between */
+    F_DET11                           /* (techno-engines) MINI's DETUNE: -64..63, 11 cents a step (FMini-1's coarse byte) */
 };
 
 /* (Skiff 2.0) 16 bytes, its fields in this order (the initializers' too): a unit is one of the few a descriptor names
@@ -153,6 +154,17 @@ enum {                          /* per-track parameters */
                                                 * by which of their notes; stored ids 143..145 */
     P_STRUM, P_SDIR,                           /* (2.5, the user's 7B) SCL > CHORD's STRUM (ms) and DIR (DOWN UP ALT,
                                                 * voice.c strum_*); stored ids 146, 147 */
+    P_MN_SET,                                  /* (techno-engines) MINI's own oscillators (eng_mini.c): 0 the SLOT's patch
+                                                * (filled into the rest by mini_poll), 1 the values below; stored ids
+                                                * 148..164 (a fork's: Skiff's own next ones would be the same numbers) */
+    P_MN_R1, P_MN_W1, P_MN_L1, P_MN_NZ,        /* OSC 1: RANGE WAVE LEVEL, the noise's LEVEL */
+    P_MN_R2, P_MN_W2, P_MN_D2, P_MN_L2,        /* OSC 2: RANGE WAVE DETUNE LEVEL */
+    P_MN_R3, P_MN_W3, P_MN_D3, P_MN_L3,        /* OSC 3 */
+    P_MN_KBD, P_MN_MDST, P_MN_NCOL, P_MN_FMODE,   /* the filter's keyboard tracking, where MOD goes, the noise's colour,
+                                                * the filter's output (LP, HP) */
+    P_IN_CUT,                                  /* (techno-engines) INDUS's CUTOFF (HOME's KNOB 4, CC74; E7 is its RES): stored
+                                                * id 165; -1 = not set (a sound from before it: eng_indus.c indus_poll
+                                                * takes its E7, the TONE it was, and sets RES 0) */
     P_E0, P_E1, P_E2, P_E3, P_E4, P_E5, P_E6, P_E7,
     P_COUNT
 };
@@ -598,6 +610,10 @@ typedef struct {
 } song_t;
 
 static track_t trk[NTRK];        /* the instrument: six parts */
+/* (techno-engines) the step being played asks for the 303's accent: seq.c sets it as a NOTE step plays (its ACC), ACID
+ * takes it with the note it belongs to (eng_acid.c acid_accent: a note-on, or a slide into it) and clears it. Keys and
+ * MIDI IN never set it: a note played hard is not an accent */
+static uint8_t seq_accent[NTRK];
 static song_t song;
 static uint8_t ui_cpu;           /* the load (%) the MENU shows: taken at each frame's start (main.c), so a frame draws one
                                   * value ((Skiff Studio) the cast's F tells the copy) */

@@ -1550,6 +1550,7 @@ static int project_restore_runtime(const project_t *input)
             fm6_set_patch(k, v);
             fm6_adopt(k);
         }
+        mini_forget(k);                                 /* ((techno-engines) MINI: its oscillators as saved) */
     }
     sel_set((uint8_t)(p->sel < NTRK ? p->sel : 0u));
     memcpy(dx_kit, p->dx_on && dx_kit_ok(p->dx) ? p->dx : DX_KIT_DEF, sizeof dx_kit);   /* (phase 7) its DRUM-X kit */

@@ -1558,6 +1558,7 @@ static __attribute__((noinline)) void seq_step(track_t *t, const step_t *s, uint
         t->slide_glide = (uint8_t)slide_in;
         if (!held)
             seq_release(t);
+        seq_accent[k] = (uint8_t)((s->flags & SF_ACCENT) && m && !miss);   /* ((techno-engines) ACID's accent: core.h) */
         for (i = 0; i < m; i++)
             if (!(((sk | on | xs) >> i) & 1u))
                 trk_note_on(t, nn[i], vv[i]);

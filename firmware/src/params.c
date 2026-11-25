@@ -13,6 +13,12 @@ static const char *const N_DTIME[] = {"1/4", "1/8", "1/16", "1/32", "8T", "16T",
 static const char *const N_SCALE[] = {"CHR", "MAJ", "MIN", "DOR", "MIX", "PEN", "MPEN", "HARM",
                                     "PHRY", "LYD", "LOC", "MEL", "BLUES", "WHOLE", "DIMHW", "DIMWH"};
 static const char *const N_ONOFF[] = {"OFF", "ON"};
+/* (techno-engines) MINI's oscillators (eng_mini.c, FMini-1's panel) */
+static const char *const N_MN_RANGE[] = {"LO", "32'", "16'", "8'", "4'", "2'"};
+static const char *const N_MN_WAVE[] = {"TRI", "SHARK", "SAW", "SQR", "PLS W", "PLS N", "SIN"};
+static const char *const N_MN_MDST[] = {"OFF", "OSC", "FILTER", "BOTH"};
+static const char *const N_MN_NCOL[] = {"WHITE", "PINK"};
+static const char *const N_MN_FMODE[] = {"LP", "HP"};
 /* seq.c kb_map; 1 = SNAP (stored projects: the former ON); 3 = SEQ: SNAP, and the sequencer's notes snap too as
  * they play (seq.c seq_step; the steps keep what was written). Append-only: older projects hold 0..2. (2.1, #74) SOLO:
  * the white keys as WHITE, the black keys single notes of the scale (seq.c kb_pitch, kb_solo) */
@@ -210,6 +216,16 @@ static const param_desc_t TP[P_COUNT] = {
     [P_FNOTE] = PE("NOTE", N_FNOTE, 0),
     [P_STRUM] = {"STRUM", 0, 0, 100, 0, F_INT, U_MS},   /* (2.5, the user's 7B) ms, 0 OFF: the chord at once */
     [P_SDIR] = PE("DIR", N_SDIR, 0),
+    [P_MN_SET] = PD("OWN", F_ONOFF, 0, 1, 0),   /* ((techno-engines) MINI: eng_mini.c; on no page) */
+    [P_MN_R1] = PE("RANGE 1", N_MN_RANGE, 3), [P_MN_W1] = PE("WAVE 1", N_MN_WAVE, 2),
+    [P_MN_L1] = PD("LEVEL 1", F_PCT, 0, 127, 127), [P_MN_NZ] = PD("NOISE", F_PCT, 0, 127, 0),
+    [P_MN_R2] = PE("RANGE 2", N_MN_RANGE, 3), [P_MN_W2] = PE("WAVE 2", N_MN_WAVE, 2),
+    [P_MN_D2] = PD("DETUNE 2", F_DET11, -64, 63, 0), [P_MN_L2] = PD("LEVEL 2", F_PCT, 0, 127, 0),
+    [P_MN_R3] = PE("RANGE 3", N_MN_RANGE, 3), [P_MN_W3] = PE("WAVE 3", N_MN_WAVE, 2),
+    [P_MN_D3] = PD("DETUNE 3", F_DET11, -64, 63, 0), [P_MN_L3] = PD("LEVEL 3", F_PCT, 0, 127, 0),
+    [P_MN_KBD] = PD("KBD", F_PCT, 0, 127, 64), [P_MN_MDST] = PE("MOD TO", N_MN_MDST, 0),
+    [P_MN_NCOL] = PE("NOISE", N_MN_NCOL, 0), [P_MN_FMODE] = PE("OUTPUT", N_MN_FMODE, 0),
+    [P_IN_CUT] = PD("CUTOFF", F_PCT, -1, 127, -1),   /* ((techno-engines) INDUS: eng_indus.c; -1 a moment only) */
 };
 
 static const param_desc_t GP[G_COUNT] = {
@@ -448,6 +464,16 @@ static void param_format(const param_desc_t *d, int32_t v, char *val, const char
             *unit = "dB";
         }
         break;
+    case F_DET11:                                   /* ((techno-engines) MINI's DETUNE: cents) */
+        fmt_int(val, v * 11);
+        if (v > 0) {
+            char t[8];
+            fmt_int(t, v * 11);
+            val[0] = '+';
+            str_cpy(val + 1, t, 6);
+        }
+        *unit = "ct";
+        break;
     case F_SEMI:
         fmt_int(val, v);
         if (v > 0) {
@@ -582,6 +608,10 @@ static const page_t PAGES[] = {
     {"SAMPLES", FAM_EDIT, SC_GLOBAL, GR_SMIX, {0xFF, 0xFF, 0xFF, 0xFF}},   /* (#21) SAMPLE on a USR set only: KNOB 1 the
                                                                          * sample, 2..4 its LEVEL REVERB DELAY (page_desc;
                                                                          * SC_GLOBAL: no lock, no automation) */
+    {"OSC 1", FAM_EDIT, SC_TRACK, GR_NONE, {P_MN_R1, P_MN_W1, P_MN_L1, P_MN_NZ}},   /* ((techno-engines) MINI only: */
+    {"OSC 2", FAM_EDIT, SC_TRACK, GR_NONE, {P_MN_R2, P_MN_W2, P_MN_D2, P_MN_L2}},   /* its oscillators, eng_mini.c) */
+    {"OSC 3", FAM_EDIT, SC_TRACK, GR_NONE, {P_MN_R3, P_MN_W3, P_MN_D3, P_MN_L3}},
+    {"MINI MOD", FAM_EDIT, SC_TRACK, GR_NONE, {P_MN_KBD, P_MN_MDST, P_MN_NCOL, P_MN_FMODE}},
     {"OP1 ENV", FAM_EDIT, SC_TRACK, GR_ADSR, {P_FM1_ATK, P_FM1_DEC, P_FM1_SUS, P_FM1_REL}},
     {"OP2 ENV", FAM_EDIT, SC_TRACK, GR_ADSR, {P_FM2_ATK, P_FM2_DEC, P_FM2_SUS, P_FM2_REL}},
     {"OP3 ENV", FAM_EDIT, SC_TRACK, GR_ADSR, {P_FM3_ATK, P_FM3_DEC, P_FM3_SUS, P_FM3_REL}},

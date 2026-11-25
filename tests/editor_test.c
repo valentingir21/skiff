@@ -139,8 +139,10 @@ static int motion_locks(void)
         host_wire[15] == P_REV);
     a[1] = 7; n = request(ED_MOTION, a, 2);
     bad += check("MOTION op 7: the query with the kinds", n == 5u + 5u + 2u * 4u + 2u + 1u && host_wire[19] == 1);
-    a[1] = 5; a[2] = 64; n = request(ED_MOTION, a, 6);
+    a[1] = 5; a[2] = 64; a[3] = 127; n = request(ED_MOTION, a, 6);   /* ((techno-engines) step 64 is "id + 128" in the
+                                                         * wide ids (P_COUNT past 164): one no parameter has) */
     bad += check("MOTION op 5 refuses step 64 (rc 1)", host_wire[6] == 1);
+    a[3] = P_REV;
     a[1] = 6; a[2] = 2; request(ED_MOTION, a, 3);
     bad += check("MOTION op 6 on step 2: its automation event stays", host_wire[6] == 0 && host_wire[8] == 2);
     a[2] = 127; request(ED_MOTION, a, 3);

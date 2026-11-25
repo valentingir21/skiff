@@ -22,10 +22,30 @@ static uint32_t tl_rnd(uint32_t n) { return n ? rng() % n : 0u; }
 static int tl_gate(const step_t *s) { return s->time == ST_NOTE && s->n && step_ties(s) != (1u << s->n) - 1u; }   /* ((2.0)
                                                     * a note starts there: one whose notes all go on is a tie) */
 static uint32_t tl_lane(const step_t *s, uint32_t l) { return (step_lanes(s) >> l) & 1u; }
-/* place p's action is there for this track (the lane row and BEAT: DRUM only) */
+/* (techno-engines) an ACID track's lane row (G4 A4 B4 C5, a DRUM track's lane tools) is ATEK303's pattern generator
+ * (acid/acid_pattern.c): G4 ACID a new acid line over LEN (a new seed each press; the track's ROOT, its SCALE as the
+ * nearest of ATEK's, C2 + ROOT the line's base as ATEK's), A4 RHYTHM, B4 NOTES (octaves), C5 ACC/SLD: a burst of
+ * ATEK's mutations on that layer of the line the steps hold (2, 2 and 3 of them, as ATEK303's). Each is one undo */
+#ifdef ENGI_ACID
+#include "acid/acid_pattern.c"
+static int tl_acid(const track_t *t, uint32_t p)
+{
+    return eng_idx(t->eng_req) == ENGI_ACID && p >= TL_LCLR && p <= TL_LRND;
+}
+static int acid_scale_of(const track_t *t)          /* CHR MAJ MIN DOR MIX PEN MPEN HARM PHRY LYD LOC MEL BLUES ..: ATEK's */
+{
+    static const uint8_t M[16] = {0, 6, 1, 4, 6, 6, 0, 3, 2, 6, 2, 1, 5, 0, 0, 0};
+    return M[(uint32_t)t->p[P_SCALE] & 15u];
+}
+#else
+static int tl_acid(const track_t *t, uint32_t p) { (void)t; (void)p; return 0; }
+#endif
+
+/* place p's action is there for this track (the lane row and BEAT: DRUM only; (techno-engines) the lane row: ACID's
+ * generator on an ACID track) */
 static int tl_cell(const track_t *t, uint32_t p)
 {
-    return p < TL_N && (p < TL_BEAT || p == TL_EUCLID || p >= TL_DOUBLE || drum_track(t));
+    return p < TL_N && (p < TL_BEAT || p == TL_EUCLID || p >= TL_DOUBLE || drum_track(t) || tl_acid(t, p));
 }
 
 /* the undo copy of t as it is now (ui.c load_begin, but the automation is copied and stays): one action, named */
@@ -88,6 +108,80 @@ static void tl_unlock(track_t *t, uint64_t was, uint32_t len)
         if (((was >> i) & 1u) && t->step[i].time == ST_REST)
             (void)motion_clear_locks(t, i);
 }
+
+#ifdef ENGI_ACID
+/* pat into t's steps 1..len: base + the degree's semitones, its accent and slide; a TIE a TIE */
+static void acid_to_steps(track_t *t, const acid_pattern_t *pat, uint32_t len, int32_t base, int scale)
+{
+    uint32_t s, e = 0;
+    for (s = 0; s < len; s++) {
+        step_t *st = &t->step[s];
+        step_clear(st);
+        if (pat->time[s] == ACID_NOTE && e < pat->pitch_length) {
+            const acid_pitch_t *q = &pat->pitch[e++];
+            st->time = ST_NOTE;
+            st->n = 1;
+            st->note[0] = (uint8_t)clamp(base + acid_semi_of(q->degree, q->octave, scale), 12, 108);
+            st->vel = 96;
+            st->flags = (uint8_t)((q->accent ? SF_ACCENT : 0u) | (q->slide_out ? SF_SLIDE : 0u));
+        } else if (pat->time[s] == ACID_TIE)
+            st->time = ST_TIE;
+    }
+}
+/* t's steps 1..len as a line (ATEK's importRendered), in semitones from base (the chromatic scale: 2 octaves each way) */
+static void acid_from_steps(const track_t *t, acid_pattern_t *pat, uint32_t len, int32_t base)
+{
+    uint32_t s;
+    int active = 0;
+    acid_clear(pat);
+    pat->seed = rng() | 1u;
+    pat->time_length = (uint8_t)len;
+    pat->pitch_length = 0;
+    for (s = 0; s < len; s++) {
+        const step_t *st = &t->step[s];
+        if (st->time == ST_TIE && active) {
+            pat->time[s] = ACID_TIE;
+        } else if (st->time == ST_NOTE && st->n) {
+            acid_pitch_t *q = &pat->pitch[pat->pitch_length++];
+            int32_t d = st->note[0] - base, o = (d + 120) / 12 - 10;
+            pat->time[s] = ACID_NOTE;
+            q->degree = (int8_t)(d - 12 * o);
+            q->octave = (int8_t)clamp(o, -2, 2);
+            q->accent = (st->flags & SF_ACCENT) != 0;
+            q->slide_out = (st->flags & SF_SLIDE) != 0;
+            active = 1;
+        } else {
+            pat->time[s] = ACID_REST;
+            active = 0;
+        }
+    }
+    acid_sanitize(pat);
+}
+static const char *const TL_ACID_NAME[4] = {"ACID", "RHYTHM", "NOTES", "ACC/SLD"};
+static const char *tl_acid_do(track_t *t, uint32_t p, uint32_t len, uint64_t was)
+{
+    static acid_pattern_t pat;                          /* (not on the main loop's stack: 320 bytes) */
+    static const uint8_t LAYER[3] = {ACID_MUT_TIME, ACID_MUT_PITCH, ACID_MUT_ARTICULATION};
+    int32_t base = 36 + t->p[P_ROOT] % 12;
+    if (p == TL_LCLR) {
+        int sc = acid_scale_of(t);
+        tl_undo_take(t, "ACID LINE");
+        acid_generate(&pat, (int)len, sc, rng() | 1u);
+        acid_to_steps(t, &pat, len, base, sc);
+        tl_unlock(t, was, len);
+        return "NEW ACID LINE";
+    }
+    acid_from_steps(t, &pat, len, base + 12);
+    if (!acid_mutate_burst(&pat, LAYER[p - TL_LREV], rng(), p == TL_LRND ? 3 : 2, ACID_CHR)) {
+        ui_message("NOTHING TO MUTATE");
+        return 0;
+    }
+    tl_undo_take(t, "MUTATE");
+    acid_to_steps(t, &pat, len, base + 12, ACID_CHR);
+    tl_unlock(t, was, len);
+    return p == TL_LREV ? "RHYTHM MUTATED" : p == TL_LFILL ? "NOTES MUTATED" : "ACC/SLD MUTATED";
+}
+#endif
 
 /* step j of t becomes the undo copy's step src[j] (taken just before), its automation and locks with it */
 static void tl_order(track_t *t, uint32_t len, const uint8_t *src)
@@ -712,6 +806,10 @@ static const char *tl_do(track_t *t, uint32_t p, uint32_t l)
     l %= NLANE;
     if ((p == TL_DOUBLE || p == TL_HALF) && !tl_resize_ok(t, p, len))
         return 0;
+#ifdef ENGI_ACID
+    if (tl_acid(t, p))                                  /* ((techno-engines) ATEK303's generator) */
+        return tl_acid_do(t, p, len, was);
+#endif
     if (p == TL_COOK) {                                 /* (nothing there: nothing to cook, no undo copy) */
         for (i = 0; i < len; i++)
             n += drum ? (uint32_t)__builtin_popcount(step_lanes(&t->step[i])) : (uint32_t)tl_gate(&t->step[i]);

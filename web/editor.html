@@ -648,7 +648,7 @@ const PUSH = new Set([CMD.CHANGED, CMD.RELOAD, CMD.STEP_CHANGED, CMD.TRACK_CHANG
 /* user preset bank: name 1..12 printable ASCII, a 16-step pattern of (note, flags 1 acc 2 slide 4 tie) */
 const UP = { NAME_MAX: 12, PAT: 16, LIST_MAX: 16 };
 const PAT_REST = 65;                              /* (#28) LIST: an entry that is a REST (patterns 1..64, 0 empty) */
-const F = { INT: 0, PCT: 1, BIPCT: 2, TIME: 3, LFOHZ: 4, CUTOFF: 5, DB: 6, SEMI: 7, ENUM: 8, BPM: 9, NOTE: 10, ONOFF: 11, OCT: 12, STEPS: 13, ST16: 14 };
+const F = { INT: 0, PCT: 1, BIPCT: 2, TIME: 3, LFOHZ: 4, CUTOFF: 5, DB: 6, SEMI: 7, ENUM: 8, BPM: 9, NOTE: 10, ONOFF: 11, OCT: 12, STEPS: 13, ST16: 14, SHAPE: 15, DET11: 16 };   /* ((techno-engines) DET11: MINI's DETUNE) */
 /* (Skiff #27) THEME CUSTOM: the colours a set holds (COLORS, cmd 39), each theme's own to start from (tools/gen_ui_palettes.py:
    BG SURF TEXT THEME ACCENT, then the six tracks', RGB565; test_web.mjs checks them against build/gen/ui_palettes.h), the
    tokens the editor wears while CUSTOM is in use, and the contrast it warns by (WCAG; below the generator's minimums, so
@@ -1435,6 +1435,7 @@ function fmtValue(d, v) {
     case F.ONOFF: return [v ? "ON" : "OFF", ""];
     case F.STEPS: return [String(v), "STEP"];
     case F.ST16: { const t = Math.trunc(((v - 64) * 30 + (v < 64 ? -8 : 8)) / 16); return [(t > 0 ? "+" : "") + (t / 10).toFixed(1), "st"]; }
+    case F.DET11: return [sign(v * 11), "ct"];   /* ((techno-engines) MINI's DETUNE: 11 cents a step) */
     default: return [String(v), d.unit || ""];
   }
 }
@@ -2604,26 +2605,29 @@ function makeMockDevice(opt = {}) {
         P("PA SS DARK", [84, 100, 52, 20, 80, 0, 40, 0], [60, 90, 118, 96], 0, 0, [[120, 127], [9, 22], [14, 14]]),
         P("BS SUPERSAW", [40, 70, 60, 30, 32, 30, 64, 90], [0, 64, 90, 22], 1)] },
     /* (techno-engines) ACID (src/eng_*.c) */
-    { name: "ACID", titles: ["303", "ACCENT"], edit: [E("WAVE", ["SAW", "SQR"], 0), D("CUTOFF", F.CUTOFF, 0, 127, 40), D("RES", F.PCT, 0, 127, 90), D("ENV MOD", F.PCT, 0, 127, 70), D("DECAY", F.PCT, 0, 127, 60), D("ACCENT", F.PCT, 0, 127, 80), D("DRIVE", F.PCT, 0, 127, 0), D("CHAR", F.PCT, 0, 127, 63)],
-      presets: [P("BS 303", [0, 30, 95, 80, 60, 80, 0, 63], [0, 100, 127, 12], 1, 0, [[41, 1], [38, 26]]),
-        P("BS 303 RESO", [0, 24, 118, 70, 66, 90, 0, 70], [0, 100, 127, 12], 1, 0, [[41, 1], [38, 26]]),
-        P("BS 303 HARD", [0, 36, 105, 85, 52, 100, 90, 55], [0, 100, 127, 10], 1, 0, [[41, 1], [38, 26], [95, 1]]),
-        P("BS 303 DARK", [1, 14, 90, 55, 70, 60, 10, 80], [0, 100, 127, 14], 1, 0, [[41, 1], [38, 26]]),
-        P("BS 303 SQLCH", [0, 20, 124, 100, 40, 110, 20, 63], [0, 100, 127, 10], 1, 0, [[41, 1], [38, 26]]),
-        P("BS PHUTURE", [0, 26, 112, 90, 74, 95, 15, 50], [0, 100, 127, 14], 1, 0, [[41, 1], [38, 26]]),
-        P("BS 303 DIST", [1, 34, 110, 90, 56, 110, 120, 60], [0, 100, 127, 10], 1, 0, [[41, 1], [38, 26], [95, 4]]),
-        P("LD 303 TRNC", [0, 40, 100, 75, 80, 70, 0, 63], [0, 100, 127, 20], 1, 0, [[41, 1], [38, 26]])] },
+    { name: "ACID", titles: ["303", "ACCENT"], edit: [E("WAVE", ["SAW", "SQR", "SAW+SUB", "SQR+SUB"], 0), D("CUTOFF", F.CUTOFF, 0, 127, 40), D("RES", F.PCT, 0, 127, 90), D("ENV MOD", F.PCT, 0, 127, 70), D("DECAY", F.PCT, 0, 127, 60), D("ACCENT", F.PCT, 0, 127, 80), D("TUNE", F.INT, -64, 63, 0, null, "ct"), D("SLIDE", F.PCT, 0, 127, 45)],
+      presets: [P("BS 303", [0, 30, 95, 80, 60, 80, 0, 45], [0, 100, 127, 12], 1),
+        P("BS 303 RESO", [0, 24, 118, 70, 66, 90, 0, 45], [0, 100, 127, 12], 1),
+        P("BS 303 HARD", [0, 36, 105, 85, 52, 100, 0, 30], [0, 100, 127, 10], 1, 0, [[95, 1]]),
+        P("BS 303 DARK", [1, 14, 90, 55, 70, 60, 0, 45], [0, 100, 127, 14], 1),
+        P("BS 303 SQLCH", [0, 20, 124, 100, 40, 110, 0, 45], [0, 100, 127, 10], 1),
+        P("BS PHUTURE", [0, 26, 112, 90, 74, 95, 0, 60], [0, 100, 127, 14], 1),
+        P("BS 303 DIST", [1, 34, 110, 90, 56, 110, 0, 45], [0, 100, 127, 10], 1, 0, [[95, 4]]),
+        P("LD 303 TRNC", [0, 40, 100, 75, 80, 70, 0, 45], [0, 100, 127, 20], 1),
+        P("BS 303 SUB", [2, 22, 100, 70, 50, 85, 0, 45], [0, 100, 127, 12], 1),
+        P("BS 303 DUB", [3, 4, 30, 127, 10, 76, 0, 70], [0, 100, 127, 12], 1)] },
     /* (techno-engines) MINI (src/eng_*.c) */
     { name: "MINI", titles: ["FILTER", "PATCH"], edit: [D("CUTOFF", F.PCT, 0, 127, 64), D("EMPH", F.PCT, 0, 127, 40), D("CONTOUR", F.PCT, 0, 127, 64), D("F.ATK", F.PCT, 0, 127, 0), D("F.DEC", F.PCT, 0, 127, 64), D("F.SUS", F.PCT, 0, 127, 40), D("MOD", F.PCT, 0, 127, 0), D("SLOT", F.INT, 0, 127, 1)],
-      presets: [P("BS MOOG", [52, 51, 71, 0, 70, 30, 0, 123], [0, 74, 100, 30], 1, 0, [[38, 18]]),
-        P("BS MOOG HARD", [56, 34, 25, 0, 72, 60, 0, 124], [0, 75, 115, 30], 1, 0, [[95, 1]]),
-        P("BS MOOG SUB", [38, 8, 13, 0, 72, 60, 0, 125], [0, 77, 118, 30], 1),
-        P("BS MOOG PLCK", [56, 61, 71, 0, 64, 0, 0, 126], [0, 67, 0, 50], 1),
-        P("BS MG REESE", [43, 32, 20, 0, 84, 60, 30, 127], [20, 81, 120, 50], 1),
-        P("LD MOOG", [61, 44, 51, 0, 79, 70, 30, 0], [5, 81, 110, 60], 1, 0, [[38, 20]]),
-        P("LD MOOG DIRT", [57, 66, 46, 0, 84, 60, 22, 110], [0, 75, 120, 60], 1, 0, [[38, 16]]),
-        P("LD MOOG TRNC", [54, 56, 56, 0, 81, 50, 30, 112], [10, 84, 115, 70], 1, 0, [[38, 18]]),
-        P("LD MOOG BUZZ", [54, 76, 86, 0, 79, 40, 0, 115], [9, 77, 110, 60], 1)] },
+      presets: [P("BS MOOG", [43, 51, 57, 0, 70, 30, 0, 0], [0, 74, 100, 30], 1, 0, [[38, 18]]),
+        P("BS MOOG HARD", [56, 34, 24, 0, 72, 60, 0, 0], [0, 75, 115, 30], 1, 0, [[95, 1]]),
+        P("BS MOOG SUB", [38, 8, 12, 0, 72, 60, 0, 0], [0, 77, 118, 30], 1),
+        P("BS MOOG PLCK", [47, 61, 57, 0, 64, 0, 0, 0], [0, 67, 0, 50], 1),
+        P("BS MG REESE", [43, 32, 19, 0, 84, 60, 30, 0], [20, 81, 120, 50], 1),
+        P("BS MOOG OCT", [53, 32, 60, 0, 61, 0, 0, 0], [0, 69, 40, 30], 1),
+        P("LD MOOG", [61, 44, 44, 0, 79, 100, 30, 0], [5, 81, 110, 60], 1, 0, [[38, 20]]),
+        P("LD MOOG DIRT", [57, 66, 40, 0, 84, 60, 22, 0], [0, 75, 120, 60], 1, 0, [[38, 16]]),
+        P("LD MOOG TRNC", [54, 56, 47, 0, 81, 50, 30, 0], [10, 84, 115, 70], 1, 0, [[38, 18]]),
+        P("LD MOOG ACID", [32, 102, 42, 0, 69, 5, 0, 0], [0, 72, 110, 57], 1)] },
     /* (techno-engines) HOOVER (src/eng_*.c) */
     { name: "HOOVER", titles: ["HOOVER", "TONE"], edit: [D("DIVE", F.PCT, 0, 127, 40), D("D.TIME", F.TIME, 0, 127, 70), D("PWM", F.PCT, 0, 127, 80), D("DETUNE", F.INT, 0, 127, 40, null, "ct"), D("CUTOFF", F.CUTOFF, 0, 127, 100), D("RES", F.PCT, 0, 127, 15), D("SUB", F.PCT, 0, 127, 0), D("DRIVE", F.PCT, 0, 127, 0)],
       presets: [P("LD MENTASM", [50, 74, 90, 44, 104, 15, 40, 10], [2, 70, 115, 55], 1, 0, [[120, 110], [38, 24]]),
@@ -2635,15 +2639,17 @@ function makeMockDevice(opt = {}) {
         P("BS HOOVER", [30, 64, 60, 30, 70, 15, 90, 40], [0, 64, 100, 22], 1),
         P("LD HOOV TRNC", [24, 60, 76, 38, 108, 14, 30, 30], [2, 72, 112, 58], 0, 0, [[120, 120]])] },
     /* (techno-engines) INDUS (src/eng_*.c) */
-    { name: "INDUS", titles: ["METAL", "HIT"], edit: [D("RATIO", F.INT, 0, 127, 77), D("MOD", F.PCT, 0, 127, 60), D("RING", F.PCT, 0, 127, 0), D("NOISE", F.PCT, 0, 127, 0), D("FOLD", F.PCT, 0, 127, 20), D("P.ENV", F.PCT, 0, 127, 0), D("P.DECAY", F.TIME, 0, 127, 60), D("TONE", F.PCT, 0, 127, 110)],
-      presets: [P("FX METAL HIT", [83, 90, 30, 20, 40, 30, 50, 120], [0, 80, 0, 70], 0),
-        P("FX SHEET", [101, 110, 60, 40, 60, 10, 40, 127], [0, 92, 0, 85], 0),
-        P("FX SLAM", [60, 80, 50, 60, 90, 100, 76, 110], [0, 96, 0, 96], 0),
-        P("FX SIREN", [64, 30, 80, 0, 30, 0, 60, 110], [20, 80, 127, 60], 0, 0, [[9, 40], [13, 40]]),
-        P("FX LARSEN", [90, 40, 0, 10, 80, 0, 60, 127], [60, 90, 127, 80], 0, 0, [[9, 20], [13, 3]]),
-        P("FX RISER IND", [70, 30, 0, 110, 60, 0, 60, 56], [118, 90, 127, 80], 0),
-        P("ST INDUS", [77, 70, 40, 10, 70, 20, 40, 100], [0, 70, 0, 55], 0),
-        P("DR MACHINE", [45, 60, 70, 50, 50, 0, 60, 70], [80, 90, 127, 100], 0, 0, [[9, 60], [15, 30]])] }
+    { name: "INDUS", titles: ["METAL", "HIT"], edit: [D("RATIO", F.INT, 0, 127, 77), D("MOD", F.PCT, 0, 127, 60), D("RING", F.PCT, 0, 127, 0), D("NOISE", F.PCT, 0, 127, 0), D("FOLD", F.PCT, 0, 127, 20), D("P.ENV", F.PCT, 0, 127, 0), D("P.DECAY", F.TIME, 0, 127, 60), D("RES", F.PCT, 0, 127, 0)],
+      presets: [P("FX METAL HIT", [83, 90, 30, 20, 40, 30, 50, 0], [0, 80, 0, 70], 0, 0, [[157, 120]]),
+        P("FX SHEET", [101, 110, 60, 40, 60, 10, 40, 0], [0, 92, 0, 85], 0, 0, [[157, 127]]),
+        P("FX SLAM", [60, 80, 50, 60, 90, 100, 76, 0], [0, 96, 0, 96], 0, 0, [[157, 110]]),
+        P("FX SIREN", [64, 30, 80, 0, 30, 0, 60, 0], [20, 80, 127, 60], 0, 0, [[9, 40], [13, 40], [157, 110]]),
+        P("FX LARSEN", [90, 40, 0, 10, 80, 0, 60, 0], [60, 90, 127, 80], 0, 0, [[9, 20], [13, 3], [157, 127]]),
+        P("FX RISER IND", [70, 30, 0, 110, 60, 0, 60, 0], [118, 90, 127, 80], 0, 0, [[157, 56]]),
+        P("ST INDUS", [77, 70, 40, 10, 70, 20, 40, 0], [0, 70, 0, 55], 0, 0, [[157, 100]]),
+        P("DR MACHINE", [45, 60, 70, 50, 50, 0, 60, 0], [80, 90, 127, 100], 0, 0, [[9, 60], [15, 30], [157, 70]]),
+        P("FX LARSEN RES", [90, 30, 0, 30, 60, 0, 60, 118], [60, 90, 127, 80], 0, 0, [[9, 15], [14, 25], [157, 70]]),
+        P("ST INDUS RES", [77, 70, 40, 10, 70, 20, 40, 105], [0, 70, 0, 55], 0, 0, [[157, 60]])] }
   ];
   const FM6_E = ENG.findIndex((e) => e.name === "FM6"), FM6_OWN = FM6.FACTORY_PK.length, DRUM_E = ENG.findIndex((e) => e.name === "DRUM");
   /* factory PATTERNS[] (engines.c; the device loads them from SEQ > PATTERNS, presets only suggest one): absolute
@@ -2688,7 +2694,17 @@ function makeMockDevice(opt = {}) {
     E("NOTE", ["ROOT", "LOW", "HIGH", "LAST"], 0));   /* 135..137: (2.1) the chord follow */
   TP.push(D("STRUM", F.INT, 0, 100, 0, null, "ms"), E("DIR", ["DOWN", "UP", "ALT"], 0));   /* 138, 139: (2.5) STRUM (0
                                                     OFF), its DIR */
-  const P_COUNT = 148, G_COUNT = 28, NSTEP = 64, P_E0 = 140, G_ENGSEL = 20, P_SLCR = 45;
+  {   /* 140..156: (techno-engines) MINI's own oscillators (eng_mini.c); 157: INDUS's CUTOFF (eng_indus.c) */
+    const RG = ["LO", "32'", "16'", "8'", "4'", "2'"], WV = ["TRI", "SHARK", "SAW", "SQR", "PLS W", "PLS N", "SIN"];
+    TP.push(D("OWN", F.ONOFF, 0, 1, 0));
+    TP.push(E("RANGE 1", RG, 3), E("WAVE 1", WV, 2), D("LEVEL 1", F.PCT, 0, 127, 127), D("NOISE", F.PCT, 0, 127, 0));
+    for (const k of [2, 3])
+      TP.push(E("RANGE " + k, RG, 3), E("WAVE " + k, WV, 2), D("DETUNE " + k, F.DET11, -64, 63, 0), D("LEVEL " + k, F.PCT, 0, 127, 0));
+    TP.push(D("KBD", F.PCT, 0, 127, 64), E("MOD TO", ["OFF", "OSC", "FILTER", "BOTH"], 0), E("NOISE", ["WHITE", "PINK"], 0),
+      E("OUTPUT", ["LP", "HP"], 0));
+    TP.push(D("CUTOFF", F.PCT, -1, 127, -1));
+  }
+  const P_COUNT = 166, G_COUNT = 28, NSTEP = 64, P_E0 = 158, G_ENGSEL = 20, P_SLCR = 45;   /* ((techno-engines) 148, 140 before) */
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const enumOrig = (d, v) => d.fmt === F.ENUM && d.names ? aliasOf(d.names, v - d.min) + d.min : v;   /* params.c enum_orig */
   /* six tracks (firmware v3; Skiff phase 6), a synth part each; engine / preset / p / step below are the selected track's */
@@ -3581,7 +3597,7 @@ function enumShown(d) {
 /* the order the device shows its engines in (src/engines.c ENGINE_ORDER): the lists here follow it, the protocol keeps
    the engine numbers. engineOrder(names): the indices of names in that order, "-" (a reserved number) left out; a name
    the list does not know (another firmware) follows in index order */
-const ENGINE_ORDER = ["ANALOG", "FM6", "DIGITAL", "PHASE", "SUPERSAW", "SAMPLE", "ACID", "TRIO", "MINI", "GRAIN", "PHYS", "NOISE", "HOOVER", "INDUS", "DRUM", "DRUM-X"];
+const ENGINE_ORDER = ["ANALOG", "FM6", "DIGITAL", "PHASE", "SUPERSAW", "SAMPLE", "ACID", "TRIO", "MINI", "GRAIN", "PHYS", "NOISE", "HOOVER", "DRUM", "DRUM-X", "INDUS"];   /* ((techno-engines) the drums on Skiff 2.7's keys, INDUS after) */
 function engineOrder(names) {
   const rank = (n) => { const k = ENGINE_ORDER.indexOf(n); return k < 0 ? ENGINE_ORDER.length : k; };
   return (names || []).map((n, i) => i).filter((i) => names[i] !== "-")

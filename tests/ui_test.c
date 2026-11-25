@@ -3702,14 +3702,14 @@ static int test_quick_layers(void)
     key_up(white(eng_rank(2))); frame();
     key_down(white(1)); key_up(white(1)); frame();
     ok &= TSEL->eng_req == ENGI_FM6;                    /* (G3: FM6, second in ENGINE_ORDER) */
-    key_down(white(NENG_SHOWN - 2u)); key_up(white(NENG_SHOWN - 2u)); frame();
-    ok &= TSEL->eng_req == ENGI_DRUM;                   /* (the key before the last: DRUM) */
-    key_down(white(NENG_SHOWN - 1u)); key_up(white(NENG_SHOWN - 1u)); frame();
-    ok &= TSEL->eng_req == ENGI_DRUMX;                  /* (the last key: (Skiff) DRUM-X) */
+    key_down(white(eng_rank(ENGI_DRUM))); key_up(white(eng_rank(ENGI_DRUM))); frame();
+    ok &= TSEL->eng_req == ENGI_DRUM && eng_rank(ENGI_DRUM) == 12u + FELUCCA_FM4;   /* (DRUM: (techno-engines) Skiff 2.7's key, D5) */
+    key_down(white(eng_rank(ENGI_DRUMX))); key_up(white(eng_rank(ENGI_DRUMX))); frame();
+    ok &= TSEL->eng_req == ENGI_DRUMX && eng_rank(ENGI_DRUMX) == 13u + FELUCCA_FM4;   /* ((Skiff) DRUM-X: E5, as in Skiff 2.7) */
     ok &= !memcmp(TSEL->step, before.step, sizeof before.step) && TSEL->p[P_SLEN] == before.p[P_SLEN] &&
           TSEL->p[P_SLCR] == SL_STUT;
     btn_up(B_EDIT); frame();
-    bad += check("EDIT + white key n: the n-th engine shown (FM6 2nd, DRUM, DRUM-X last), while playing; steps, LEN, SLICER stay", ok);
+    bad += check("EDIT + white key n: the n-th engine shown (FM6 2nd, DRUM, DRUM-X on Skiff 2.7's keys), while playing; steps, LEN, SLICER stay", ok);
     hold(B_SAVE);
     bad += check("  SAVE held: UNDO back to before the layer's loads, the steps untouched",
                  TSEL->eng_req == 0u && TSEL->preset == before.preset && !memcmp(TSEL->step, before.step, sizeof before.step));
@@ -4518,10 +4518,11 @@ static int test_fm4_retired(void)
     }
     bad += check("PRESETS KNOB 2: the engines in order, DIGITAL skipped, back to the first",
                  seen == all && TSEL->eng_req == 0u && eng_step(0, 1) == ENGI_FM6 && eng_step(ENGI_FM6, 1) == 2u &&
-                 eng_step(ENGI_FM6, -1) == 0u && eng_step(0, -1) == ENGI_DRUMX && eng_step(ENGI_DRUMX, -1) == ENGI_DRUM);
+                 eng_step(ENGI_FM6, -1) == 0u && eng_step(0, -1) == eng_vis(NENG_SHOWN - 1u) &&
+                 eng_step(ENGI_DRUMX, -1) == ENGI_DRUM);   /* ((techno-engines) INDUS last, after the drums) */
     {   /* the display order (engines.c ENGINE_ORDER): every engine one can pick once; the PRESETS list follows it */
         static const char *const ORDER[] = {   /* ((techno-engines) LOFI VOICE WHEEL SLICE left out; the new ones */
-            "ANALOG", "FM6", "PHASE", "SUPERSAW", "SAMPLE", "ACID", "TRIO", "MINI", "GRAIN", "PHYS", "NOISE", "HOOVER", "INDUS", "DRUM", "DRUM-X"};   /* in their places) */
+            "ANALOG", "FM6", "PHASE", "SUPERSAW", "SAMPLE", "ACID", "TRIO", "MINI", "GRAIN", "PHYS", "NOISE", "HOOVER", "DRUM", "DRUM-X", "INDUS"};   /* in their places, INDUS after the drums) */
         uint32_t last = 0xFFu, r = 0, n = 0;
         ok = NENG_SHOWN == NELEM(ORDER);
         for (i = 0; ok && i < NENG_SHOWN; i++)
@@ -7894,6 +7895,58 @@ static int test_drum_lane_copy(void)
 
 /* (2.0, #25) SEQ TOOLS on notes that overlap: REVERSE note by note (each starting where it ended, its ties after it,
  * its step's velocity and lock along); RANDOM and COOK move a note with the steps it goes on */
+#ifdef ENGI_ACID
+/* (techno-engines) SEQ TOOLS on an ACID track: G4 ACID writes ATEK303's acid line over LEN (notes from C2 + ROOT, accents,
+ * slides, a step 1 that plays), A4 B4 C5 mutate it (RHYTHM, NOTES, ACC/SLD); each one undo; the lane row is ACID's there
+ * (ACID on G4's cell), a DRUM track keeps its lane tools */
+static int test_tools_acid(void)
+{
+    track_t *t;
+    int bad = 0, ok;
+    uint32_t i, notes = 0, acc = 0, sld = 0, low = 127, high = 0;
+    step_t before[NSTEP];
+    ui_power_on();
+    t = TSEL;
+    set_engine_of(t, ENGI_ACID);
+    track_defaults_steps(t);
+    t->p[P_SLEN] = 32;
+    t->p[P_ROOT] = 9;                                        /* A: the line from A2 */
+    go_page(GR_ROLL); frame();
+    btn_down(B_SEQ); frame();
+    ok = tl_cell(t, TL_LCLR) && tl_cell(t, TL_LRND);
+    tl_key(TL_LCLR);                                         /* G4: ACID */
+    for (i = 0; i < 32u; i++) {
+        const step_t *s = &t->step[i];
+        if (s->time == ST_NOTE && s->n) {
+            notes++;
+            acc += (s->flags & SF_ACCENT) != 0;
+            sld += (s->flags & SF_SLIDE) != 0;
+            low = s->note[0] < low ? s->note[0] : low;
+            high = s->note[0] > high ? s->note[0] : high;
+        }
+    }
+    ok &= msg_is("NEW ACID LINE") && notes >= 8u && acc && t->step[32].time == ST_REST && low >= 21u && high <= 69u;
+    bad += check("  ACID track, SEQ TOOLS G4 ACID: an acid line over LEN (notes around A2, accents, slides)", ok);
+    (void)sld;
+    memcpy(before, t->step, sizeof before);
+    tl_key(TL_LRND);                                         /* C5: ACC/SLD */
+    ok = msg_is("ACC/SLD MUTATED") && memcmp(before, t->step, sizeof before);
+    memcpy(before, t->step, sizeof before);
+    tl_key(TL_LREV);                                         /* A4: RHYTHM */
+    ok &= msg_is("RHYTHM MUTATED") && memcmp(before, t->step, sizeof before);
+    btn_up(B_SEQ); frame();
+    hold(B_SAVE);                                            /* SAVE held: the RHYTHM back */
+    ok &= !memcmp(before, t->step, sizeof before);
+    bad += check("  .. C5 ACC/SLD and A4 RHYTHM mutate it, SAVE held takes the last one back", ok);
+    set_engine_of(t, ENGI_DRUM);
+    ok = tl_cell(t, TL_LCLR) && !tl_acid(t, TL_LCLR);
+    set_engine_of(t, 0);
+    ok &= !tl_cell(t, TL_LCLR);
+    bad += check("  a DRUM track keeps its lane tools there, another engine none", ok);
+    return bad;
+}
+#endif
+
 static int test_tools_overlap(void)
 {
     track_t *t;
@@ -10207,6 +10260,9 @@ int main(void)
     bad += test_notes_overlap();
     bad += test_drum_lane_copy();
     bad += test_tools_overlap();
+#ifdef ENGI_ACID
+    bad += test_tools_acid();
+#endif
     bad += test_rec_overlap();
     bad += test_mod_routes();
     bad += test_lock_src_seq();

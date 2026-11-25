@@ -1071,6 +1071,10 @@ static int menu_protocol(void)
         usb_cdc_on = 1;
         usb_serial_apply();
         ok = usb_cdc_on && usb.config;
+        fm1_ms |= 1u;                                   /* ((techno-mixer) an odd ms: editor_menu.c stores fm1_ms | 1, so an
+                                                         * even one makes usb_serial_apply's difference wrap and apply at
+                                                         * once (a bug of Skiff 2.7's, left as it is: the menus are not this
+                                                         * fork's); the test as it ran before */
         ok &= menu_set(11, 1) == 3 && host_wire[6] == 11 && ed_rv(host_wire + 7) == 1 && (ui_prefs & PREF_SERIAL_OFF);
         t0 = fm1_ms;
         usb_serial_apply();

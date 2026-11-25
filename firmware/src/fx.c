@@ -927,7 +927,8 @@ static int32_t wet[CTL];                                 /* (the dry mix and the
  * DIST / SLICER while it sounds or its tail runs. ENGINES[] order. An estimate: it only steers the split, the sound does
  * not depend on it */
 static uint16_t part_cost[NPART];                       /* the last block's, per track */
-static const uint16_t ENG_VCOST[NENGINES] = {163, 0, 162, 67, 70, 174, 144, 143, 189, 309, 113, 134, 181, 129, 120, 290, 270, 290, 297, 96};
+static const uint16_t ENG_VCOST[NENGINES] = {163, 0, 162, 67, 70, 174, 144, 143, 189, 309, 113, 134, 181, 129, 120, 290, 800, 307, 297, 122};
+/* ((techno-mixer) ACID 800 since it runs ATEK303's voice (tools/cpu_worst.c), MINI 307, INDUS 122 with its RES) */
 _Static_assert(NENGINES == 20, "ENG_VCOST: a cost per engine");
 #else
 static int32_t send_c[CTL], send_d[CTL], send_e[CTL], send_r[CTL], wet[CTL], mix_l[CTL], mix_r[CTL];
@@ -1174,6 +1175,156 @@ static __attribute__((noinline)) void track_insert(track_t *t, int32_t *b, int32
  * overflow) and the 2 bits that shift drops through their own product. Before, x >> 2 floored them away: a fading note
  * left in steps of 4, its error tied to the note. Held to 16 x full scale (never reached by music; sixteen voices at the
  * top LEVEL could), so the pans' Q12 products after it never wrap */
+/* ---- (techno-mixer) the track's isolator and DEPTH (core.h P_EQ_LOW .. P_DEPTH; MIXER.md) ----
+ * Three bands, LOW / MID / HIGH, split at 200 Hz and 2.5 kHz by third-order Butterworth crossovers made of two allpasses
+ * each (LP = (A0 + A1) / 2, HP = (A0 - A1) / 2: 18 dB/oct, the two summing to an allpass), the low band through the second
+ * split's first-order allpass, so that the three bands at 0 dB add up to an allpass: no dip, no bump at the crossovers
+ * (the magnitude flat; tests/eq_test.c). Each band from KILL (0) to +6 dB (eq_tables.h), its gain glided over the block;
+ * on the track's mono signal, before the PAN (a SPREAD or a panned kit: its side signals too). All bands at 0 dB and
+ * DEPTH 0: nothing runs, the signal as it was, bit for bit; switching on or off crossfades in EQ_FADE blocks (the
+ * allpass's phase). DEPTH (front 0 .. back 127): the level down to -6 dB, HIGH down to -12 dB, the REVERB send up by 60 %
+ * of what it lacks, on top of the track's own values. The coefficients are fixed (Q30), the states carry 4 bits more
+ * than the signal (the 200 Hz allpasses' poles sit near 1) */
+#define EQ_FADE 8u                                      /* blocks (5.8 ms) */
+#define EQ_A200 (-1043573156)                           /* split 1, 200 Hz: A0 = (a + z^-1) / (1 + a z^-1) */
+#define EQ_D1_200 (-2116461470)                         /* A1 = (d2 + d1 z^-1 + z^-2) / (1 + d1 z^-1 + d2 z^-2) */
+#define EQ_D2_200 1043579194
+#define EQ_A2500 (-746156574)                           /* split 2, 2.5 kHz */
+#define EQ_D1_2500 (-1713872602)
+#define EQ_D2_2500 754911084
+typedef struct { int32_t x1, y1; } eq_ap1_t;
+typedef struct { int32_t x1, x2, y1, y2; } eq_ap2_t;
+typedef struct { eq_ap1_t a0, b0, c; eq_ap2_t a1, b1; } eq_st_t;   /* one signal's: the two splits, the low's allpass */
+typedef struct {
+    eq_st_t s[3];                                       /* the mono (or mid) signal, a SPREAD's side, a kit's lanes' */
+    int32_t g[3];                                       /* the band gains the last block ended on (Q14) */
+    uint8_t fade, on;                                   /* EQ_FADE .. 0 of the switch on (on) or off (!on) */
+} eq_trk_t;
+static eq_trk_t eq_trk[NTRK];
+static inline int32_t eq_ap1(eq_ap1_t *f, int32_t a, int32_t x)
+{
+    int32_t y = (int32_t)(((int64_t)a * (x - f->y1) + (1 << 29)) >> 30) + f->x1;
+    f->x1 = x;
+    f->y1 = y;
+    return y;
+}
+static inline int32_t eq_ap2(eq_ap2_t *f, int32_t d1, int32_t d2, int32_t x)
+{
+    int32_t y = (int32_t)(((int64_t)d2 * (x - f->y2) + (int64_t)d1 * (f->x1 - f->y1) + (1 << 29)) >> 30) + f->x2;
+    f->x2 = f->x1;
+    f->x1 = x;
+    f->y2 = f->y1;
+    f->y1 = y;
+    return y;
+}
+/* the track's band gains now (Q14): its LOW MID HIGH, DEPTH taking HIGH down */
+static void eq_gains(const track_t *t, int32_t *g)
+{
+    int32_t d = clamp(t->p[P_DEPTH], 0, 127);
+    g[0] = EQ_G[t->p[P_EQ_LOW] & 127];
+    g[1] = EQ_G[t->p[P_EQ_MID] & 127];
+    g[2] = (int32_t)(((int64_t)EQ_G[t->p[P_EQ_HIGH] & 127] * (32768 - d * 193)) >> 15);   /* (127: x 0.25, -12 dB) */
+}
+static inline int eq_wanted(const track_t *t)
+{
+    return t->p[P_EQ_LOW] != 64 || t->p[P_EQ_MID] != 64 || t->p[P_EQ_HIGH] != 64 || t->p[P_DEPTH] > 0;
+}
+/* track t this block: does the isolator run (on, or fading either way)? Its gains and the fade's step taken once */
+static int eq_block(const track_t *t, int32_t *g1)
+{
+    eq_trk_t *q = &eq_trk[(uint32_t)(t - trk) % NTRK];
+    int w = eq_wanted(t);
+    if (w != q->on) {                                   /* switched: fade from where it is */
+        if (w && !q->fade)
+            memset(q->s, 0, sizeof q->s);               /* (from silence of its own: the states start at 0) */
+        q->on = (uint8_t)w;
+        q->fade = (uint8_t)(EQ_FADE - q->fade);
+    }
+    if (!q->on && !q->fade)
+        return 0;
+    eq_gains(t, g1);
+    if (!q->g[0] && !q->g[1] && !q->g[2] && q->fade == EQ_FADE && q->on) {
+        q->g[0] = g1[0];                                /* (the first block: no glide from 0) */
+        q->g[1] = g1[1];
+        q->g[2] = g1[2];
+    }
+    return 1;
+}
+/* signal x (n samples) of track t through the isolator, its states k; f0 / f1 the fade's share of the wet signal at the
+ * block's start and end (Q15), g1 the gains it glides to */
+static void eq_run(eq_trk_t *q, uint32_t k, int32_t *x, uint32_t n, int32_t f0, int32_t f1, const int32_t *g1)
+{
+    eq_st_t *e = &q->s[k];
+    uint32_t i, glide = q->g[0] != g1[0] || q->g[1] != g1[1] || q->g[2] != g1[2], fading = f0 != 32768 || f1 != 32768;
+    int32_t dg[3], g[3], df = (f1 - f0) / (int32_t)n, f = f0;
+    for (i = 0; i < 3u; i++) {
+        g[i] = q->g[i];
+        dg[i] = (g1[i] - g[i]) / (int32_t)n;
+    }
+    for (i = 0; i < n; i++) {
+        int32_t v = x[i] << 4, a0, a1, lo, hi, b0, b1, w;
+        a0 = eq_ap1(&e->a0, EQ_A200, v);
+        a1 = eq_ap2(&e->a1, EQ_D1_200, EQ_D2_200, v);
+        lo = (a0 + a1) >> 1;
+        hi = (a0 - a1) >> 1;
+        b0 = eq_ap1(&e->b0, EQ_A2500, hi);
+        b1 = eq_ap2(&e->b1, EQ_D1_2500, EQ_D2_2500, hi);
+        lo = eq_ap1(&e->c, EQ_A2500, lo);
+        if (glide) {                                    /* (the gains glide only in a block where they moved) */
+            g[0] += dg[0];
+            g[1] += dg[1];
+            g[2] += dg[2];
+        }
+        /* mid = (b0 + b1) / 2, top = (b0 - b1) / 2: lo g0 + mid g1 + top g2, in two products for the pair */
+        w = (int32_t)(((int64_t)lo * g[0] + (int64_t)b0 * ((g[1] + g[2]) >> 1) + (int64_t)b1 * ((g[1] - g[2]) >> 1) +
+                       (1 << 17)) >> 18);               /* (Q14, << 4) */
+        if (fading) {
+            f += df;
+            w = x[i] + (int32_t)((((int64_t)w - x[i]) * f) >> 15);
+        }
+        x[i] = w;
+    }
+}
+/* DEPTH on the level and the REVERB send (Q12, Q15) */
+static void eq_depth(const track_t *t, int32_t *lvl, int32_t *r)
+{
+    int32_t dp = clamp(t->p[P_DEPTH], 0, 127);
+    if (dp) {
+        *lvl = (int32_t)(((int64_t)*lvl * (32768 - dp * 129)) >> 15);   /* (127: x 0.5, -6 dB) */
+        *r += (int32_t)(((int64_t)(32767 - *r) * dp * 155) >> 15);       /* (127: 60 % of what the send lacks) */
+    }
+}
+/* before PAN: the isolator on b (and the side signals d, e: 0 none); DEPTH on the level and the REVERB send */
+static void eq_track(track_t *t, int32_t *b, int32_t *d, int32_t *e, uint32_t n, int32_t *lvl, int32_t *r)
+{
+    eq_trk_t *q = &eq_trk[(uint32_t)(t - trk) % NTRK];
+    int32_t g1[3];
+    if (eq_block(t, g1)) {
+        int32_t f0, f1;
+        if (q->on) {                                    /* fading in: the wet share up */
+            f0 = (int32_t)((EQ_FADE - q->fade) * 32768u / EQ_FADE);
+            f1 = (int32_t)((EQ_FADE - (q->fade ? q->fade - 1u : 0u)) * 32768u / EQ_FADE);
+        } else {                                        /* fading out: down */
+            f0 = (int32_t)(q->fade * 32768u / EQ_FADE);
+            f1 = (int32_t)((q->fade - 1u) * 32768u / EQ_FADE);
+        }
+        eq_run(q, 0, b, n, f0, f1, g1);
+        if (d)
+            eq_run(q, 1, d, n, f0, f1, g1);
+        if (e)
+            eq_run(q, 2, e, n, f0, f1, g1);
+        q->g[0] = g1[0];
+        q->g[1] = g1[1];
+        q->g[2] = g1[2];
+        if (q->fade)
+            q->fade--;
+    }
+    eq_depth(t, lvl, r);
+}
+#if FELUCCA_CPU2
+#define EQ_VCOST 50u                                    /* (part_cost: the isolator's host instructions a signal) */
+#endif
+
 static inline int32_t lvl_mul(int32_t x, int32_t lvl)
 {
     return clamp(((x >> 2) * lvl + (((x & 3) * lvl) >> 2) + 512) >> 10, -524287, 524287);
@@ -1198,6 +1349,7 @@ static __attribute__((noinline)) AUDIO_RAM void lpan_mix(track_t *t, const int32
     int32_t c = t->p[P_CHOR] * 258, dl = t->p[P_DLY] * 258, r = t->p[P_REV] * 258, pk = t->peak, de;
     int32_t xmax = c > dl ? c : dl;
     uint32_t i;
+    AUDIO_FAR(eq_depth)(t, &lvl, &r);                   /* ((techno-mixer) DEPTH: fx.c eq_track did the isolator */
     xmax = 0x7FFFFFFF / ((xmax > r ? xmax : r) | 1);
     de = dly_send_r(&dl, gl, gr);
     for (i = 0; i < n; i++) {
@@ -1255,6 +1407,9 @@ static __attribute__((noinline)) AUDIO_RAM void mix_spread(track_t *t, int32_t *
         if (e)
             duck_apply(k, e, n);
     }
+    AUDIO_FAR(eq_track)(t, b, d, e, n, &lvl, &r);       /* ((techno-mixer) the isolator on both, DEPTH */
+    if (t->p[P_DEPTH] > 0)
+        xmax = 0x7FFFFFFF / (((c > dl ? c : dl) > r ? (c > dl ? c : dl) : r) | 1);
     if (e) {
         lpan_mix(t, b, d, e, n SM_ARG(sm));
         return;
@@ -1350,7 +1505,8 @@ static void mix_part(track_t *t, uint32_t n SM_DECL)
 #if FELUCCA_CPU2
     vs_sm[(uint32_t)(t - trk) % NPART] = sm;            /* ((#21) smx_render's sums) */
     nr = track_render(t, b, n);
-    part_cost[(uint32_t)(t - trk) % NPART] = (uint16_t)(nr * ENG_VCOST[t->engine % NENGINES] + (nr || t->tail ? 60u : 0u));
+    part_cost[(uint32_t)(t - trk) % NPART] = (uint16_t)(nr * ENG_VCOST[t->engine % NENGINES] + (nr || t->tail ? 60u : 0u) +
+                                                        (eq_wanted(t) ? EQ_VCOST : 0u));   /* ((techno-mixer) its isolator */
     if (nr)
 #else
     if (track_render(t, b, n))
@@ -1387,6 +1543,9 @@ static void mix_part(track_t *t, uint32_t n SM_DECL)
             AUDIO_FAR(perf_mute)((uint32_t)(t - trk), b, n);   /* key held, (2.0) a MUTE, the ramp back */
         if ((duck_on >> (t - trk)) & 1u)
             duck_apply((uint32_t)(t - trk), b, n);      /* (Skiff) duck.c: under its source's hits */
+        AUDIO_FAR(eq_track)(t, b, 0, 0, n, &lvl, &r);   /* ((techno-mixer) the isolator, DEPTH: before PAN */
+        if (t->p[P_DEPTH] > 0)                          /* (DEPTH raised the REVERB send: the sends' bound again) */
+            xmax = 0x7FFFFFFF / (((c > d ? c : d) > r ? (c > d ? c : d) : r) | 1);
         for (i = 0; i < n; i++) {
             int32_t x = lvl_mul(b[i], lvl), a = x < 0 ? -x : x;   /* ((2.5, #110) rounded, no bits lost) */
             int32_t xs = clamp(x, -xmax, xmax);         /* sends: mulq15 would overflow */
@@ -1439,18 +1598,22 @@ static AUDIO_RAM void c1_parts(uint32_t arg)            /* arg: the tracks (bit 
 /* which tracks go to the second core: the split of the last block's costs that leaves the busier core the least; none
  * when that saves less than handing them over costs (C1_HAND) */
 #define C1_HAND 40u
+/* ((techno-mixer) this core's own work besides its tracks: the idle mix, the buses, the master (tools/cpu_worst.c: ~480
+ * and ~300 host instructions a sample with every bus busy): counted on its side, so that the second core takes more of
+ * the tracks when the buses are heavy. Steers the split only: the sound is the same bit for bit whichever it is */
+#define C0_OWN 500u
 static __attribute__((noinline)) uint32_t mix_split(void)
 {
     uint32_t m, i, best = 0, all = 0, lo;
     for (i = 0; i < NPART; i++)
         all += part_cost[i];
-    lo = all;
+    lo = all + C0_OWN;
     for (m = 1; m < (1u << NPART) - 1u; m++) {
         uint32_t a = 0, w;
         for (i = 0; i < NPART; i++)
             if (m >> i & 1u)
                 a += part_cost[i];
-        w = (a > all - a ? a : all - a) + C1_HAND;
+        w = (a > all - a + C0_OWN ? a : all - a + C0_OWN) + C1_HAND;
         if (w < lo) {
             lo = w;
             best = m;

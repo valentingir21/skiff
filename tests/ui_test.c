@@ -2211,12 +2211,24 @@ static int test_product_ux(void)
     turn(EN_K3, 1);
     bad += check("MIXER K3 edits reverb, never sequence length", TSEL->p[P_SLEN] == len && TSEL->p[P_REV] == send + 1);
     frames(320);                                       /* (taps further apart than a double tap: #83) */
-    press(B_GLO); frames(320); ok = cur_page()->fam == FAM_GLO && str_eq(cur_page()->title, "DELAY");
+    press(B_GLO); frames(320); ok = cur_page()->fam == FAM_GLO && str_eq(cur_page()->title, "EQ");   /* ((techno-mixer)) */
+    {   /* ((techno-mixer) EQ: the selected track's LOW MID HIGH DEPTH on KNOB 1..4, kept over a sound load) */
+        int ok2 = TSEL->p[P_EQ_LOW] == 64 && TSEL->p[P_DEPTH] == 0;
+        turn(EN_K1, -10);
+        turn(EN_K4, 5);
+        ok2 &= TSEL->p[P_EQ_LOW] < 64 && TSEL->p[P_DEPTH] > 0 && TSEL->p[P_EQ_MID] == 64;
+        apply_preset_to(TSEL, 1);
+        ok2 &= TSEL->p[P_EQ_LOW] < 64 && TSEL->p[P_DEPTH] > 0;
+        bad += check("(techno-mixer) GLO twice: EQ, KNOB 1 LOW, KNOB 4 DEPTH of the selected track; a sound load keeps them", ok2);
+        TSEL->p[P_EQ_LOW] = 64;
+        TSEL->p[P_DEPTH] = 0;
+    }
+    press(B_GLO); frames(320); ok &= cur_page()->fam == FAM_GLO && str_eq(cur_page()->title, "DELAY");
     press(B_GLO); frames(320); ok &= str_eq(cur_page()->title, "REVERB");
     press(B_GLO); frames(320); ok &= str_eq(cur_page()->title, "CHORUS");
     press(B_GLO); frames(320); ok &= str_eq(cur_page()->title, "GLOBAL");
     press(B_GLO); ok &= cur_page()->graph == GR_TRK;
-    bad += check("(U3) GLO cycles MIXER > DELAY > REVERB > CHORUS > GLOBAL > MIXER", ok);
+    bad += check("(U3) GLO cycles MIXER > EQ > DELAY > REVERB > CHORUS > GLOBAL > MIXER", ok);
     go_home(); hold(B_SEQ);
     bad += check("(U2) long SEQ anywhere: the SEQ TOOLS map (a peek), no page", ui.home && !ui.layer);
     ui_power_on(); open_family(FAM_EDIT);
@@ -6328,10 +6340,11 @@ static int test_layer_lock(void)
     ui_power_on();
     go_page(GR_TRK); frame();
     press(B_GLO); frames(400);
-    ok = str_eq(cur_page()->title, "DELAY") && !ui.lock;
+    ok = str_eq(cur_page()->title, "EQ") && !ui.lock;   /* ((techno-mixer) EQ after MIXER) */
     press(B_GLO); frames(400);
-    ok &= str_eq(cur_page()->title, "REVERB") && !ui.lock && !ui.layer;
-    press(B_GLO); frames(400); press(B_GLO); frames(400); press(B_GLO);   /* (CHORUS, GLOBAL, MIXER) */
+    ok &= str_eq(cur_page()->title, "DELAY") && !ui.lock && !ui.layer;
+    press(B_GLO); frames(400); press(B_GLO); frames(400); press(B_GLO); frames(400);
+    press(B_GLO);                                       /* (REVERB, CHORUS, GLOBAL, MIXER) */
     btn_down(B_GLO); frames(500);
     ok &= ui.layer == LAYER_GLO && !ui.lock;
     btn_up(B_GLO); frame();
@@ -6346,7 +6359,7 @@ static int test_layer_lock(void)
     press(B_GLO); frames(16);
     press(B_LFO); frames(16);
     press(B_GLO); frames(400);
-    ok = !ui.lock && str_eq(cur_page()->title, "DELAY");   /* (another button between the taps: two taps; (U3, N3) GLO
+    ok = !ui.lock && str_eq(cur_page()->title, "EQ");   /* (another button between the taps: two taps; (U3, N3) GLO
                                                          * back to the page it was left on) */
     ui_power_on();
     go_title("ENV"); frame();
@@ -8632,10 +8645,10 @@ static int test_u3(void)
     ui_power_on();                                      /* N6: GLO's count */
     press(B_GLO); frame();
     page_title(ti);
-    ok = str_eq(ti, "MIXER 1/5");
+    ok = str_eq(ti, "MIXER 1/6");
     press(B_GLO); frame();
     page_title(ti);
-    bad += check("U3 N6: GLO's pages counted as one: MIXER 1/5, DELAY 2/5", ok && str_eq(ti, "DELAY 2/5"));
+    bad += check("U3 N6: GLO's pages counted as one: MIXER 1/6, EQ 2/6 ((techno-mixer) EQ)", ok && str_eq(ti, "EQ 2/6"));
     ui_power_on();                                      /* R8: the unit's TUNE */
     song.g[G_TUNE] = 7;
     project_save(1);
@@ -8864,12 +8877,12 @@ static int test_select_pages(void)
     press(B_GLO);
     ok = cur_page()->fam == FAM_TRK;                                 /* (MIXER) */
     turn(EN_SELECT, 1);
-    ok &= str_eq(cur_page()->title, "DELAY");
+    ok &= str_eq(cur_page()->title, "EQ");              /* ((techno-mixer)) */
     turn(EN_SELECT, 1);
-    ok &= str_eq(cur_page()->title, "REVERB");
+    ok &= str_eq(cur_page()->title, "DELAY");
     turn(EN_SELECT, -2);
     ok &= cur_page()->fam == FAM_TRK;
-    bad += check("SELECT on GLO's pages: MIXER, DELAY, REVERB and back, as GLO's button steps them", ok);
+    bad += check("SELECT on GLO's pages: MIXER, EQ, DELAY and back, as GLO's button steps them", ok);
     go_title("NOTES"); frame();
     cur = ui.cursor;
     turn(EN_SELECT, 1);

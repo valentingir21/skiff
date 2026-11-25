@@ -70,7 +70,7 @@ launch_step 28
 launch_swap 68
 throw_on 187
 throw_off 15
-mix_part 1576
+mix_part 13588
 mix_split 42
 track_insert 3
 ins_drive 280

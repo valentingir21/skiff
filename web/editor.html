@@ -648,7 +648,7 @@ const PUSH = new Set([CMD.CHANGED, CMD.RELOAD, CMD.STEP_CHANGED, CMD.TRACK_CHANG
 /* user preset bank: name 1..12 printable ASCII, a 16-step pattern of (note, flags 1 acc 2 slide 4 tie) */
 const UP = { NAME_MAX: 12, PAT: 16, LIST_MAX: 16 };
 const PAT_REST = 65;                              /* (#28) LIST: an entry that is a REST (patterns 1..64, 0 empty) */
-const F = { INT: 0, PCT: 1, BIPCT: 2, TIME: 3, LFOHZ: 4, CUTOFF: 5, DB: 6, SEMI: 7, ENUM: 8, BPM: 9, NOTE: 10, ONOFF: 11, OCT: 12, STEPS: 13, ST16: 14, SHAPE: 15, DET11: 16 };   /* ((techno-engines) DET11: MINI's DETUNE) */
+const F = { INT: 0, PCT: 1, BIPCT: 2, TIME: 3, LFOHZ: 4, CUTOFF: 5, DB: 6, SEMI: 7, ENUM: 8, BPM: 9, NOTE: 10, ONOFF: 11, OCT: 12, STEPS: 13, ST16: 14, SHAPE: 15, DET11: 16, EQ: 17 };   /* ((techno-mixer) EQ: an isolator band */   /* ((techno-engines) DET11: MINI's DETUNE) */
 /* (Skiff #27) THEME CUSTOM: the colours a set holds (COLORS, cmd 39), each theme's own to start from (tools/gen_ui_palettes.py:
    BG SURF TEXT THEME ACCENT, then the six tracks', RGB565; test_web.mjs checks them against build/gen/ui_palettes.h), the
    tokens the editor wears while CUSTOM is in use, and the contrast it warns by (WCAG; below the generator's minimums, so
@@ -1436,6 +1436,12 @@ function fmtValue(d, v) {
     case F.STEPS: return [String(v), "STEP"];
     case F.ST16: { const t = Math.trunc(((v - 64) * 30 + (v < 64 ? -8 : 8)) / 16); return [(t > 0 ? "+" : "") + (t / 10).toFixed(1), "st"]; }
     case F.DET11: return [sign(v * 11), "ct"];   /* ((techno-engines) MINI's DETUNE: 11 cents a step) */
+    case F.EQ: {   /* ((techno-mixer) an isolator band: 0 KILL, (v / 64)^3 up to 0 dB at 64, then +6 dB at 127 (eq_tables.h) */
+      if (v <= 0) return ["KILL", ""];
+      const db = v >= 64 ? 6 * (v - 64) / 63 : 60 * Math.log10(v / 64);
+      const d10 = Math.round(db * 10);
+      return [(d10 > 0 ? "+" : "") + (d10 / 10).toFixed(1), "dB"];
+    }
     default: return [String(v), d.unit || ""];
   }
 }
@@ -2703,8 +2709,10 @@ function makeMockDevice(opt = {}) {
     TP.push(D("KBD", F.PCT, 0, 127, 64), E("MOD TO", ["OFF", "OSC", "FILTER", "BOTH"], 0), E("NOISE", ["WHITE", "PINK"], 0),
       E("OUTPUT", ["LP", "HP"], 0));
     TP.push(D("CUTOFF", F.PCT, -1, 127, -1));
+    TP.push(D("LOW", F.EQ, 0, 127, 64), D("MID", F.EQ, 0, 127, 64), D("HIGH", F.EQ, 0, 127, 64), D("DEPTH", F.PCT, 0, 127, 0));   /* 158..161:
+                                                    (techno-mixer) the isolator, DEPTH (fx.c) */
   }
-  const P_COUNT = 166, G_COUNT = 28, NSTEP = 64, P_E0 = 158, G_ENGSEL = 20, P_SLCR = 45;   /* ((techno-engines) 148, 140 before) */
+  const P_COUNT = 170, G_COUNT = 28, NSTEP = 64, P_E0 = 162, G_ENGSEL = 20, P_SLCR = 45;   /* ((techno-mixer) 166, 158 before) */
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const enumOrig = (d, v) => d.fmt === F.ENUM && d.names ? aliasOf(d.names, v - d.min) + d.min : v;   /* params.c enum_orig */
   /* six tracks (firmware v3; Skiff phase 6), a synth part each; engine / preset / p / step below are the selected track's */

@@ -97,9 +97,11 @@ enum {
     F_INT, F_PCT, F_BIPCT, F_TIME, F_LFOHZ, F_CUTOFF, F_DB, F_SEMI, F_ENUM, F_BPM, F_NOTE,
     F_ONOFF, F_OCT, F_STEPS, F_ST16,  /* (Skiff U1) F_ST16: 0..127, 64 = 0, 3/16 semitone a step (DRUM's TUNE) */
     F_SHAPE,                          /* (2.5) the FILTR insert's SHAPE: LP (0) .. BP (64) .. HP (127), "30 BP" between */
-    F_DET11                           /* (techno-engines) MINI's DETUNE: -64..63, 11 cents a step (FMini-1's coarse byte) */
+    F_DET11,                          /* (techno-engines) MINI's DETUNE: -64..63, 11 cents a step (FMini-1's coarse byte) */
+    F_EQ                              /* (techno-mixer) an isolator band: 0 KILL, 64 0 dB, 127 +6 dB (fx.c EQ_DB10) */
 };
 
+#include "eq_tables.h"            /* (techno-mixer) the isolator's gains */
 /* (Skiff 2.0) 16 bytes, its fields in this order (the initializers' too): a unit is one of the few a descriptor names
  * (PD_UNIT_OF; every other unit comes from the format, params.c param_format) */
 typedef struct {
@@ -165,6 +167,10 @@ enum {                          /* per-track parameters */
     P_IN_CUT,                                  /* (techno-engines) INDUS's CUTOFF (HOME's KNOB 4, CC74; E7 is its RES): stored
                                                 * id 165; -1 = not set (a sound from before it: eng_indus.c indus_poll
                                                 * takes its E7, the TONE it was, and sets RES 0) */
+    P_EQ_LOW, P_EQ_MID, P_EQ_HIGH, P_DEPTH,    /* (techno-mixer) the track's isolator (LOW MID HIGH: KILL .. 0 dB at 64 ..
+                                                * +6 dB) and DEPTH (front .. back), fx.c eq_*: the mix's, kept over sound
+                                                * loads; stored ids 166..169 (a project from before: 64 64 64 0, as
+                                                * without them) */
     P_E0, P_E1, P_E2, P_E3, P_E4, P_E5, P_E6, P_E7,
     P_COUNT
 };

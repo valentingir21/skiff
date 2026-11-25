@@ -38,6 +38,7 @@ static uint64_t instr_now(void)
 
 typedef struct { uint8_t e, pi, n; } part_t;       /* engine, preset, notes (0: silent) */
 static int fx_all;                                  /* every send at 100, the heavy bus models */
+static int eq_on;                                   /* ((techno-mixer) the worst cases' runs: EQ_ALL applies (not the calibration) */
 
 static void setup(const part_t *P)
 {
@@ -56,6 +57,13 @@ static void setup(const part_t *P)
         trk[p].p[P_SUS] = 127;
         trk[p].p[P_AMODE] = 0;
         trk[p].p[P_DIST] = trk[p].p[P_CHOR] = trk[p].p[P_DLY] = trk[p].p[P_REV] = fx_all ? 100 : 0;   /* (alone: none) */
+        if (eq_on && getenv("EQ_ALL")) {                         /* ((techno-mixer) EQ_ALL=1: every track's isolator running (a
+                                                         * track's own cost: in its runs alone too) */
+            trk[p].p[P_EQ_LOW] = 30;
+            trk[p].p[P_EQ_MID] = 80;
+            trk[p].p[P_EQ_HIGH] = 100;
+            trk[p].p[P_DEPTH] = 40;
+        }
     }
     for (i = 0; i < NPART; i++) {
         p = order[i];
@@ -170,6 +178,7 @@ static void worst(uint32_t x, uint32_t sc, const uint32_t *hp, double idle, doub
         P[k + 1] = (part_t){(uint8_t)o, (uint8_t)hp[o], (uint8_t)(sc ? (ENGINES[o]->oneshot ? 4 : 1) : 8)};
     }
     fx_all = 1;
+    eq_on = 1;
     tot = run(P, nv);                                 /* everything, every send */
     c1h_off = 1;
     run(P, n1);                                       /* (1 CORE: how many sound) */
@@ -191,13 +200,19 @@ static void worst(uint32_t x, uint32_t sc, const uint32_t *hp, double idle, doub
         if (getenv("CPU_DEBUG"))
             printf("    alone, no sends: %-8s %u notes %.0f\n", ENGINES[S[0].e]->name, S[0].n, solo[k]);
     }
+    eq_on = 0;
     fxw = tot - sum - idle;                           /* the sends, the buses, the master: core 0 */
-    for (m = 1; m < (1u << NPART) - 1u; m++) {        /* fx.c mix_split: the busier side least (the tracks only) */
+    best = 1e9;
+    for (m = 1; m < (1u << NPART) - 1u; m++) {        /* fx.c mix_split: the busier side least */
         double s1 = 0, w;
         for (k = 0; k < NPART; k++)
             if (m >> k & 1u)
                 s1 += solo[k];
+#ifdef C0_OWN
+        w = s1 > sum - s1 + C0_OWN ? s1 : sum - s1 + C0_OWN;   /* ((techno-mixer) core 0's own work counted, as fx.c */
+#else
         w = s1 > sum - s1 ? s1 : sum - s1;
+#endif
         if (w < best) {
             best = w;
             bm = m;

@@ -226,6 +226,8 @@ static const param_desc_t TP[P_COUNT] = {
     [P_MN_KBD] = PD("KBD", F_PCT, 0, 127, 64), [P_MN_MDST] = PE("MOD TO", N_MN_MDST, 0),
     [P_MN_NCOL] = PE("NOISE", N_MN_NCOL, 0), [P_MN_FMODE] = PE("OUTPUT", N_MN_FMODE, 0),
     [P_IN_CUT] = PD("CUTOFF", F_PCT, -1, 127, -1),   /* ((techno-engines) INDUS: eng_indus.c; -1 a moment only) */
+    [P_EQ_LOW] = PD("LOW", F_EQ, 0, 127, 64), [P_EQ_MID] = PD("MID", F_EQ, 0, 127, 64),   /* ((techno-mixer) the */
+    [P_EQ_HIGH] = PD("HIGH", F_EQ, 0, 127, 64), [P_DEPTH] = PD("DEPTH", F_PCT, 0, 127, 0),   /* isolator, DEPTH: fx.c) */
 };
 
 static const param_desc_t GP[G_COUNT] = {
@@ -343,7 +345,8 @@ static int param_kept(uint32_t i)
     return i == P_LEVEL || i == P_PAN || i == P_MUTE || (i >= P_AMODE && i <= P_SGATE) ||
            (i >= P_SLCR && i <= P_SLDEPTH) || i == P_CHRD || i == P_VOIC || i == P_DIR ||   /* ((Skiff) DIR: the pattern's; */
            (i >= P_DKSRC && i <= P_DKREL) ||         /* the ducking: the mix's; */
-           (i >= P_FOLLOW && i <= P_SDIR);           /* (2.1) the chord follow, (2.5) STRUM and DIR: SCL's) */
+           (i >= P_FOLLOW && i <= P_SDIR) ||         /* (2.1) the chord follow, (2.5) STRUM and DIR: SCL's) */
+           (i >= P_EQ_LOW && i <= P_DEPTH);          /* ((techno-mixer) the isolator and DEPTH: the mix's */
 }
 
 /* a knob moved an F_ENUM from `from` to v: past any alias in that direction (back to `from` at the end) */
@@ -461,6 +464,20 @@ static void param_format(const param_desc_t *d, int32_t v, char *val, const char
             str_cpy(val, "OFF", 6);
         } else {
             fmt_fix(val, LEVEL_DB_X10(v), 1);
+            *unit = "dB";
+        }
+        break;
+    case F_EQ:                                      /* ((techno-mixer) an isolator band: KILL, -18.1, 0, +6.0 dB */
+        if (v <= 0) {
+            str_cpy(val, "KILL", 6);
+        } else {
+            fmt_fix(val, EQ_DB10[v & 127], 1);
+            if (v > 64) {
+                char t[8];
+                str_cpy(t, val, sizeof t);
+                val[0] = '+';
+                str_cpy(val + 1, t, 6);
+            }
             *unit = "dB";
         }
         break;
@@ -621,6 +638,8 @@ static const page_t PAGES[] = {
     {"VOICE 2", FAM_EDIT, SC_TRACK, GR_VOICE2, {P_ALLOC, P_DETUNE, P_SPRD, 0xFF}},   /* ((U3, R4) PAN MUTE: MIXER's;
                                                                                      * (1.3) SPREAD) */
     {"MIXER", FAM_TRK, SC_TRK, GR_TRK, {0, 1, 2, 3}},   /* GLO button; LEVEL PAN REV MUTE */
+    {"EQ", FAM_GLO, SC_TRACK, GR_NONE, {P_EQ_LOW, P_EQ_MID, P_EQ_HIGH, P_DEPTH}},   /* ((techno-mixer) GLO again: the
+                                                                         * selected track's isolator and DEPTH (fx.c) */
     {"DELAY", FAM_GLO, SC_GLOBAL, GR_DELAY, {G_DTIME, G_DFDBK, G_DCOLOR, G_DMIX}},   /* ((U3, N4) the buses: FX's before) */
     {"REVERB", FAM_GLO, SC_GLOBAL, GR_REVERB, {G_RTYPE, G_RSIZE, G_RDAMP, 0xFF}},   /* TYPE: ROOM / SPRING / HALL */
     {"CHORUS", FAM_GLO, SC_GLOBAL, GR_CHORUS, {G_CRATE, G_CDEPTH, G_CMODE, G_CFDBK}},   /* ((phase 9) MODE, FEEDBACK) */

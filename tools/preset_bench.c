@@ -5,7 +5,10 @@
  * suits its kind (the name's prefix): LD a lead line (legato overlaps; POLY ones chords), BS a bass line (ACID: a
  * 303 line with accents and slides), PA pads, ST off-beat stabs, DR a held drone, FX single hits, KT a beat.
  *   cc -O2 -w -Ibuild/gen -Ifirmware/src -o build/host/preset_bench tools/preset_bench.c -lm
- *   build/host/preset_bench OUTDIR [PREFIX|NAME ..]     (default prefixes: LD BS PA ST DR FX KT; a whole name: that one)
+ *   build/host/preset_bench OUTDIR [PREFIX|NAME ..]     (default prefixes: LD BS PA ST DR FX KT; a whole name: that one;
+ *                                                       @FILE: the names in FILE, one a line)
+ * ((techno-presets-v2) PL plucks: an arpeggio; PC percussion: hits on the note its name suggests. With CATDIR set, each
+ * WAV goes in OUTDIR/<category>/ (PLUCK STAB BASS LEAD PAD DRONE FX PERC KIT; a sound with no prefix: SKIFF)) 
  * Prints each render's peak and RMS (16-bit units) and whether every voice was free at the end. */
 #define main hostsim_main
 #include "../tests/hostsim.c"
@@ -153,6 +156,19 @@ static double phrase_kit(void)
     return 32;
 }
 
+static double phrase_perc(const char *n)        /* ((techno-presets-v2) a percussion hit: a 1/16 groove on one note */
+{
+    static const uint8_t G[16] = {1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0};
+    uint32_t nt = strstr(n, "KICK") ? 36u : strstr(n, "TOM") || strstr(n, "TIMPANI") || strstr(n, "GONG") ? 45u
+                : strstr(n, "SNAR") || strstr(n, "SNR") || strstr(n, "CLAP") || strstr(n, "CONGA") || strstr(n, "TABLA")
+                ? 50u : strstr(n, "HAT") || strstr(n, "RIM") || strstr(n, "CLAVE") || strstr(n, "TICK") ||
+                  strstr(n, "SHAKER") || strstr(n, "WOOD") || strstr(n, "GLASS") || strstr(n, "BELL") ||
+                  strstr(n, "COW") || strstr(n, "CLICK") || strstr(n, "RIDE") ? 72u : 60u, i;
+    for (i = 0; i < 32u; i++)
+        if (G[i % 16u])
+            note(i, 0.5, nt, i % 4u == 0u ? 120 : 90);
+    return 32;
+}
 static double make_phrase(uint32_t e, const preset_t *p)
 {
     const char *n = p->name;
@@ -167,6 +183,10 @@ static double make_phrase(uint32_t e, const preset_t *p)
     if (!strncmp(n, "BS", 2))
         return strstr(n, "ACID") ? phrase_acid() : strstr(n, "RUMBLE") || strstr(n, "SUB") ? phrase_bass(1)
                                                                                              : phrase_bass(0);
+    if (!strncmp(n, "PL", 2))
+        return phrase_pluck();
+    if (!strncmp(n, "PC", 2))
+        return phrase_perc(n);
     if (!strncmp(n, "LD", 2))
         return p->tag == PT_PLUCK ? phrase_pluck() : phrase_lead(!p->mono);
     if (!strncmp(n, "PA", 2))
@@ -238,18 +258,44 @@ static void render(const char *path, uint32_t e, uint32_t pi)
         }
     }
     fclose(w);
-    seq_line = 0;
-    nev = 0;
-    printf("%-8s %2u %-13s peak %5d  rms %5.0f  %s\n", ENGINES[e]->name, pi, p->name, peak,
-           sqrt(ss / (2.0 * frames)), voices_free() ? "free" : "STILL SOUNDING");
+    {   /* ((techno-presets-v2) how long the last voice takes to end after the WAV: 20 s at most) */
+        uint32_t extra = 0;
+        int ok = voices_free();
+        while (!ok && extra < 20u * FS) {
+            mix_block(o, CTL);
+            extra += CTL;
+            ok = voices_free();
+        }
+        seq_line = 0;
+        nev = 0;
+        printf("%-8s %2u %-13s peak %5d  rms %5.0f  %s", ENGINES[e]->name, pi, p->name, peak,
+               sqrt(ss / (2.0 * frames)), extra == 0u ? "free" : ok ? "free later" : "STILL SOUNDING");
+        if (extra)
+            printf(" (+%.1f s)", (double)extra / FS);
+        printf("\n");
+    }
 }
 
 int main(int argc, char **argv)
 {
     static const char *const DEF[] = {"LD", "BS", "PA", "ST", "DR", "FX", "KT"};
+    static char names[1024][16];
+    static const char *lst[1024];
     const char *const *pre = argc > 2 ? (const char *const *)argv + 2 : DEF;
     uint32_t npre = argc > 2 ? (uint32_t)argc - 2u : NELEM(DEF), e, pi, i;
-    char path[512], slug[32];
+    char path[512], slug[32], dir[512];
+    if (argc == 3 && argv[2][0] == '@') {           /* ((techno-presets-v2) the names in a file) */
+        FILE *f = fopen(argv[2] + 1, "r");
+        npre = 0;
+        while (f && npre < NELEM(names) && fgets(names[npre], sizeof names[0], f)) {
+            names[npre][strcspn(names[npre], "\n")] = 0;
+            if (names[npre][0])
+                lst[npre] = names[npre], npre++;
+        }
+        if (f)
+            fclose(f);
+        pre = lst;
+    }
     if (argc < 2) {
         fprintf(stderr, "usage: preset_bench OUTDIR [PREFIX ..]\n");
         return 2;
@@ -263,9 +309,21 @@ int main(int argc, char **argv)
             if (i == npre)
                 continue;
             for (i = 0; n[i] && i + 1 < sizeof slug; i++)
-                slug[i] = n[i] == ' ' ? '_' : n[i];
+                slug[i] = n[i] == ' ' || n[i] == '/' ? '_' : n[i];
             slug[i] = 0;
-            snprintf(path, sizeof path, "%s/%s_%02u_%s.wav", argv[1], ENGINES[e]->name, pi, slug);
+            snprintf(dir, sizeof dir, "%s", argv[1]);
+            if (getenv("CATDIR")) {                   /* ((techno-presets-v2) by category) */
+                static const char *const C[][2] = {{"PL", "PLUCK"}, {"ST", "STAB"}, {"BS", "BASS"}, {"LD", "LEAD"},
+                                                   {"PA", "PAD"}, {"DR", "DRONE"}, {"FX", "FX"}, {"PC", "PERC"},
+                                                   {"KT", "KIT"}};
+                const char *c = "SKIFF";
+                for (i = 0; i < NELEM(C); i++)
+                    if (!strncmp(n, C[i][0], 2) && n[2] == ' ')
+                        c = C[i][1];
+                snprintf(dir, sizeof dir, "%s/%s", argv[1], c);
+                mkdir(dir, 0755);
+            }
+            snprintf(path, sizeof path, "%s/%s_%02u_%s.wav", dir, ENGINES[e]->name, pi, slug);
             render(path, e, pi);
         }
     return 0;

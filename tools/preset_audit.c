@@ -31,6 +31,9 @@
 #define main hostsim_main
 #include "../tests/hostsim.c"
 #undef main
+#include <sys/mman.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #define BPM 145.0
 #define NB 32                                     /* spectrum bands */
@@ -56,7 +59,7 @@ typedef struct {
     int has_twin;
 } item_t;
 
-static item_t it[MAXP];
+static item_t *it;                                /* (shared with the children: mmap) */
 static uint32_t nit;
 static float bufl[MAXF], bufr[MAXF];
 
@@ -439,7 +442,7 @@ static uint32_t uf_find(uint32_t x) { return uf[x] == x ? x : (uf[x] = uf_find(u
 
 int main(int argc, char **argv)
 {
-    uint32_t e, pi, i, j, ntw = 0, np = 0, nflag = 0;
+    uint32_t e, pi, i, j, ntw = 0, np = 0, nflag = 0, running = 0;
     static double tw[MAXP];
     double thr, p50, p90, p10;
     FILE *rep, *ft = 0;
@@ -447,28 +450,42 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: preset_audit REPORT.md [FEATURES.tsv]\n");
         return 2;
     }
+    it = mmap(0, sizeof(item_t) * MAXP, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, -1, 0);
+    if (it == MAP_FAILED) {
+        perror("mmap");
+        return 1;
+    }
     for (e = 0; e < NENGINES; e++)
         for (pi = 0; eng_ok(e) && pi < ENGINES[e]->npresets && nit < MAXP; pi++) {
-            item_t *x = &it[nit++];
+            item_t *x = &it[nit];
             if (ENGINES[e]->presets == SMP_PRESET_TABLE ||   /* (SAMPLE: the recorded instruments; not a synth bank) */
-                (e == ENGI_DRUMX && !strcmp(ENGINES[e]->presets[pi].name, "OWN KIT"))) {   /* (the user's own kit) */
-                nit--;
+                (e == ENGI_DRUMX && !strcmp(ENGINES[e]->presets[pi].name, "OWN KIT")))   /* (the user's own kit) */
                 continue;
-            }
+            nit++;
             x->e = (uint16_t)e, x->pi = (uint16_t)pi, x->p = &ENGINES[e]->presets[pi];
-            fingerprint(e, pi, 0, &x->f);
-            if (tone_param(e) >= 0) {
-                fingerprint(e, pi, 16, &x->twin);
-                x->has_twin = 1;
-                tw[ntw++] = distance(&x->f, &x->twin).all;
+            x->has_twin = tone_param(e) >= 0;
+            if (running == 8u) {                  /* every preset in a child of its own, from the same fresh state
+                                                   * (as tests/regress.c): no tail, no random state carried over */
+                wait(0);
+                running--;
             }
-            fprintf(stderr, "\r%3u %-8s %-14s", nit, ENGINES[e]->name, x->p->name);
+            if (!fork()) {
+                fingerprint(e, pi, 0, &x->f);
+                if (x->has_twin)
+                    fingerprint(e, pi, 16, &x->twin);
+                _exit(0);
+            }
+            running++;
         }
-    fprintf(stderr, "\n");
+    while (running--)
+        wait(0);
+    for (i = 0; i < nit; i++)
+        if (it[i].has_twin)
+            tw[ntw++] = distance(&it[i].f, &it[i].twin).all;
     qsort(tw, ntw, sizeof tw[0], dcmp);
     p10 = tw[ntw / 10], p50 = tw[ntw / 2], p90 = tw[ntw * 9 / 10];
     thr = getenv("THR") ? atof(getenv("THR")) : p50;   /* (REDONDANCE.md: the median twin of the bank at the start,
-                                                   * 0.48 with AMOD, given as THR from then on so the bar does not move) */
+                                                   * 0.493, given as THR from then on so the bar does not move) */
     for (i = 0; i < nit; i++)
         uf[i] = i;
     for (i = 0; i < nit; i++)

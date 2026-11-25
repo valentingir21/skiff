@@ -151,6 +151,8 @@ static uint32_t heaviest(uint32_t e, double idle, double *cost)
         double c;
         P[0] = (part_t){(uint8_t)e, (uint8_t)pi, 8};
         c = run(P, 0) - idle;
+        if (getenv("EACH"))                       /* ((techno-presets-v2) every preset's cost, for the bank's check) */
+            printf("each %-9s %3u %-13s %8.0f\n", ENGINES[e]->name, pi, ENGINES[e]->presets[pi].name, c);
         if (c > hi) {
             hi = c;
             best = pi;

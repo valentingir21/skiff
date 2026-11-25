@@ -21,6 +21,8 @@
  *   build/host/knobs_test [REPORT.md] */
 #define main hostsim_main
 #include "hostsim.c"
+#include <unistd.h>
+#include <sys/wait.h>
 #undef main
 
 #define NSEG 4
@@ -51,7 +53,7 @@ static const struct { uint8_t n, acc, sl; } LINE[16] = {
 typedef struct { double f[NFEAT]; double clip, sus_db; } meas_t;
 
 /* engine e preset pi with parameter id at v (id P_COUNT: none), note: features into *m */
-static void measure(uint32_t e, uint32_t pi, uint32_t id, int32_t v, uint32_t note, meas_t *m, int cc, int ccv)
+static void measure_in(uint32_t e, uint32_t pi, uint32_t id, int32_t v, uint32_t note, meas_t *m, int cc, int ccv)
 {
     track_t *t = &trk[0];
     int32_t o[2 * CTL];
@@ -145,6 +147,30 @@ static void measure(uint32_t e, uint32_t pi, uint32_t id, int32_t v, uint32_t no
     }
     m->clip = (double)nclip / total;
     m->sus_db = m->f[6];
+}
+/* ((techno-presets-v2) each measure in a fresh child (as tests/regress.c, tools/preset_audit.c): nothing of the last
+ * one (a voice still in its RELEASE, an engine's gliding knobs, MINI's loaded patch) changes this one */
+static void measure(uint32_t e, uint32_t pi, uint32_t id, int32_t v, uint32_t note, meas_t *m, int cc, int ccv)
+{
+    int fd[2];
+    pid_t pid;
+    if (pipe(fd) || (pid = fork()) < 0) {
+        measure_in(e, pi, id, v, note, m, cc, ccv);
+        return;
+    }
+    if (!pid) {
+        meas_t r;
+        close(fd[0]);
+        measure_in(e, pi, id, v, note, &r, cc, ccv);
+        if (write(fd[1], &r, sizeof r) != (ssize_t)sizeof r)
+            _exit(1);
+        _exit(0);
+    }
+    close(fd[1]);
+    if (read(fd[0], m, sizeof *m) != (ssize_t)sizeof *m)
+        measure_in(e, pi, id, v, note, m, cc, ccv);
+    close(fd[0]);
+    waitpid(pid, 0, 0);
 }
 static int use_pitch;                      /* the knob moves the pitch (TUNE, SLIDE, GLIDE, DETUNE, RANGE, DIVE, ..): its
                                             * zero crossings count; else not (a filter moves them too) */
@@ -249,7 +275,8 @@ static void sweep_engine(uint32_t e)
     for (ki = 0; ki < nk; ki++) {
         uint32_t id = kn[ki].id, any = 0;
         const param_desc_t *d = param_desc_of(e, id);
-        int is_enum = d->fmt == F_ENUM || d->fmt == F_ONOFF;
+        int is_enum = d->fmt == F_ENUM || d->fmt == F_ONOFF ||
+                      (e == ENGI_MINI && id == P_E7);   /* ((techno-presets-v2) MINI's SLOT: each value another patch) */
         use_pitch = pitch_knob(d->label);
         int32_t nv = is_enum ? d->max - d->min + 1 : NSTEPS;
         for (pi = 0; pi < en->npresets; pi++) {
@@ -296,6 +323,9 @@ static void sweep_engine(uint32_t e)
                     jump_lvl = 0;
                     for (j = 0; j < NFEAT; j += 6)   /* the level itself (not a band) moved that much: a fault */
                         jump_lvl |= fabs(fmax(m[s].f[j], -60) - fmax(m[s - 1].f[j], -60)) >= 12.0;
+                    if (pr->tag == PT_BASS && !strcmp(d->label, "CUTOFF") && vals[s] <= 32)
+                        jump_lvl = 0;             /* ((techno-presets-v2) a bass's low-pass crossing its fundamental
+                                                   * (A1 55 Hz) at the bottom of the range: the note goes, as it should */
                 }
             }
             if (tot < 1.0)

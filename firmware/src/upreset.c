@@ -76,7 +76,11 @@ typedef struct {
     up_rec_t r[UP_PER_BANK];
 } up_bank_t;
 _Static_assert(sizeof(up_rec_t) == 192, "user preset record layout");
-_Static_assert(SID_COUNT <= UP_SIDS, "user preset record: the SIDs");
+/* (Gir 1.0) the ids past UP_SIDS (R.ATTACK R.SLICE K.CLICK K.PUNCH) are held in the bytes of the isolator's (LOW MID
+ * HIGH DEPTH: the mix's, kept over a sound load, so a user preset's never loads); np stays UP_SIDS */
+#define UP_OVER (SID_COUNT > UP_SIDS ? SID_COUNT - UP_SIDS : 0u)
+_Static_assert(UP_OVER <= 4u && P_DEPTH == P_EQ_LOW + 3 && P_EQ_LOW + 8u + 4u <= UP_SIDS && P_EQ_LOW >= SID_E0,
+               "user preset record: the SIDs (p_sid(P_EQ_LOW) = P_EQ_LOW + 8)");
 /* (Skiff) packed[132..143] held the pattern's NUDGE (see the top); (phase 5) a user preset holds no pattern and nothing
  * reads one, so (1.3) the parameters may pass 132 into it: firmware before maps them by count, as any np. (2.1) Past
  * UP_PMAX * 2 (P_COUNT 146) only version 6 holds them all: SAVE and UP_PUT write nothing else */
@@ -114,10 +118,12 @@ static void up_set_sound(up_rec_t *r, const int16_t *v)
 {
     uint32_t s;
     r->ver = UP_VER_SID;
-    r->np = (uint8_t)SID_COUNT;
+    r->np = (uint8_t)(SID_COUNT - UP_OVER);
     memset(r->sid, 0, sizeof r->sid);
-    for (s = 0; s < SID_COUNT; s++)
+    for (s = 0; s < SID_COUNT - UP_OVER; s++)
         r->sid[s] = (uint8_t)(v[sid_p(s)] + 64);
+    for (s = 0; s < UP_OVER; s++)                   /* ((Gir 1.0) the ids past the record's, see above) */
+        r->sid[p_sid(P_EQ_LOW) + s] = (uint8_t)(v[sid_p(UP_SIDS + s)] + 64);
 }
 #if FELUCCA_LEGACY
 /* Legacy PHYS drums map through decoded parameters, not their disk representation. */
@@ -169,6 +175,11 @@ static void up_params(const up_rec_t *r, int16_t *out, const int16_t *def)
         for (i = 0; i < r->np; i++)
             if (sid_p(i) < P_COUNT)
                 out[sid_p(i)] = up_value(r, i);
+        if (r->np == UP_SIDS)                          /* ((Gir 1.0) a record of this firmware's: the ids past it */
+            for (i = 0; i < UP_OVER; i++) {            /* where the isolator's were (kept anyway) */
+                out[sid_p(UP_SIDS + i)] = up_value(r, p_sid(P_EQ_LOW) + i);
+                out[P_EQ_LOW + i] = def[P_EQ_LOW + i];
+            }
         return;
     }
     for (i = 0; i < r->np && i < NELEM(values); i++) values[i] = up_value(r, i);

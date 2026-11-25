@@ -309,7 +309,6 @@ static const preset_t PHASE_PRESETS[] = {
     /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
     {"PL PD RESO", {5, 0, 70, 70, 0, 0, 0, 0}, {0, 62, 0, 54}, 0, 0, FX(0, 20, 60, 40), TAG(PT_PLUCK)},
     {"PL PD BELL", {6, 3, 90, 40, 0, 1, 0, 0}, {0, 70, 0, 64}, 0, 0, FX(0, 20, 50, 60), TAG(PT_PLUCK)},
-    {"ST PD STAB", {0, 1, 60, 80, 10, 0, 40, 0}, {0, 60, 0, 46}, 0, 0, FX(10, 40, 50, 50), TAG(PT_KEYS)},
     {"ST PD ORGAN", {3, 0, 40, 10, 0, 0, 60, 0}, {0, 62, 60, 40}, 0, 0, FX(0, 70, 30, 50), TAG(PT_KEYS)},
     {"BS PD RESO", {5, 0, 60, 90, 0, 0, 80, 0}, {0, 58, 40, 20}, 0, 1, FX(20, 0, 10, 5), TAG(PT_BASS)},
     {"BS PD SUB", {3, 0, 20, 20, 0, 0, 127, 0}, {0, 64, 110, 20}, 0, 1, FX(0, 0, 0, 0), TAG(PT_BASS)},
@@ -318,9 +317,6 @@ static const preset_t PHASE_PRESETS[] = {
     {"PA PD CHOIR", {3, 6, 50, 20, 14, 0, 0, 0}, {90, 90, 120, 100}, 0, 0, FX(0, 90, 30, 110), MORE({P_LRATE, 20}, {P_SPRD, 110}), TAG(PT_PAD)},
     {"PA PD DARK", {7, 0, 30, 40, 0, 0, 40, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 90, 20, 120), MORE({P_LRATE, 10}, {P_LD_SHP, 20}), TAG(PT_PAD)},
     {"DR PD FOLD", {0, 0, 60, 20, 0, 0, 60, 70}, {110, 90, 127, 110}, 0, 0, FX(20, 40, 20, 115), MORE({P_LRATE, 6}, {P_LD_SHP, 30}), TAG(PT_PAD)},
-    {"LD PD SYNC", {7, 5, 100, 70, 0, 0, 0, 30}, {0, 70, 110, 40}, 0, 1, FX(30, 0, 40, 30), TAG(PT_LEAD)},
-    {"BS PD SAW", {0, 0, 70, 90, 0, 0, 60, 0}, {0, 56, 30, 20}, 0, 1, FX(20, 0, 5, 5), TAG(PT_BASS)},
-    {"BS PD RING", {1, 0, 60, 60, 20, 1, 60, 0}, {0, 60, 60, 24}, 0, 1, FX(30, 0, 5, 5), TAG(PT_BASS)},
     {"ST PD BELL", {6, 0, 90, 60, 0, 0, 0, 0}, {0, 64, 0, 56}, 0, 0, FX(0, 40, 50, 60), TAG(PT_KEYS)},
     {"PA PD WIDE", {0, 0, 40, 20, 30, 0, 0, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 110, 30, 110), MORE({P_SPRD, 127}), TAG(PT_PAD)},
     {"PA PD RESO", {5, 0, 30, 0, 0, 0, 0, 0}, {100, 90, 120, 110}, 0, 0, FX(0, 90, 30, 115), MORE({P_LRATE, 12}, {P_LD_SHP, 40}), TAG(PT_PAD)},

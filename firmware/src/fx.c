@@ -1322,6 +1322,7 @@ static void eq_track(track_t *t, int32_t *b, int32_t *d, int32_t *e, uint32_t n,
     eq_depth(t, lvl, r);
 }
 #if FELUCCA_CPU2
+#define RB_VCOST 80u                                    /* ((Gir 1.0) part_cost: a kit's RUMBLE (rumble.c, the KICK page's click) */
 #define EQ_VCOST 50u                                    /* (part_cost: the isolator's host instructions a signal) */
 #endif
 
@@ -1387,6 +1388,7 @@ static __attribute__((noinline)) AUDIO_RAM void mix_spread(track_t *t, int32_t *
         for (i = 0; i < n; i++)
             d[i] = (d[i] << 1) - b[i];                  /* left - right */
     track_dist(t, b, n);
+    AUDIO_FAR(rb_mix)(t, b, n);                         /* ((Gir) a kit's RUMBLE: after the DRIVE, rumble.c) */
     if (t->p[P_ITYPE] | t->ins_run)
         AUDIO_FAR(track_insert)(t, b, d, e, n);         /* (the mono sum, as DRIVE; FILTR the sides too) */
     AUDIO_FAR(slicer_track_sd)(t, b, d, e, n);
@@ -1506,7 +1508,9 @@ static void mix_part(track_t *t, uint32_t n SM_DECL)
     vs_sm[(uint32_t)(t - trk) % NPART] = sm;            /* ((#21) smx_render's sums) */
     nr = track_render(t, b, n);
     part_cost[(uint32_t)(t - trk) % NPART] = (uint16_t)(nr * ENG_VCOST[t->engine % NENGINES] + (nr || t->tail ? 60u : 0u) +
-                                                        (eq_wanted(t) ? EQ_VCOST : 0u));   /* ((techno-mixer) its isolator */
+                                                        (eq_wanted(t) ? EQ_VCOST : 0u) +   /* ((techno-mixer) its isolator,
+                                                         * (Gir 1.0) a kit's RUMBLE */
+                                                        (drum_engine(t->engine) && t->p[P_RB_MIX] > 0 ? RB_VCOST : 0u));
     if (nr)
 #else
     if (track_render(t, b, n))
@@ -1536,6 +1540,7 @@ static void mix_part(track_t *t, uint32_t n SM_DECL)
         xmax = 0x7FFFFFFF / ((xmax > r ? xmax : r) | 1);   /* sends: loud chords at a high LEVEL */
         de = dly_send_r(&d, gl, gr);                    /* ((2.5) a stereo MODE: the delay's send by the PAN) */
         track_dist(t, b, n);
+        AUDIO_FAR(rb_mix)(t, b, n);                     /* ((Gir) a kit's RUMBLE: after the DRIVE, rumble.c) */
         if (t->p[P_ITYPE] | t->ins_run)
             AUDIO_FAR(track_insert)(t, b, 0, 0, n);     /* ((1.3) the INSERT: off, nothing) */
         slicer_track(t, b, n);                          /* slicer.c: before the level, pan and sends */
@@ -1601,7 +1606,9 @@ static AUDIO_RAM void c1_parts(uint32_t arg)            /* arg: the tracks (bit 
 /* ((techno-mixer) this core's own work besides its tracks: the idle mix, the buses, the master (tools/cpu_worst.c: ~480
  * and ~300 host instructions a sample with every bus busy): counted on its side, so that the second core takes more of
  * the tracks when the buses are heavy. Steers the split only: the sound is the same bit for bit whichever it is */
-#define C0_OWN 500u
+#define C0_OWN 650u   /* ((Gir 1.0) 500 before: core 0's own work
+                                                         * (the buses, the master) measured ~790 at every send full; 650 splits
+                                                         * the worst cases best, tools/cpu_worst.c (FW_SPLIT), 83 % -> 79 %) */
 static __attribute__((noinline)) uint32_t mix_split(void)
 {
     uint32_t m, i, best = 0, all = 0, lo;

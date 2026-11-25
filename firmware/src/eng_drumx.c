@@ -89,8 +89,10 @@ static void drumx_note_on(track_t *t, voice_t *v)
     v->env = 1 << 24;                                    /* the ADSR held at full from here (eng_drum.c: a key-off
                                                           * before the first block must not end a fresh voice) */
     dx_trigger(&L->x);
-    if (lane == DV_KICK)                                 /* ((Gir) the RUMBLE ducks: rumble.c) */
+    if (lane == DV_KICK) {                               /* ((Gir) the RUMBLE ducks, the KICK page's attack: rumble.c) */
         rb_hit(t);
+        kick_hit(t);
+    }
     if (lane == DV_HATC)                                 /* a closed hat chokes the open one */
         dx_choke(&K[DV_HATO].x);
 }
@@ -129,6 +131,8 @@ static void drumx_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const
            p[P_E6], p[P_E5], y, n);
     if (on)                                              /* ((Gir) the kick's RUMBLE: rumble.c) */
         rb_run(t, y, rb, n);
+    if (lane == DV_KICK && (p[P_KCLICK] > 0 || p[P_KPUNCH] > 0))
+        kick_shape(t, y, n);                             /* ((Gir) EDIT > KICK: its click, its punch) */
     if ((drum_mute[(uint32_t)(t - trk) % NTRK] >> lane) & 1u)
         n = 0;                                           /* ((1.3) a muted lane rings on unheard, as DRUM's; (Gir) one
                                                           * way out, at the end: the loops' cost stays countable) */
@@ -142,8 +146,8 @@ static void drumx_render(track_t *t, voice_t *v, int32_t *out, uint32_t n, const
             s = (softclip((s * g) >> 12) * mk) >> 15;
         out[i] += voice_amp2(soft_knee(s + (s >> 2), 24000), m, i);
     }
-    for (i = 0; on && i < n; i++)
-        out[i] += voice_amp2(rb[i], m, i);
+    if (on && n)
+        rb_out(t, rb, m, n);                             /* ((Gir) to the track after its DRIVE: rumble.c rb_mix) */
 }
 
 /* {MRPH, TUNE, TONE, DECY, NOIS, FM, FOLD, DRV} */
@@ -167,31 +171,34 @@ static const preset_t DRUMX_PRESETS[] = {
     {"LASER KIT", {64, 64, 70, 64, 64, 10, 0, 10}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 30, 25), TAG(PT_DRUM)},    /* (techno-presets) a techno bank: LD leads, BS basses, PA pads, ST stabs, DR drones, FX, KT kits (PRESETS.md) */
     {"KT INDUS", {80, 58, 90, 60, 80, 50, 70, 90}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 40), TAG(PT_DRUM)},
     /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
-    {"KT DX BERLIN", {60, 58, 50, 64, 50, 10, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 10, 50), TAG(PT_DRUM)},
-    {"KT DX DUB", {50, 54, 40, 64, 40, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 40, 90), TAG(PT_DRUM)},
+    {"KT DX BERLIN", {60, 58, 50, 64, 50, 10, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 10, 50), MORE({P_KCLICK, 49}), TAG(PT_DRUM)},
+    {"KT DX DUB", {50, 54, 40, 64, 40, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 40, 90), MORE({P_KCLICK, 47}, {P_KPUNCH, 24}), TAG(PT_DRUM)},
     {"KT DX MINIML", {70, 70, 80, 30, 70, 20, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 30, 20), TAG(PT_DRUM)},
     {"KT DX METAL", {90, 60, 100, 60, 90, 90, 110, 110}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 10, 40), TAG(PT_DRUM)},
-    {"KT DX TRIBAL", {64, 60, 70, 64, 50, 20, 20, 60}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 40), TAG(PT_DRUM)},
+    {"KT DX TRIBAL", {64, 60, 70, 64, 50, 20, 20, 60}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 10, 40), MORE({P_KPUNCH, 72}), TAG(PT_DRUM)},
     {"KT DX GLITCH", {80, 70, 90, 40, 80, 80, 40, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 50, 30), TAG(PT_DRUM)},
     {"KT DX HARD", {70, 60, 100, 50, 90, 30, 40, 127}, {0, 100, 127, 100}, 0, 0, FX(90, 0, 0, 15), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
     {"KT DX SCHRNZ", {80, 66, 110, 40, 110, 50, 60, 127}, {0, 100, 127, 100}, 0, 0, FX(110, 0, 0, 10), MORE({P_DTYPE, 4}), TAG(PT_DRUM)},
     {"KT DX ACID", {60, 64, 80, 50, 70, 30, 0, 30}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 20), TAG(PT_DRUM)},
     {"KT DX TRIBE", {70, 54, 100, 64, 60, 40, 60, 110}, {0, 100, 127, 100}, 0, 0, FX(90, 0, 10, 30), MORE({P_DTYPE, 1}), TAG(PT_DRUM)},
-    {"KT DX DETROI", {50, 68, 70, 60, 70, 10, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 40), TAG(PT_DRUM)},
+    {"KT DX DETROI", {50, 68, 70, 60, 70, 10, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 40), MORE({P_KCLICK, 43}), TAG(PT_DRUM)},
     {"KT DX GABBER", {90, 50, 127, 50, 100, 80, 100, 127}, {0, 100, 127, 100}, 0, 0, FX(127, 0, 0, 10), MORE({P_DTYPE, 2}), TAG(PT_DRUM)},
     {"KT DX ELECTR", {30, 46, 40, 64, 30, 90, 30, 50}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 60, 40), TAG(PT_DRUM)},
     {"KT DX CLICK2", {90, 70, 100, 20, 80, 30, 60, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 40, 30), TAG(PT_DRUM)},
     {"KT DX LOW", {60, 40, 50, 64, 50, 20, 0, 60}, {0, 100, 127, 100}, 0, 0, FX(40, 0, 10, 60), TAG(PT_DRUM)},
     {"KT DX FM", {80, 70, 100, 50, 60, 127, 0, 20}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 30, 40), TAG(PT_DRUM)},
-    {"KT DX BOOM", {40, 50, 40, 64, 40, 0, 0, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 90), TAG(PT_DRUM)},
-    {"KT DX TRBL2", {64, 80, 90, 50, 70, 20, 0, 30}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 20, 30), TAG(PT_DRUM)},
-    {"KT DX SCIFI", {100, 70, 110, 60, 80, 100, 40, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 50, 50), TAG(PT_DRUM)},
+    {"KT DX BOOM", {40, 50, 40, 64, 40, 0, 0, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 90), MORE({P_KCLICK, 71}, {P_KPUNCH, 48}), TAG(PT_DRUM)},
+    {"KT DX TRBL2", {64, 80, 90, 50, 70, 20, 0, 30}, {0, 100, 127, 100}, 0, 0, FX(10, 0, 20, 30), MORE({P_KCLICK, 43}), TAG(PT_DRUM)},
+    {"KT DX SCIFI", {100, 70, 110, 60, 80, 100, 40, 40}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 50, 50), MORE({P_KPUNCH, 24}), TAG(PT_DRUM)},
     {"KT DX DIRTY", {64, 60, 90, 60, 80, 20, 60, 127}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 0, 20), TAG(PT_DRUM)},
-    {"KT DX WOOD", {40, 60, 40, 50, 20, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 40), TAG(PT_DRUM)},
-    {"KT DX METAL2", {100, 90, 120, 40, 100, 60, 40, 60}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 30), TAG(PT_DRUM)},
+    {"KT DX WOOD", {40, 60, 40, 50, 20, 0, 0, 0}, {0, 100, 127, 100}, 0, 0, FX(0, 0, 20, 40), MORE({P_KCLICK, 41}), TAG(PT_DRUM)},
+    {"KT DX METAL2", {100, 90, 120, 40, 100, 60, 40, 60}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 20, 30), MORE({P_KPUNCH, 72}), TAG(PT_DRUM)},
     /* (Gir) kits made for the RUMBLE (RB_KITS below) */
     {"KT RMB INDUS", {80, 56, 90, 50, 80, 50, 80, 110}, {0, 100, 127, 100}, 0, 0, FX(50, 0, 0, 20), TAG(PT_DRUM)},
-    {"KT RMB WAREH", {64, 58, 70, 50, 60, 20, 20, 60}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 10, 30), TAG(PT_DRUM)},
+    {"KT RMB WAREH", {64, 58, 70, 50, 60, 20, 20, 60}, {0, 100, 127, 100}, 0, 0, FX(20, 0, 10, 30), MORE({P_KPUNCH, 48}), TAG(PT_DRUM)},
+    /* (Gir 1.0) a rumble's slicer, a kick that hits (EDIT > KICK) */
+    {"KT RMB ROLL", {70, 58, 100, 50, 80, 40, 50, 110}, {0, 100, 127, 100}, 0, 0, FX(60, 0, 0, 10), MORE({P_RB_SLICE, 3}, {P_KCLICK, 40}), TAG(PT_DRUM)},
+    {"KT WAREH KCK", {64, 56, 80, 44, 60, 20, 10, 70}, {0, 100, 127, 100}, 0, 0, FX(30, 0, 0, 20), MORE({P_KCLICK, 60}, {P_KPUNCH, 48}, {P_RB_SLICE, 1}), TAG(PT_DRUM)},
 };
 
 /* (Skiff phase 9) the factory kits a preset loads as the project's kit (ui.c apply_preset_to), 8 lanes as dx_kit has
@@ -271,7 +278,7 @@ static const dx_lane_t DX_KITS[][8] = {
         {DX_MODE(DXW_SINE, DXF_LP, 0) | DXM_SINE << 5, {70, 127, 50, 0, 40}, {80, 127, 60, 0, 60}},   /* BELL */
     },
 };
-static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 4, 1, 2, 3, 1, 7, 6, 1, 4, 3, 7, 5, 4, 8, 3, 4, 6, 2, 7, 8, 1, 7, 4, 4, 1};   /* ((techno-presets) KT INDUS: INDUSTRIAL's
+static const uint8_t DRUMX_PKIT[] = {0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 4, 1, 2, 3, 1, 7, 6, 1, 4, 3, 7, 5, 4, 8, 3, 4, 6, 2, 7, 8, 1, 7, 4, 4, 1, 4, 1};   /* ((techno-presets) KT INDUS: INDUSTRIAL's
                                                                                           * kit; (Gir) KT RMB INDUS, WAREH) */
 _Static_assert(sizeof DRUMX_PKIT == NELEM(DRUMX_PRESETS), "a kit (or none) per DRUM-X preset");
 _Static_assert(NELEM(DRUMX_PRESETS) <= 64u, "its favourites end before THEME CUSTOM's colours (ui.c CPAL_COLS)");
@@ -285,12 +292,14 @@ static const int8_t RB_STYLE[][5] = {
     {9, 60, 50, 60, 40}, {9, 80, 80, 70, 56}, {9, 60, 127, 70, 34},
 };
 static const uint8_t RB_KITS[][3] = {
-    {13, RS_HARD, 64}, {14, RS_HARD, 74}, {15, RS_DEEP, 92}, {17, RS_SCHRANZ, 78}, {18, RS_GROOVE, 54},
-    {20, RS_GABBER, 97}, {22, RS_GROOVE, 48}, {25, RS_INDUS, 78}, {26, RS_RAVE, 83}, {28, RS_DEEP, 88},
-    {29, RS_HARD, 122}, {31, RS_HARD, 84}, {32, RS_SCHRANZ, 98}, {33, RS_DEEP, 88},
-    {128 + 10, RS_INDUS, 103}, {128 + 11, RS_DEEP, 91}, {128 + 14, RS_INDUS, 89}, {128 + 17, RS_HARD, 67},
-    {128 + 18, RS_SCHRANZ, 97}, {128 + 20, RS_GROOVE, 57}, {128 + 22, RS_GABBER, 80}, {128 + 25, RS_DEEP, 86},
-    {128 + 30, RS_RAVE, 68}, {128 + 33, RS_INDUS, 127}, {128 + 34, RS_HARD, 86},
+    {13, RS_HARD, 65}, {14, RS_HARD, 87}, {15, RS_DEEP, 76}, {17, RS_SCHRANZ, 68}, {18, RS_GROOVE, 54},
+    {20, RS_GABBER, 65}, {22, RS_GROOVE, 51}, {25, RS_INDUS, 71}, {26, RS_RAVE, 88}, {28, RS_DEEP, 78},
+    {29, RS_HARD, 81}, {31, RS_HARD, 83}, {32, RS_SCHRANZ, 91}, {33, RS_DEEP, 75},
+    {128 + 10, RS_INDUS, 80}, {128 + 11, RS_DEEP, 81}, {128 + 14, RS_INDUS, 78}, {128 + 17, RS_HARD, 75},
+    {128 + 18, RS_SCHRANZ, 74}, {128 + 20, RS_GROOVE, 55}, {128 + 22, RS_GABBER, 61}, {128 + 25, RS_DEEP, 89},
+    {128 + 30, RS_RAVE, 59}, {128 + 33, RS_INDUS, 88}, {128 + 34, RS_HARD, 81},
+    {34, RS_HARD, 70}, {35, RS_HARD, 65}, {36, RS_SCHRANZ, 101}, {37, RS_GABBER, 52}, {128 + 35, RS_SCHRANZ, 67},
+    {128 + 36, RS_HARD, 71},
 };
 /* a kit preset's RUMBLE into the values p (ui.c preset_fill: the others stay at their defaults, RUMBLE 0) */
 static void rb_preset_fill(int16_t *p, uint32_t dx, uint32_t pi)

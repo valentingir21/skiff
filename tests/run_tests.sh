@@ -405,7 +405,11 @@ if [ -f build/gen/felucca_tables.h ]; then
     $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/eq_test" tests/eq_test.c -lm
     run "(techno-mixer) the isolator and DEPTH: off untouched, flat, KILL / +6 dB, no click, DEPTH, stored" "$OUT/eq_test"
     $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/rumble_test" tests/rumble_test.c -lm
-    run "(Gir) the kick's RUMBLE: off bit for bit, ducked, each value, tuned, the tail, DRUM-X, stored" "$OUT/rumble_test"
+    run "(Gir) the kick's RUMBLE: off bit for bit, ducked, each value, tuned, the tail, DRUM-X, R.SLICE, R.ATTACK, stored" "$OUT/rumble_test"
+    $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/rumble_fuzz_test" tests/rumble_fuzz_test.c -lm
+    run "(Gir 1.0) the RUMBLE's stability (R.TONE swept, 2000 random cases, kit loads, STOP / PLAY) and no metallic highs" "$OUT/rumble_fuzz_test"
+    $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/kick_test" tests/kick_test.c -lm
+    run "(Gir 1.0) the kicks that hit: every techno kit's click, the classic kits as they were, the rumble under the attack" "$OUT/kick_test"
     $CC -O2 -w -Ibuild/gen -Ifirmware/src -o "$OUT/knobs_test" tests/knobs_test.c -lm
     run "(techno-engines) the techno engines' knobs: each acts in a preset, no level jump, no clipping; CC74 CC71" \
         "$OUT/knobs_test" build/knobs_check.md

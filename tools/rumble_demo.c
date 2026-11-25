@@ -42,6 +42,8 @@ static void drums(track_t *t, uint32_t e, uint32_t pi)
         put_step(t, i, n, kk, n ? ST_NOTE : ST_REST, 0);
     }
 }
+static int16_t slice_set = -1, atk_set = -1;        /* ((Gir 1.0) R.SLICE, R.ATTACK set for the demo (-1: the kit's) */
+static int stab;                                       /* (the hard techno loop: an offbeat stab on T2) */
 /* bars of the loop into w; rumble_from: the bar from which the kit's RUMBLE plays (before it: RUMBLE 0); bass: with it */
 static void play(FILE *w, uint32_t e, uint32_t pi, uint32_t bars, uint32_t rumble_from, int bass)
 {
@@ -50,6 +52,22 @@ static void play(FILE *w, uint32_t e, uint32_t pi, uint32_t bars, uint32_t rumbl
     host_tracks_init();
     song.g[G_BPM] = BPM;
     drums(&trk[0], e, pi);
+    if (slice_set >= 0)
+        trk[0].p[P_RB_SLICE] = slice_set;
+    if (atk_set >= 0)
+        trk[0].p[P_RB_ATK] = atk_set;
+    if (stab) {                                        /* T2: INDUS ST INDUS on the offbeats, A */
+        static const uint8_t A[1] = {57};
+        track_t *t = &trk[1];
+        uint32_t i;
+        host_preset(t, ENGI_INDUS, find(ENGI_INDUS, "ST INDUS"));
+        t->p[P_AMODE] = 0;
+        t->p[P_SLEN] = 16;
+        t->p[P_SDIV] = 2;
+        t->p[P_LEVEL] = 90;
+        for (i = 0; i < 16u; i++)
+            put_step(t, i, i % 4u == 2u, A, i % 4u == 2u ? ST_NOTE : ST_REST, 0);
+    }
     if (getenv("NODIST"))                              /* (the check: the track's DRIVE off) */
         trk[0].p[P_DIST] = 0;
     mix = trk[0].p[P_RB_MIX];
@@ -106,6 +124,32 @@ int main(int argc, char **argv)
     render(argv[1], "boucle_150_avec", ENGI_DRUM, find(ENGI_DRUM, "KT HARD"), 4, 0, 0);
     render(argv[1], "boucle_150_sans_puis_avec", ENGI_DRUM, find(ENGI_DRUM, "KT HARD"), 8, 4, 0);
     render(argv[1], "boucle_150_basse_sans_puis_avec", ENGI_DRUM, find(ENGI_DRUM, "KT HARD"), 8, 4, 1);
+    if (getenv("CORRECTIFS")) {                        /* ((Gir 1.0) livraison/wav_correctifs: R.SLICE, R.ATTACK, the loop */
+        static const char *const SN[5] = {"CLASSIC", "OFFBEAT", "DOUBLE", "ROLL", "GATE"};
+        static const int16_t AT[4] = {0, 40, 90, 127};
+        char n[64];
+        uint32_t m;
+        for (m = 0; m < 5u; m++) {
+            slice_set = (int16_t)m;
+            snprintf(n, sizeof n, "rslice_%u_%s_KT_RMB_HARD", m, SN[m]);
+            render(argv[1], n, ENGI_DRUM, find(ENGI_DRUM, "KT RMB HARD"), 2, 0, 0);
+        }
+        for (m = 0; m < 4u; m++) {
+            slice_set = 0;
+            atk_set = AT[m];
+            snprintf(n, sizeof n, "rattack_%03d_CLASSIC", AT[m]);
+            render(argv[1], n, ENGI_DRUM, find(ENGI_DRUM, "KT RMB HARD"), 2, 0, 0);
+            slice_set = 2;
+            snprintf(n, sizeof n, "rattack_%03d_DOUBLE", AT[m]);
+            render(argv[1], n, ENGI_DRUM, find(ENGI_DRUM, "KT RMB HARD"), 2, 0, 0);
+        }
+        slice_set = atk_set = -1;
+        stab = 1;
+        render(argv[1], "boucle_150_hardtechno_KT_PUNCH_909", ENGI_DRUM, find(ENGI_DRUM, "KT PUNCH 909"), 8, 0, 0);
+        render(argv[1], "boucle_150_hardtechno_KT_RMB_DOUBL", ENGI_DRUM, find(ENGI_DRUM, "KT RMB DOUBL"), 8, 0, 0);
+        render(argv[1], "boucle_150_hardtechno_KT_TOK_SCHRZ", ENGI_DRUM, find(ENGI_DRUM, "KT TOK SCHRZ"), 8, 0, 0);
+        return 0;
+    }
     for (k = 0; k < NELEM(RB_KITS); k++) {
         uint32_t e = RB_KITS[k][0] >= 128u ? ENGI_DRUMX : ENGI_DRUM, pi = RB_KITS[k][0] & 127u;
         char n[64], *c;

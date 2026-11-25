@@ -1049,7 +1049,7 @@ int main(void)
     memset(&r, 0, sizeof r);
     r.used = UP_USED;
     r.ver = UP_VER_SID;                       /* ((2.1) version 6, as SAVE and UP_PUT write: P_COUNT is past what a */
-    r.np = (uint8_t)SID_COUNT;                /* record by count holds) */
+    r.np = (uint8_t)(SID_COUNT - UP_OVER);    /* record by count holds; (Gir 1.0) its last ids in the isolator's bytes) */
     memcpy(r.name, "First", 6);
     erase_error = 1;
     bank = up_bank[1];

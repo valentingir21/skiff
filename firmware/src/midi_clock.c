@@ -38,6 +38,7 @@ static __attribute__((noinline)) void midi_clock_transport(uint32_t status, uint
         if (!song.playing)
             motion_begin();
         song.playing = 1;
+        rb_play_gen++;                             /* ((Gir) the RUMBLE from silence: rumble.c) */
     } else if (status == 0xFCu) {
         seq_stop();
     }

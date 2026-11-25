@@ -675,7 +675,8 @@ static int page_visible(uint32_t i)
     if (PAGES[i].graph == GR_SLICES)
         return 0;
 #endif
-    if (PAGES[i].fam == FAM_EDIT && (id == P_RB_MIX || id == P_RB_TONE))   /* ((Gir) RUMBLE: a kit's) */
+    if (PAGES[i].fam == FAM_EDIT && (id == P_RB_MIX || id == P_RB_TUNE || id == P_KCLICK))   /* ((Gir) RUMBLE, KICK: a
+                                                                                                    * kit's) */
         return drum_engine(TSEL->eng_req % NENGINES);
     if (PAGES[i].fam == FAM_EDIT && id >= P_MN_R1 && id <= P_MN_FMODE)   /* ((techno-engines) MINI's oscillators) */
         return TSEL->eng_req % NENGINES == ENGI_MINI;

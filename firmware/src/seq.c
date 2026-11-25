@@ -1259,6 +1259,7 @@ static void seq_start(void)
     clk_pos = CLK_START;                           /* the metronome's first beat with step 0 */
     sy_clk = SY_START;                             /* (SYNC OUT) the first pulse with step 0 (sync_out.c) */
     song.playing = 1;
+    rb_play_gen++;                                 /* ((Gir) the RUMBLE from silence: rumble.c) */
     slicer_start();                                /* slicer.c: its step 0 with the sequencer's */
     perf_start();                                  /* perform.c: its 1/16 grid too */
 }

@@ -27,7 +27,9 @@ static void check(const char *what, int ok)
 
 #define BPM 150
 #define NF (2u * 4u * FS * 60u / BPM / CTL * CTL)      /* two bars */
-static uint32_t beat(void) { return FS * 60u / BPM; }
+static int16_t sw_now;                                 /* (the swing of the R.SLICE checks) */
+static int32_t bpm_now = BPM;                         /* (R.SLICE's check: another tempo too) */
+static uint32_t beat(void) { return bpm_quarter((uint32_t)bpm_now); }
 
 static uint32_t find(uint32_t e, const char *name)
 {
@@ -63,7 +65,7 @@ static void kicks_here(uint32_t tr, uint32_t e, const char *name, void (*tweak)(
     int32_t o[2 * CTL];
     uint32_t i, f;
     host_tracks_init();
-    song.g[G_BPM] = BPM;
+    song.g[G_BPM] = (int16_t)bpm_now;
     host_preset(t, e, find(e, name));
     t->p[P_AMODE] = 0;
     t->p[P_SLEN] = 16;
@@ -101,6 +103,7 @@ static void rumble_of(uint32_t tr, uint32_t e, const char *name, void (*tweak)(t
         d[i] = K1[i] - K0[i];
 }
 static void off(track_t *t) { t->p[P_RB_MIX] = 0; }
+static void off_sw(track_t *t) { t->p[P_RB_MIX] = 0; if (sw_now) t->p[P_SSWING] = sw_now; }
 static void off_wild(track_t *t)
 {
     t->p[P_RB_MIX] = 0;
@@ -110,18 +113,20 @@ static void off_wild(track_t *t)
     t->p[P_RB_TONE] = 0;
     t->p[P_RB_DUCK] = 0;
 }
-static int16_t tv[6];                                  /* the values set by `set` (a < 0: as the kit has it) */
+static int16_t tv[8];                                  /* the values set by `set` (a < 0: as the kit has it) */
 static void set(track_t *t)
 {
     uint32_t i;
-    for (i = 0; i < 6u; i++)
+    for (i = 0; i < 8u; i++)
         if (tv[i] != -100)
             t->p[P_RB_MIX + i] = tv[i];
+    if (sw_now)
+        t->p[P_SSWING] = sw_now;
 }
 static void tv_kit(void)
 {
     uint32_t i;
-    for (i = 0; i < 6u; i++)
+    for (i = 0; i < 8u; i++)
         tv[i] = -100;
 }
 /* the power at hz over the second bar (Goertzel) */
@@ -236,7 +241,7 @@ int main(void)
             }
         }
         snprintf(what, sizeof what, "the %d KT RMB kits with a RUMBLE tuned to A; %d kits with a RUMBLE in all", nrmb, nkt);
-        check(what, on && nrmb == 5);
+        check(what, on && nrmb == 7);
         for (i = 0; i < NELEM(RB_KITS); i++) {       /* every entry names a kit */
             uint32_t e = RB_KITS[i][0] >= 128u ? ENGI_DRUMX : ENGI_DRUM, pi = RB_KITS[i][0] & 127u;
             ok &= pi < ENGINES[e]->npresets && !strncmp(ENGINES[e]->presets[pi].name, "KT ", 3);
@@ -369,6 +374,118 @@ int main(void)
         }
         snprintf(what, sizeof what, "every rumble kit at RUMBLE and R.DRIVE 127: the peak %d (the output's range 32767)", mx);
         check(what, mx <= 32767);
+    }
+
+    /* (Gir 1.0) R.SLICE: each pattern's pulses on the beat's 16ths (the kick's ducked), at 150 and 128 BPM, straight and
+     * swung (the odd 16ths later, as the sequencer's); R.ATTACK; no click */
+    {
+        static const char *const SN[5] = {"CLASSIC", "OFFBEAT", "DOUBLE", "ROLL", "GATE"};
+        static const uint8_t ON[5] = {0, 4u, 2u | 8u, 2u | 4u | 8u, 2u | 4u | 8u};
+        int16_t bpms[2] = {150, 128}, sws[2] = {0, 40};
+        uint32_t mode, bi, si, okg = 1, okt = 1, okc = 1;
+        double worst_ratio = 1e9, worst_dt = 0, worst_step = 0;
+        for (mode = 1; mode < 5u; mode++)
+            for (bi = 0; bi < 2u; bi++)
+                for (si = 0; si < 2u; si++) {
+                    uint32_t B, st, b, j, i, sw;
+                    double on = 0, off = 0, mx = 0, step = 0;
+                    uint32_t non = 0, noff = 0;
+                    bpm_now = bpms[bi];
+                    tv_kit();
+                    tv[7 - 0] = (int16_t)mode;          /* (tv: RUMBLE .. R.SLICE in P_* order) */
+                    tv[5] = 0;                          /* (no duck: the slicer alone shapes it) */
+                    sw_now = sws[si];
+                    kicks(0, ENGI_DRUM, "KT RMB HARD", off_sw, K0);
+                    rumble_of(0, ENGI_DRUM, "KT RMB HARD", set, D);
+                    B = beat();
+                    st = B / 4u;
+                    sw = (uint32_t)(sws[si] * (int32_t)st / 250);
+                    for (b = 2; b < 7u && (b + 1u) * B < NF; b++)
+                        for (j = 1; j < 4u; j++) {
+                            uint32_t beg = b * B + j * st + ((j & 1u) ? sw : 0u), end = j < 3u ? b * B + (j + 1u) * st +
+                                           (((j + 1u) & 1u) ? sw : 0u) : (b + 1u) * B, len = (end - beg) * 7u / 8u, k;
+                            double e = 0, pk = 0;
+                            for (i = beg + len / 4u; i < beg + len * 3u / 4u; i++)
+                                e += (double)D[i] * D[i];
+                            e /= len / 2u;
+                            if ((ON[mode] >> j) & 1u) {
+                                on += e, non++;
+                                for (i = beg; i < beg + len; i++)
+                                    pk = fabs((double)D[i]) > pk ? fabs((double)D[i]) : pk;
+                                for (k = beg > FS / 100u ? beg - FS / 100u : 0u; k < beg + len; k++)   /* its onset */
+                                    if (fabs((double)D[k]) > pk * 0.3)
+                                        break;
+                                {
+                                    double dt = ((double)k - beg) * 1000.0 / FS;
+                                    worst_dt = fabs(dt) > fabs(worst_dt) ? dt : worst_dt;
+                                    okt &= dt > -1.0 && dt < 4.0;
+                                }
+                            } else {
+                                off += e, noff++;
+                            }
+                        }
+                    for (i = B; i < NF; i++) {
+                        double a = fabs((double)D[i]), dd = fabs((double)D[i] - D[i - 1]);
+                        mx = a > mx ? a : mx;
+                        step = dd > step ? dd : step;
+                    }
+                    if (noff) {
+                        double r = 10 * log10((on / non + 1) / (off / noff + 1));
+                        worst_ratio = r < worst_ratio ? r : worst_ratio;
+                        okg &= r > 15;
+                    }
+                    worst_step = step / (mx + 1) > worst_step ? step / (mx + 1) : worst_step;
+                    okc &= step < mx * 0.15;
+                    if (!okg || !okt || !okc)
+                        printf("rumble:   %s at %d BPM swing %d: on/off %.1f dB, onset %.2f ms, step %.3f of the peak\n",
+                               SN[mode], bpms[bi], sws[si], noff ? 10 * log10((on / non + 1) / (off / noff + 1)) : 99.0,
+                               worst_dt, step / (mx + 1));
+                }
+        bpm_now = BPM;
+        sw_now = 0;
+        snprintf(what, sizeof what, "R.SLICE OFFBEAT DOUBLE ROLL GATE at 150 and 128 BPM, straight and swung 40: the pulses on "
+                 "their 16ths, %.1f dB over the gaps (15)", worst_ratio);
+        check(what, okg);
+        snprintf(what, sizeof what, "  each pulse starts on its 16th (swung: the odd ones later): within %.2f ms (-1 .. 4)", worst_dt);
+        check(what, okt);
+        snprintf(what, sizeof what, "  no click: the largest step a sample %.3f of the peak (under 0.15)", worst_step);
+        check(what, okc);
+    }
+    {   /* R.ATTACK: CLASSIC's ramp from the kick (64: ~76 ms), a pulse's rise (127: most of it) */
+        static int32_t D0[NF];
+        uint32_t B = beat(), a = 64u * 64u * 13230u / 16129u + 1u, b, i;
+        double q1 = 0, q1n = 0, q3 = 0, q3n = 0;
+        kicks(0, ENGI_DRUM, "KT RMB HARD", off, K0);   /* (the reference at 150 BPM, straight again) */
+        tv_kit();
+        tv[5] = 0;
+        rumble_of(0, ENGI_DRUM, "KT RMB HARD", set, D0);
+        tv[6] = 64;
+        rumble_of(0, ENGI_DRUM, "KT RMB HARD", set, D);
+        for (b = 2; b < 4u; b++)
+            for (i = 0; i < B; i++) {
+                double x0 = (double)D0[b * B + i] * D0[b * B + i], x1 = (double)D[b * B + i] * D[b * B + i];
+                if (i > a / 5u && i < a / 3u)
+                    q1 += x1, q1n += x0;
+                if (i > a * 3u / 2u && i < a * 2u)
+                    q3 += x1, q3n += x0;
+            }
+        snprintf(what, sizeof what, "R.ATTACK 64 (CLASSIC, a %.0f ms ramp): at a quarter of it %.2f of the level, past it %.2f",
+                 a * 1000.0 / FS, sqrt(q1 / (q1n + 1)), sqrt(q3 / (q3n + 1)));
+        check(what, sqrt(q1 / (q1n + 1)) > 0.15 && sqrt(q1 / (q1n + 1)) < 0.4 && sqrt(q3 / (q3n + 1)) > 0.9 &&
+                    sqrt(q3 / (q3n + 1)) < 1.1);
+        tv_kit();
+        tv[5] = 0;
+        tv[7] = 2;                                       /* DOUBLE */
+        rumble_of(0, ENGI_DRUM, "KT RMB HARD", set, D0);
+        tv[6] = 127;
+        rumble_of(0, ENGI_DRUM, "KT RMB HARD", set, D);
+        q1 = q1n = 0;
+        for (b = 2; b < 4u; b++)
+            for (i = B / 4u; i < B / 4u + B / 16u; i++)   /* the first quarter of the first pulse */
+                q1 += (double)D[b * B + i] * D[b * B + i], q1n += (double)D0[b * B + i] * D0[b * B + i];
+        snprintf(what, sizeof what, "R.ATTACK 127 (DOUBLE): a pulse's first quarter at %.2f of its level at 0 (a slow rise)",
+                 sqrt(q1 / (q1n + 1)));
+        check(what, sqrt(q1 / (q1n + 1)) < 0.5);
     }
 
     /* stored */

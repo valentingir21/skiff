@@ -174,6 +174,12 @@ enum {                          /* per-track parameters */
     P_RB_MIX, P_RB_TUNE, P_RB_DECAY, P_RB_DRIVE, P_RB_TONE, P_RB_DUCK,   /* (Gir, rumble) DRUM's and DRUM-X's kick RUMBLE
                                                 * (rumble.c): its level (0: off), note (-1 OFF), DECAY DRIVE TONE DUCK;
                                                 * the sound's; stored ids 170..175 (a sound from before: RUMBLE 0) */
+    P_RB_ATK, P_RB_SLICE,                      /* (Gir 1.0) its ATTACK and SLICE (CLASSIC OFFBEAT DOUBLE ROLL GATE): stored
+                                                * ids 176, 177 (a sound from before: 0, CLASSIC: as it was) */
+    P_KCLICK, P_KPUNCH,                        /* (Gir 1.0) the kick's CLICK (a tok and a breath on its attack) and PUNCH
+                                                * (its first 10 ms raised), DRUM's and DRUM-X's (rumble.c kick_shape):
+                                                * stored ids 178, 179 (0: the kick as it was). A user preset holds ids
+                                                * 176.. in the isolator's bytes (upreset.c: a sound never loads those) */
     P_E0, P_E1, P_E2, P_E3, P_E4, P_E5, P_E6, P_E7,
     P_COUNT
 };

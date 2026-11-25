@@ -112,6 +112,8 @@ static void host_preset_values(track_t *t, uint32_t e, uint32_t pi, const preset
     t->p[P_VOICE] = p->mono ? V_LEGATO : V_POLY;
     for (i = 0; i < 4u; i++)
         t->p[P_DIST + i] = (int16_t)(p->fx[i] ? p->fx[i] - 1 : FX_DEF[i]);
+    for (i = P_RB_MIX; i <= P_KPUNCH; i++)        /* ((Gir) the RUMBLE's and the KICK page's: defaults, then the preset's */
+        t->p[i] = TP[i].def;                      /* MORE and its kit's RUMBLE (ui.c preset_fill sets every one) */
     for (i = 0; i < NELEM(p->more) && p->more[i].id; i++)   /* (Skiff) its LFO, GLIDE, .. */
         t->p[p->more[i].id] = p->more[i].v;
     if (e == ENGI_DRUMX && pi < NELEM(DRUMX_PKIT) && DRUMX_PKIT[pi])   /* ((Skiff phase 9) its kit: ui.c apply_preset_to) */
@@ -121,11 +123,8 @@ static void host_preset_values(track_t *t, uint32_t e, uint32_t pi, const preset
     if (e == ENGI_MINI)                           /* ((techno-engines) MINI: its patch, its oscillators: ui.c preset_fill) */
         mini_preset_fill(t->p, pi);
 #endif
-    if (e == ENGI_DRUM || e == ENGI_DRUMX) {      /* ((Gir) a kit's RUMBLE, the others' off: ui.c preset_fill) */
-        for (i = P_RB_MIX; i <= P_RB_DUCK; i++)
-            t->p[i] = TP[i].def;
+    if (e == ENGI_DRUM || e == ENGI_DRUMX)        /* ((Gir) a kit's RUMBLE, the others' off: ui.c preset_fill) */
         rb_preset_fill(t->p, e == ENGI_DRUMX, pi);
-    }
 }
 static void host_preset_req(track_t *t, uint32_t e, uint32_t pi)
 {

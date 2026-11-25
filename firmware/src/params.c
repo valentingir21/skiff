@@ -19,6 +19,7 @@ static const char *const N_MN_WAVE[] = {"TRI", "SHARK", "SAW", "SQR", "PLS W", "
 static const char *const N_MN_MDST[] = {"OFF", "OSC", "FILTER", "BOTH"};
 static const char *const N_MN_NCOL[] = {"WHITE", "PINK"};
 static const char *const N_MN_FMODE[] = {"LP", "HP"};
+static const char *const N_RB_SLICE[] = {"CLASSIC", "OFFBEAT", "DOUBLE", "ROLL", "GATE"};   /* ((Gir) rumble.c RB_SLICE) */
 /* seq.c kb_map; 1 = SNAP (stored projects: the former ON); 3 = SEQ: SNAP, and the sequencer's notes snap too as
  * they play (seq.c seq_step; the steps keep what was written). Append-only: older projects hold 0..2. (2.1, #74) SOLO:
  * the white keys as WHITE, the black keys single notes of the scale (seq.c kb_pitch, kb_solo) */
@@ -231,6 +232,8 @@ static const param_desc_t TP[P_COUNT] = {
     [P_RB_MIX] = PD("RUMBLE", F_PCT, 0, 127, 0), [P_RB_TUNE] = PD("R.TUNE", F_NOTE, -1, 11, 9),   /* ((Gir) the kick's */
     [P_RB_DECAY] = PD("R.DECAY", F_PCT, 0, 127, 80), [P_RB_DRIVE] = PD("R.DRIVE", F_PCT, 0, 127, 60),   /* RUMBLE: */
     [P_RB_TONE] = PD("R.TONE", F_PCT, 0, 127, 50), [P_RB_DUCK] = PD("R.DUCK", F_PCT, 0, 127, 64),   /* rumble.c) */
+    [P_RB_ATK] = PD("R.ATTACK", F_PCT, 0, 127, 0), [P_RB_SLICE] = PE("R.SLICE", N_RB_SLICE, 0),
+    [P_KCLICK] = PD("K.CLICK", F_PCT, 0, 127, 0), [P_KPUNCH] = PD("K.PUNCH", F_PCT, 0, 127, 0),   /* ((Gir) the kick's) */
 };
 
 static const param_desc_t GP[G_COUNT] = {
@@ -616,8 +619,10 @@ static const page_t PAGES[] = {
     {"FOLLOW", FAM_SCL, SC_TRACK, GR_FOLLOW, {P_FOLLOW, P_FMODE, P_FNOTE, 0xFF}},   /* (2.1) again: the chord follow */
     {"EDIT 1", FAM_EDIT, SC_ENGINE, GR_NONE, {P_E0, P_E1, P_E2, P_E3}},
     {"EDIT 2", FAM_EDIT, SC_ENGINE, GR_NONE, {P_E4, P_E5, P_E6, P_E7}},
-    {"RUMBLE", FAM_EDIT, SC_TRACK, GR_NONE, {P_RB_MIX, P_RB_TUNE, P_RB_DECAY, P_RB_DRIVE}},   /* ((Gir) DRUM, DRUM-X: */
-    {"RUMBLE 2", FAM_EDIT, SC_TRACK, GR_NONE, {P_RB_TONE, P_RB_DUCK, 0xFF, 0xFF}},              /* the kick's, rumble.c) */
+    {"RUMBLE", FAM_EDIT, SC_TRACK, GR_NONE, {P_RB_MIX, P_RB_SLICE, P_RB_DECAY, P_RB_TONE}},   /* ((Gir) DRUM, DRUM-X: */
+    {"RUMBLE 2", FAM_EDIT, SC_TRACK, GR_NONE, {P_RB_TUNE, P_RB_DRIVE, P_RB_DUCK, P_RB_ATK}},   /* the kick's, rumble.c;
+                                                       * the ones played live first) */
+    {"KICK", FAM_EDIT, SC_TRACK, GR_NONE, {P_KCLICK, P_KPUNCH, 0xFF, 0xFF}},   /* ((Gir) DRUM, DRUM-X: the kick's attack) */
     {"OPERATOR", FAM_EDIT, SC_TRACK, GR_FMOP, {0xFF, 0xFF, 0xFF, 0xFF}},   /* (FM6 LAB) FM6 only: an operator's values */
     {"ALL OPS", FAM_EDIT, SC_TRACK, GR_FMALL, {0xFF, 0xFF, 0xFF, 0xFF}},   /* (FM6 LAB) FM6 only: the voice's (ui_fm6.c) */
     {"LANES", FAM_EDIT, SC_TRACK, GR_LANES, {0xFF, 0xFF, 0xFF, 0xFF}},   /* DRUM only: LANE, its LEVEL TUNE DECAY

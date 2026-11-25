@@ -717,7 +717,7 @@ static int user_preset_roundtrip(void)
     for (i = 0; i < 16u; i++) { a[k++] = i & 1u ? 0u : (uint8_t)(48u + i); a[k++] = 0; }
     request(ED_UP_PUT, a, k);
     bad += check("UP_PUT stores a version 6 record (no flash here: kept in RAM)",
-                 host_wire[6] != 1u && up_used(3) && up_rec(3)->ver == UP_VER_SID && up_rec(3)->np == SID_COUNT);
+                 host_wire[6] != 1u && up_used(3) && up_rec(3)->ver == UP_VER_SID && up_rec(3)->np == SID_COUNT - UP_OVER);
     up_values(up_rec(3), got);
     for (i = 0, ok = 1; i < P_COUNT; i++) ok &= got[i] == want[i];
     bad += check("UP_PUT keeps every value (PAN -20, FLT -40, min and max)", ok);

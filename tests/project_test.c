@@ -227,10 +227,10 @@ int main(void)
                  P_SLCR == P_DETUNE + 1 && P_SLDEPTH + 1 == P_M1SRC && P_M4AMT + 1 == P_FM1_ATK && P_FM4_LEVEL + 1 == P_CHRD && P_VOIC + 1 == P_LN0 &&
                  P_LN7 + 1 == P_DIR && P_DIR + 1 == P_DKSRC && P_DKREL + 1 == P_DTYPE && P_LDECAY7 + 1 == P_LSYNC &&
                  P_ESYNC + 1 == P_LPAN0 && P_LPAN7 + 1 == P_FOLLOW && P_FNOTE + 1 == P_STRUM && P_SDIR + 1 == P_MN_SET &&
-                 P_MN_SET + 17 == P_IN_CUT && P_IN_CUT + 1 == P_EQ_LOW && P_DEPTH + 1 == P_RB_MIX && P_RB_DUCK + 1 == P_E0 && P_E0 == 168 &&   /* ((techno-
+                 P_MN_SET + 17 == P_IN_CUT && P_IN_CUT + 1 == P_EQ_LOW && P_DEPTH + 1 == P_RB_MIX && P_KPUNCH + 1 == P_E0 && P_E0 == 172 &&   /* ((techno-
                                                * engines) MINI's oscillators, INDUS's CUTOFF; (techno-mixer) LOW .. DEPTH; (Gir) the RUMBLE) */                /* ((1.3) LFO SYNC .. ENV SYNC: P_COUNT past 127; (2.0, #36) the lane pans;
                                                * (2.1) the chord follow; (2.5) STRUM, DIR) */
-                 P_COUNT == PROJ_NP_V3 + 119u && PROJ_NP == 103u && PROJ_NX == 32u && PROJ_NX == PROJ_PX_MAX &&
+                 P_COUNT == PROJ_NP_V3 + 123u && PROJ_NP == 103u && PROJ_NX == 32u && PROJ_NX == PROJ_PX_MAX &&
                  PROJ_NP_V3 == PROJ_NP_V2 + 4u);
     bad += check("SKF1 fits one flash object, the retained cache in NOINIT", sizeof(project_store_t) <= 4096u - 256u &&
                  sizeof(project_store_t) == 3840u && 0xC8u + 4u * sizeof(project_store_t) <= 0x3D50u);

@@ -13,7 +13,8 @@
  * five others the heaviest of PHASE, GRAIN, PHYS, FM6 and DRUM-X (8 notes or lanes each), every send at 100, REVERB
  * HALL, DELAY PING, CHORUS PHASER; the voices that sound (16 at most) counted, then each track alone with that many,
  * split as fx.c mix_split does (the bus effects and master on core 0) -> the busier core's load.
- * (Gir) RUMBLE=1: the kits' RUMBLE on (DRUM's and DRUM-X's tracks), at its heaviest. */
+ * (Gir) RUMBLE=1: the kits' RUMBLE on (DRUM's and DRUM-X's tracks), at its heaviest. (Gir 1.0) the tracks split as the
+ * firmware splits them (mix_split on its part_cost estimates); IDEAL=1: the best split of the measured costs (before). */
 #include "../tests/c1_host.h"
 #define main hostsim_main
 #include "../tests/hostsim.c"
@@ -71,6 +72,10 @@ static void setup(const part_t *P)
             trk[p].p[P_RB_TUNE] = 9;
             trk[p].p[P_RB_DRIVE] = 127;
             trk[p].p[P_RB_DUCK] = 64;
+            trk[p].p[P_RB_SLICE] = 3;                    /* ((Gir 1.0) ROLL: its shape each quarter point, */
+            trk[p].p[P_RB_ATK] = 64;                     /* the KICK page's click and punch) */
+            trk[p].p[P_KCLICK] = 127;
+            trk[p].p[P_KPUNCH] = 127;
         }
     }
     for (i = 0; i < NPART; i++) {
@@ -213,6 +218,31 @@ static void worst(uint32_t x, uint32_t sc, const uint32_t *hp, double idle, doub
     eq_on = 0;
     fxw = tot - sum - idle;                           /* the sends, the buses, the master: core 0 */
     best = 1e9;
+    if (!getenv("IDEAL")) {                         /* ((Gir 1.0) the split as the firmware makes it: fx.c mix_split on
+                                                         * part_cost, its estimate (voices x ENG_VCOST + 60, the isolator's
+                                                         * EQ_VCOST), not on the costs measured here: those then land where
+                                                         * it puts each track */
+        uint32_t pc[NPART], all = 0, lo, a2, w2, c0own = getenv("C0") ? (uint32_t)atoi(getenv("C0")) : C0_OWN;
+        uint32_t rbc = getenv("RBC") ? (uint32_t)atoi(getenv("RBC")) : RB_VCOST;
+        for (k = 0; k < NPART; k++) {
+            pc[k] = nv[k] * ENG_VCOST[P[k].e % NENGINES] + (nv[k] ? 60u : 0u) + (getenv("EQ_ALL") ? EQ_VCOST : 0u) +
+                    (getenv("RUMBLE") && (P[k].e == ENGI_DRUM || P[k].e == ENGI_DRUMX) ? rbc : 0u);
+            all += pc[k];
+        }
+        lo = all + c0own;
+        bm = 0;
+        for (m = 1; m < (1u << NPART) - 1u; m++) {
+            a2 = 0;
+            for (k = 0; k < NPART; k++)
+                if (m >> k & 1u)
+                    a2 += pc[k];
+            w2 = (a2 > all - a2 + c0own ? a2 : all - a2 + c0own) + C1_HAND;
+            if (w2 < lo) {
+                lo = w2;
+                bm = m;
+            }
+        }
+    } else
     for (m = 1; m < (1u << NPART) - 1u; m++) {        /* fx.c mix_split: the busier side least */
         double s1 = 0, w;
         for (k = 0; k < NPART; k++)

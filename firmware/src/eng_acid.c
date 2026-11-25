@@ -324,7 +324,6 @@ static const preset_t ACID_PRESETS[] = {
     {"BS 303 DUB", {3, 4, 30, 127, 10, 76, 0, 70}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 55, 30), TAG(PT_BASS)},
     /* (techno-presets-v2) the second techno bank (tools/bank_v2.py, livraison/PRESETS.md) */
     {"PL 303", {0, 80, 120, 30, 20, 90, 0, 20}, {0, 100, 127, 8}, 0, 1, FX(0, 0, 90, 40), TAG(PT_PLUCK)},
-    {"LD 303 SCRM", {1, 90, 127, 90, 60, 110, 0, 50}, {0, 100, 127, 20}, 0, 1, FX(60, 0, 90, 30), MORE({P_DTYPE, 1}), TAG(PT_LEAD)},
     {"BS 303 FUNK", {1, 60, 40, 40, 100, 60, 0, 127}, {0, 100, 127, 14}, 0, 1, FX(0, 50, 30, 10), TAG(PT_BASS)},
     {"BS 303 MUTED", {2, 10, 40, 40, 40, 40, 0, 45}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 10, 10), TAG(PT_BASS)},
     {"BS 303 PHASR", {0, 30, 100, 80, 60, 80, 0, 45}, {0, 100, 127, 12}, 0, 1, FX(0, 0, 30, 20), MORE({P_ITYPE, 6}, {P_IA, 60}, {P_IB, 120}, {P_IC, 110}), TAG(PT_BASS)},

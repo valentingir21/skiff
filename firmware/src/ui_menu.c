@@ -131,9 +131,9 @@ static int32_t menu_document(int32_t y, int draw)
 {
     uint32_t i;
     if (draw) {
-        cv_text(6, y + 2, &AF_L, "SKIFF", T_THEME);
-        cv_text(6, y + 38, &AF_S, "Groovebox on Felucca", T_TEXT);
-        cv_text(6, y + 58, &AF_M, FELUCCA_VERSION, T_THEME);
+        cv_text(6, y + 2, &AF_L, "GIR 1.0", T_THEME);           /* (Gir 1.0) the fork's name and its base */
+        cv_text(6, y + 38, &AF_S, "based on Skiff 2.7", T_TEXT);
+        cv_text(6, y + 58, &AF_M, "Skiff " FELUCCA_VERSION, T_THEME);
         cv_text_r(232, y + 61, &AF_S, __DATE__, T_MID, T_BG);
         {   /* (Skiff) the core clock now, from the PLL (hal/fm1_clk.h; MENU > SYSTEM > CPU CLOCK) */
             char c[16] = "CPU ?";

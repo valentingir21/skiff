@@ -1907,7 +1907,7 @@ static void draw(int s)
     }
     if (s == S_SPLASH) {                          /* the power-on splash (main.c, before the UI): its lines, the version
                                                    * shown FELUCCA_VERSION (run_tests.sh: src/felucca.c's) */
-        static const char WANT[] = "Skiff|" FELUCCA_VERSION "|on Felucca 1.1.5|H\xFCgelton + community";
+        static const char WANT[] = "Gir 1.0|on Skiff 2.7|on Felucca 1.1.5|H\xFCgelton + community";   /* (Gir 1.0) */
         splash_seen[0] = 0;
         in_splash = 1;
         draw_splash();

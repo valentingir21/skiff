@@ -1,3 +1,48 @@
+# Gir 1.0 — Skiff, taillé pour la techno
+
+**Gir 1.0** est un firmware pour la groovebox **M-VAVE FM-1**, par valentingir21. C'est un fork de **Skiff 2.7**
+(illuminus5), lui-même construit sur **Felucca** (Hügelton Instruments). Tout Skiff est là : son séquenceur, ses
+effets, ses écrans et ses menus. Gir le règle pour la techno, la hard techno, la techno industrielle, la hard trance,
+la hardtech et le hardgroove.
+
+**Ce qui change par rapport à Skiff 2.7**
+- **Cinq moteurs ajoutés** à la place de WHEEL, VOICE, LOFI et SLICE, qui ne sont plus dans le build. Leurs sons se
+  chargent en ANALOG.
+  - **SUPERSAW** : le supersaw du JP-8000, polyphonique.
+  - **ACID** : la voix TB-303 et le générateur de patterns acid d'ATEK303. Accent par pas ACC, slide par pas SLD ; le
+    générateur est dans les outils de SEQ.
+  - **MINI** : un Minimoog, d'après FMini-1, avec ses trois oscillateurs sur des pages à eux.
+  - **HOOVER** : le lead rave « Mentasm ».
+  - **INDUS** : métal et machines, avec un CUTOFF résonant.
+- **Un mixer techno** : par piste, un isolateur 3 bandes (LOW, MID et HIGH, de KILL à +6 dB) et un réglage **DEPTH**
+  (devant ↔ au fond). C'est la page GLO › EQ ; les CC 24 à 27 le pilotent en MIDI.
+- **Une banque techno** d'environ 480 sons, rangés par catégorie : plucks PL, stabs ST, basses BS, leads LD, pads PA,
+  drones DR, effets FX, percussions PC et kits KT. Chaque son est vérifié contre les doublons, sur son niveau et sur le
+  CPU.
+- **À l'écran** : « Gir 1.0 », au démarrage et dans MENU › ABOUT. L'identité technique de l'installateur ne change
+  pas (FM-1_700), ni la version que lisent l'éditeur et la console (`v2.7`).
+
+**Installer** (à vos risques, comme tout firmware non officiel ; le retour en arrière est décrit plus bas, dans la
+partie Skiff). Il faut `gir-1.0.fwsc`, à prendre dans la release « Gir 1.0 » de ce dépôt. Sauvegardez d'abord votre
+musique avec l'éditeur Skiff (onglet Backup), puis, depuis le dossier du dépôt :
+
+```
+pip install mido python-rtmidi
+python tools/fm1_install.py gir-1.0.fwsc
+```
+
+La FM-1 redémarre sur Gir en environ deux minutes. Le manuel complet de Gir est `MANUEL-GIR.md` (dans la release).
+
+**Crédits** : Skiff par illuminus5 ; Felucca par Hügelton Instruments / Leo Kuroshita ; voix TB-303 et générateur de
+patterns d'ATEK303 (Javier Melgar / Animatek), d'après Open303 (Robin Schmidt) ; MINI d'après FMini-1 (Guilherme
+Ruppert), d’abord porté dans Skiff Atlatl (LIkst4) ; l’émulateur web et le démarrage du second cœur d’après X0X (charlesvestal). Licence
+**GPL-3.0-only** ; détails dans [LICENSING.md](LICENSING.md).
+
+---
+
+*La suite est le README de Skiff 2.7, la base de Gir : tout ce qu'il décrit reste vrai dans Gir, sauf les moteurs
+WHEEL, VOICE, LOFI et SLICE.*
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/logo/skiff-logo.svg">
@@ -13,15 +58,6 @@ synths and drums, patterns and songs, live performance, and a screen that shows 
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--only-blue.svg" alt="License: GPL-3.0-only"></a>
   <img src="https://img.shields.io/badge/hardware-M--VAVE%20FM--1%20%7C%20SMK--37%20Pro-555" alt="Hardware: M-VAVE FM-1 | SMK-37 Pro">
 </p>
-
-> **This fork: Skiff techno** (branch `techno-engines-v2`, by valentingir21). The same Skiff, its effects, sequencer and
-> screens unchanged, tuned for techno, hard techno, industrial, hard trance and hardtech: a techno preset bank, and five
-> engines in place of WHEEL, VOICE, LOFI and SLICE (left out of the build; their sounds load as ANALOG): **SUPERSAW**
-> (the JP-8000's, polyphonic), **ACID** (the TB-303 voice and acid pattern generator of ATEK303 by Javier Melgar /
-> Animatek, after Open303 by Robin Schmidt: the step's ACC accents, SLD slides; the generator in SEQ's tools),
-> **MINI** (a Minimoog: FMini-1's by Guilherme Ruppert, first ported by Skiff Atlatl's LIkst4; its oscillators on pages
-> of their own), **HOOVER** (the rave "Mentasm" lead) and **INDUS** (metal and machines, a resonant CUTOFF). Skiff is
-> by illuminus5, built on Felucca by Hügelton Instruments; credits and licences in [LICENSING.md](LICENSING.md).
 
 <p align="center"><b>New in 2.7:</b> the Screen tab goes full screen, works the FM-1 from the page (mouse, touch or
 keyboard) and comes to the SMK-37, the editor's Sequencer as a piano roll, SYNC OUT for Pocket Operators, and fixes: the phaser's squeal, the

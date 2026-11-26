@@ -22,6 +22,9 @@
   import ScreenView from "./views/ScreenView.svelte";
   import SettingsView from "./views/SettingsView.svelte";
   import DemoView from "./views/DemoView.svelte";
+  import CompactView from "./views/CompactView.svelte";
+  import { initDesktop } from "./lib/desktop";
+  initDesktop();
 
   device.onEvent = (e) => toastKey(e.level, e.key, e.vars);
 
@@ -31,6 +34,7 @@
   const qs = new URLSearchParams(location.search);
   if (qs.get("view") === "demo") ui.view = "demo";
   if (qs.get("demo") === "1" && device.status === "off") device.connect("emulator").catch(() => {});
+  const compact = qs.get("compact") === "1";
 
   $effect(() => { document.documentElement.lang = i18n.lang; });
 
@@ -60,6 +64,8 @@
   <DemoView />
 {:else if !connected}
   <Welcome />
+{:else if compact}
+  <div class="app" style="--tc:{tc}; --accent:{tc}"><CompactView /></div>
 {:else}
   <div class="app" style="--tc:{tc}; --accent:{tc}">
     <TopBar />

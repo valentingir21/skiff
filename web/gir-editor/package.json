@@ -12,17 +12,87 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "npm run proto && vitest run",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "app": "npm run build && electron .",
+    "dist:mac": "npm run build && electron-builder --mac --universal",
+    "dist:win": "npm run build && electron-builder --win"
   },
   "devDependencies": {
     "@fontsource/inter": "^5.3.0",
     "@playwright/test": "^1.65.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.2",
     "@types/node": "^26.6.11",
+    "electron": "^45.5.0",
+    "electron-builder": "^26.18.0",
     "svelte": "^5.59.2",
     "svelte-check": "^4.7.8",
     "typescript": "^5.9.3",
     "vite": "^8.4.0",
     "vitest": "^5.1.2"
+  },
+  "main": "electron/main.cjs",
+  "author": {
+    "name": "Gir (valentingir21), after Skiff by illuminus5 and Felucca by Leo Kuroshita"
+  },
+  "homepage": "https://github.com/valentingir21/skiff",
+  "build": {
+    "appId": "io.github.valentingir21.gireditor",
+    "productName": "Gir Editor",
+    "copyright": "GPL-3.0-only",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "asar": true,
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.music",
+      "identity": null,
+      "icon": "build/icon.png",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Gir Editor records samples for the FM-1 only when you ask it to."
+      }
+    },
+    "dmg": {
+      "artifactName": "Gir-Editor-${version}-mac-universal.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Gir-Editor-${version}-windows-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "Gir-Editor-${version}-windows-portable.${ext}"
+    },
+    "publish": null
   }
 }

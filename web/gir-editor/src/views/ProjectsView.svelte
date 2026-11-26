@@ -4,19 +4,16 @@
   // restore always downloads a backup of the FM-1 as it is before it writes anything.
   import { onMount } from "svelte";
   import { device } from "../lib/model/device.svelte";
-  import { ask, toast, toastKey, download, pickFile } from "../lib/ui.svelte";
+  import { ask, toast, toastKey } from "../lib/ui.svelte";
   import { t } from "../lib/i18n/index.svelte";
-  import * as BK from "../../../fm1backup.js";
+  import { backup, restore, backupState } from "../lib/backup.svelte";
   import Button from "../ui/components/Button.svelte";
   import { ic } from "../ui/icons";
 
-  const { captureBackup, restoreBackup, readBackup } = BK as any;   // (web/fm1backup.js, the original editor's)
   onMount(() => { device.readProj().catch(() => {}); });
   const S = "ABCD";
   const p = $derived(device.proj);
-  let busy = $state<null | { what: string; pct: number }>(null);
-  const rq = (r: [number, number[]], o?: any) => device.rq(r, o);
-  const stamp = () => new Date().toISOString().slice(0, 10);
+  const busy = $derived(backupState.busy);
 
   async function load(s: number) {
     if (!(await ask({ title: t("proj.load") + " " + S[s], body: t("proj.loadConfirm", { s: S[s] }), ok: t("dlg.load") }))) return;
@@ -33,35 +30,6 @@
     const name = await ask({ title: t("proj.rename") + " " + S[s], body: "", ok: t("proj.rename"), input: { label: t("proj.name"), value: p?.slots[s].name || "", max: 12 } });
     if (name == null) return;
     try { await device.renameProject(s, String(name)); toastKey("ok", "toast.renamed"); } catch (e) { toastKey("err", "toast.error", { detail: String((e as Error).message) }); }
-  }
-  async function backup(prefix = "Skiff-backup") {
-    busy = { what: "proj.backingUp", pct: 0 };
-    try {
-      await device.stop();
-      const file = await captureBackup(rq, device.info!.version, (d: number, n: number) => (busy = { what: "proj.backingUp", pct: Math.round((100 * d) / Math.max(1, n)) }));
-      const name = `${prefix}-${stamp()}.json`;
-      download(name, JSON.stringify(file));
-      toastKey("ok", "proj.backupDone", { file: name });
-      return true;
-    } catch (e) { toastKey("err", "toast.error", { detail: String((e as Error).message) }); return false; }
-    finally { busy = null; }
-  }
-  async function restore() {
-    const [f] = await pickFile(".json,application/json");
-    if (!f) return;
-    let file: any;
-    try { file = JSON.parse(await f.text()); readBackup(file); } catch (e) { toastKey("err", "toast.error", { detail: String((e as Error).message) }); return; }
-    if (!(await ask({ title: t("proj.restore"), body: t("proj.restoreConfirm", { file: f.name }), ok: t("dlg.restore"), danger: true }))) return;
-    if (!(await backup("Skiff-backup-before-restore"))) return;        // the FM-1 as it is, first
-    busy = { what: "proj.restoring", pct: 0 };
-    try {
-      await restoreBackup(rq, file, (d: number, n: number) => (busy = { what: "proj.restoring", pct: Math.round((100 * d) / Math.max(1, n)) }));
-      device.steps = {};
-      await device.readTracks(true);
-      await device.readProj();
-      toastKey("ok", "proj.restoreDone");
-    } catch (e) { toastKey("err", "toast.error", { detail: String((e as Error).message) }); }
-    finally { busy = null; }
   }
 </script>
 

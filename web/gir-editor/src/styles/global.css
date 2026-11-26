@@ -32,3 +32,9 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
 }
+/* the desktop app (Electron): on a Mac the window's own buttons sit at the top left; the top bar drags the window */
+.desktop .top { -webkit-app-region: drag; }
+.desktop .top button, .desktop .top input, .desktop .top [role="slider"], .desktop .top .status { -webkit-app-region: no-drag; }
+.desktop.platform-mac .top { padding-left: 84px; }
+.desktop.platform-mac .welcome header { padding-left: 64px; -webkit-app-region: drag; }
+.desktop.platform-mac .welcome header button { -webkit-app-region: no-drag; }

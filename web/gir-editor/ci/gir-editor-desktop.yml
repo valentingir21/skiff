@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Gir Editor's desktop apps: a universal .dmg on macOS, an NSIS installer and a portable .exe on Windows, from the web
+# build (web/gir-editor). The virtual FM-1's wasm is committed (web/gir-editor/public/emu), so neither Emscripten nor
+# the firmware build is needed here. Unsigned (see livraison/EDITOR/GUIDE-EDITEUR.md: how to open them anyway).
+name: Gir Editor desktop
+on:
+  push:
+    branches: [gir-editor]
+    paths: ["web/gir-editor/**", "web/editor.html", "web/fm1backup.js", "web/panel.js", ".github/workflows/gir-editor-desktop.yml"]
+    tags: ["gir-editor-v*"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: web/gir-editor } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm run proto && npx svelte-check --tsconfig ./tsconfig.json
+      - run: npx vitest run
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-latest, target: "--mac --universal", name: mac }
+          - { os: windows-latest, target: "--win", name: windows }
+    runs-on: ${{ matrix.os }}
+    defaults: { run: { working-directory: web/gir-editor } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm run build
+      - run: npx electron-builder ${{ matrix.target }} --publish never
+        env: { CSC_IDENTITY_AUTO_DISCOVERY: "false" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gir-editor-${{ matrix.name }}
+          path: |
+            web/gir-editor/release/*.dmg
+            web/gir-editor/release/*.exe
+          if-no-files-found: error

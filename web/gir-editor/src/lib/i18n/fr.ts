@@ -13,6 +13,7 @@ export default {
   "welcome.nomidi": "Ce navigateur ne parle pas aux appareils MIDI. Ouvrez Gir Editor dans Chrome ou Edge, ou utilisez l'appli de bureau. La démo marche ici.",
   "welcome.connecting": "Connexion…",
   "welcome.loading": "Lecture de la FM-1…",
+  "welcome.try": "Essayer Gir dans le navigateur (émulateur)",
   "welcome.desktop": "Appli de bureau pour Mac et Windows",
   "welcome.footer": "Gir 1.0 pour la M-VAVE FM-1, sur Skiff 2.7. Logiciel libre, GPL-3.0.",
   "err.nomidi": "Ce navigateur n'a pas Web MIDI. Utilisez Chrome ou Edge, ou l'appli de bureau.",

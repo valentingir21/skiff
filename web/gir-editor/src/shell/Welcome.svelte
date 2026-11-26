@@ -78,7 +78,10 @@
     </section>
   </div>
 
-  <footer>{t("welcome.footer")} · Skiff (illuminus5) · Felucca (Leo Kuroshita, Hügelton Instruments)</footer>
+  <footer>
+    <nav><a href="../try/">{t("welcome.try")}</a><a href="https://github.com/valentingir21/skiff/releases">{t("welcome.desktop")}</a><a href="https://github.com/valentingir21/skiff">Source</a></nav>
+    {t("welcome.footer")} · Skiff (illuminus5) · Felucca (Leo Kuroshita, Hügelton Instruments)
+  </footer>
 </div>
 
 <style>
@@ -123,6 +126,9 @@
   .knobs { display: flex; justify-content: space-around; }
   .k { width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #3a3a40, #17171a 70%); border: 1px solid #333; position: relative; transform: rotate(var(--r)); }
   .k::after { content: ""; position: absolute; left: 50%; top: 6px; width: 3px; height: 12px; margin-left: -1.5px; border-radius: 2px; background: #eee; }
-  footer { color: var(--mute); font-size: 12px; text-align: center; }
+  footer { color: var(--mute); font-size: 12px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
+  footer nav { display: flex; justify-content: center; gap: 18px; }
+  footer a { color: var(--fg-2); text-decoration: none; }
+  footer a:hover { color: var(--fg); text-decoration: underline; }
   @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .right { display: none; } .welcome { padding: 20px; } .actions { grid-template-columns: 1fr; } h1 { font-size: 30px; } }
 </style>

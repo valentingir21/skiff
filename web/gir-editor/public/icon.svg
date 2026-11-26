@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Gir Editor: the FM-1's HOME screen, its six tracks in their colours (SKIFF palette) -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#111113"/>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="#2a2a2f" stroke-width="8"/>
+  <g stroke-linecap="round" stroke-width="34">
+    <line x1="120" y1="126" x2="392" y2="126" stroke="#ff5931"/>
+    <line x1="120" y1="178" x2="300" y2="178" stroke="#20c2b4"/>
+    <line x1="120" y1="230" x2="360" y2="230" stroke="#ffbe00"/>
+    <line x1="120" y1="282" x2="252" y2="282" stroke="#9481ff"/>
+    <line x1="120" y1="334" x2="392" y2="334" stroke="#ff6dac"/>
+    <line x1="120" y1="386" x2="324" y2="386" stroke="#a4e631"/>
+  </g>
+</svg>

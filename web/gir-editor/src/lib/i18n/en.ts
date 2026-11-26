@@ -15,6 +15,7 @@ export default {
   "welcome.nomidi": "This browser can't talk to MIDI devices. Open Gir Editor in Chrome or Edge, or use the desktop app. The demo works here.",
   "welcome.connecting": "Connecting…",
   "welcome.loading": "Reading the FM-1…",
+  "welcome.try": "Try Gir in the browser (emulator)",
   "welcome.desktop": "Desktop app for Mac and Windows",
   "welcome.footer": "Gir 1.0 for the M-VAVE FM-1, on Skiff 2.7. Free software, GPL-3.0.",
   // errors

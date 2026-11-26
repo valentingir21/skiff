@@ -19,6 +19,8 @@ export class EmulatorTransport implements Transport {
   private st = listeners<[TransportState, string?]>();
   private fr = listeners<[EmuFrame]>();
   lastFb: Uint16Array | null = null;
+  /** true when the virtual FM-1 started with an empty flash (its first time here): the demo music is written */
+  fresh = false;
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private base = import.meta.env.BASE_URL || "./") {}
@@ -37,6 +39,7 @@ export class EmulatorTransport implements Transport {
         fetch(url("emu/felucca_link.wasm")).then((r) => { if (!r.ok) throw new TransportError("wasm"); return r.arrayBuffer(); }),
         kvGet<Record<string, Uint8Array>>(FLASH_KEY),
       ]);
+      this.fresh = !sectors || !Object.keys(sectors).length;
       this.node = new AudioWorkletNode(this.ctx, "gir-link", { numberOfInputs: 0, outputChannelCount: [2] });
       this.gain = this.ctx.createGain();
       this.gain.gain.value = 0.8;

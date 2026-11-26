@@ -9,6 +9,8 @@ import { EmulatorTransport } from "../transport/emulator";
 import { WebMidiTransport } from "../transport/webmidi";
 import { TransportError, type Transport } from "../transport/types";
 import { ID, T, tdesc } from "./tables";
+import { seedDemo } from "./demo";
+import { prefs } from "../store";
 
 export type Status = "off" | "connecting" | "loading" | "ready" | "lost" | "reconnecting";
 export interface TrackState extends TrackRow { p: number[]; name: string }
@@ -213,6 +215,11 @@ export class Device {
     await this.readProj().catch(() => {});
     const w = parse[CMD.WATCH](await this.rq(req.watch(3), { timeout: 400, retries: 1, quiet: true }).catch(() => [0]));
     this.live = !!(w.on & 1);
+    const emu = this.transport instanceof EmulatorTransport ? this.transport : null;
+    if (emu?.fresh && !prefs.get("noseed", false)) {           // the demo's first time: a loop to play with
+      emu.fresh = false;
+      try { await seedDemo(this, (pct) => (this.progress = { what: "demo", pct })); } catch (e) { console.warn("demo", e); }
+    }
     this.progress = null;
     this.status = "ready";
     this.startAlive();

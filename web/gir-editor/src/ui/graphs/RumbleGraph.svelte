@@ -6,7 +6,7 @@
   const W = 300, H = 84, B = 4;           // two beats
   const path = $derived.by(() => {
     const n = 240, pts: string[] = [];
-    const amp = mix / 127;
+    const amp = mix ? 0.18 + 0.82 * Math.sqrt(mix / 127) : 0;   // (drawn so a low RUMBLE still shows its shape)
     const tau = 0.25 + (decay / 127) * 2.5;          // in beats
     for (let i = 0; i <= n; i++) {
       const x = (i / n) * 2;                         // beats
@@ -34,7 +34,7 @@
   {#each [0, 1, 2, 3, 4, 5, 6, 7] as s}<line x1={(s / 8) * (W - 8) + 4} x2={(s / 8) * (W - 8) + 4} y1={B} y2={H - B} class="grid" class:beat={s % 4 === 0} />{/each}
   <path d={path + ` L${W - 4} ${H - B} L4 ${H - B} Z`} class="area" />
   <path d={path} class="line" />
-  {#each kicks as x}<rect x={x} y={B + 2} width="7" height={H - 2 * B - 2} rx="2" class="kick" />{/each}
+  {#each kicks as x}<rect x={x} y={B + 2} width="3" height={H - 2 * B - 2} rx="1.5" class="kick" /><circle cx={x + 1.5} cy={B + 4} r="4" class="kick" />{/each}
 </svg>
 <style>
   .g { width: 100%; height: 84px; display: block; }
@@ -42,5 +42,5 @@
   .grid.beat { stroke: var(--line-2); }
   .area { fill: color-mix(in srgb, var(--c) 18%, transparent); opacity: var(--o); }
   .line { fill: none; stroke: var(--c); stroke-width: 2; }
-  .kick { fill: var(--fg); }
+  .kick { fill: var(--fg); opacity: 0.85; }
 </style>

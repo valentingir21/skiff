@@ -61,8 +61,8 @@
             <Param track={k} id={ID.P_REV} color={c} size={30} where="FX › FX › KNOB 4" />
           </div>
           <div class="g2">
-            <Param track={k} id={ID.P_DKSRC} color={c} size={30} where="FX › DUCK › KNOB 1" />
-            <Param track={k} id={ID.P_DKAMT} color={c} size={30} where="FX › DUCK › KNOB 2" />
+            <Param track={k} id={ID.P_DKSRC} color={c} size={30} where="FX › DUCK › KNOB 1" label="DUCK BY" />
+            <Param track={k} id={ID.P_DKAMT} color={c} size={30} where="FX › DUCK › KNOB 2" label="DUCK" />
           </div>
         </div>
         <div class="bottom">

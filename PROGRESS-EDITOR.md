@@ -4,26 +4,20 @@ Lire ce fichier d'abord. Branche `gir-editor` (depuis le tag `gir-v1.0`). Docs :
 (DECISIONS.md = journal des décisions). Règles : pas de flash, pas de changement dans `firmware/`, pas de merge.
 
 ## Étape en cours
-Phase 1 : tests Playwright, revue de design, publication gh-pages.
+**Terminé** (nuit du 26 au 27/11/2026). Voir `../livraison/EDITOR/RAPPORT-NUIT.md` (checklist matériel incluse).
 
 ## Fait
-- [x] Branche `gir-editor` créée depuis `gir-v1.0` (ac64866).
-- [x] Fausse FM-1 : `web/gir-editor/emu/felucca_link.c` (firmware complet + editor.c en WASM), build
-      `web/gir-editor/emu/build.sh` → `web/gir-editor/public/emu/felucca_link.wasm`. Répond à INFO/DUMP/DESC/NAMES,
-      PANEL actif (INFO 59 01 = 3).
+- Phase 0 : étude, `FIRMWARE-A-PREVOIR.md` (NAMES coupé à 600 octets : l'éditeur d'origine ne se connecte pas à Gir).
+- Phase 1 : éditeur web complet, publié sur `gh-pages` `/skiff/editor/` (925d6fc), `/skiff/try/` intact et lié.
+  Tests : 12 unitaires + 12 e2e verts ; tables `--check` ok ; `web/test_web.mjs` inchangé et vert.
+- Phase 2 : Electron (`web/gir-editor/electron/`), .dmg universel + .exe NSIS + portable construits sur ce Mac,
+  pré-release `gir-editor-v1.0-rc1` (avec SHA256SUMS). Workflow CI prêt dans `web/gir-editor/ci/` (non activé :
+  jeton sans droit `workflow`).
+- Phase 3 : `ETUDE-PLUGIN.md` (recommandation : appli compacte maintenant, Max for Live ensuite, JUCE plus tard).
+- Phase 4 : `GUIDE-EDITEUR.md`, `RAPPORT-NUIT.md`, `LICENCES.md`, `DECISIONS.md`, `screens/`.
 
-- [x] Phase 0 : `../livraison/EDITOR/ETUDE-EDITEUR-ORIGINE.md`, `FIRMWARE-A-PREVOIR.md` (NAMES coupé à 600 octets).
-- [x] Tables générées : `tools/gen_editor_tables.sh` (C contre le firmware + aide depuis le manuel), test `--check`.
-- [x] Modèle + protocole + transports (Web MIDI, émulateur), 12 tests unitaires contre la fausse FM-1 (`npm test`).
-- [x] Interface : toutes les vues (Son, Séquenceur, Song, Mixer, Bibliothèque, Projets, Samples, FM6, Écran, Réglages),
-      palette ⌘K, aide ?, undo/redo, i18n en/fr, galerie `?view=demo`.
-
-## Reste
-- Tests Playwright (e2e) + captures `../livraison/EDITOR/screens/` + 2 passes de revue de design.
-- Build + publication `gh-pages` sous `/skiff/editor/` (worktree `../work/ghp`), vérifier `/skiff/try/`.
-- Phase 2 Electron (+ workflow GitHub Actions, pré-release `gir-editor-v1.0-rc1`).
-- Phase 3 étude plugin ; Phase 4 docs (GUIDE, RAPPORT-NUIT, LICENCES).
-Voir le plan des phases dans `../livraison/EDITOR/DECISIONS.md` (section « Plan »).
+## Reste (avec l'utilisateur)
+- Checklist matériel du rapport ; activer la CI ; décider release finale et merge.
 
 ## Commandes
 - Dev : `cd web/gir-editor && npm install && npm run dev` (http://localhost:5174, `?demo=1` démarre la démo, `?view=demo` la galerie)

@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
+# TO ENABLE: move this file to .github/workflows/ (the token used tonight could not push workflows: it lacks the
+# "workflow" scope; run `gh auth refresh -s workflow` once, then `git mv web/gir-editor/ci/gir-editor-desktop.yml .github/workflows/`).
 # Gir Editor's desktop apps: a universal .dmg on macOS, an NSIS installer and a portable .exe on Windows, from the web
 # build (web/gir-editor). The virtual FM-1's wasm is committed (web/gir-editor/public/emu), so neither Emscripten nor
 # the firmware build is needed here. Unsigned (see livraison/EDITOR/GUIDE-EDITEUR.md: how to open them anyway).

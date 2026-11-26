@@ -14,7 +14,8 @@ export type Status = "off" | "connecting" | "loading" | "ready" | "lost" | "reco
 export interface TrackState extends TrackRow { p: number[]; name: string }
 export interface UndoEntry { label: string; track: number; scope: number; id: number; before: number; after: number; at: number }
 export interface SoundUndo { label: string; track: number; before: { engine: number; preset: number; p: number[] }; after: { engine: number; preset: number }; at: number }
-type Entry = (UndoEntry & { kind: "param" }) | (SoundUndo & { kind: "sound" });
+export interface StepsUndo { label: string; track: number; before: Record<number, Step>; after: Record<number, Step>; at: number }
+type Entry = (UndoEntry & { kind: "param" }) | (SoundUndo & { kind: "sound" }) | (StepsUndo & { kind: "steps" });
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /** SEQ TOOLS: white key place (from F3) -> its key bit (F3 = 0, chromatic) */
@@ -411,6 +412,8 @@ export class Device {
     if (e.kind === "param") {
       if (e.scope === 1) await this.setGlobal(e.id, e.before, { undo: false });
       else await this.setParam(e.track, e.id, e.before, { undo: false });
+    } else if (e.kind === "steps") {
+      for (const [i, st] of Object.entries(e.before)) await this.writeStep(e.track, +i, st);
     } else {
       const now = this.tracks[e.track];
       const redo = { engine: now.engine, preset: now.preset };
@@ -425,6 +428,8 @@ export class Device {
     if (e.kind === "param") {
       if (e.scope === 1) await this.setGlobal(e.id, e.after, { undo: false });
       else await this.setParam(e.track, e.id, e.after, { undo: false });
+    } else if (e.kind === "steps") {
+      for (const [i, st] of Object.entries(e.after)) await this.writeStep(e.track, +i, st);
     } else await this.loadPreset(e.track, e.after.engine, e.after.preset, { undo: false });
     this.undoStack.push(e);
   }
@@ -511,6 +516,38 @@ export class Device {
       if (this.steps[k]) this.steps[k][i] = r;
       this.touch(k);
     } catch (e) { this.fail(e); }
+  }
+
+  // --------------------------------------------------------- motion and locks ---
+  motion = $state<Record<number, { on: boolean; events: { step: number; param: number; value: number; lock: boolean }[] }>>({});
+  async readMotion(k: number) {
+    if (!this.info?.motionMax) return;
+    const op = this.info.locks ? 7 : 0;
+    const r = await this.ask<{ on: boolean; events: { step: number; param: number; value: number; lock?: boolean }[] }>(req.motion(k, op, {}, this.info.ntrk));
+    this.motion = { ...this.motion, [k]: { on: r.on, events: r.events.map((e) => ({ ...e, lock: !!e.lock })) } };
+  }
+  /** an automation event (op 3) or, with lock, a parameter lock (op 5) at step on parameter id */
+  async setMotion(k: number, step: number, id: number, value: number, lock = false) {
+    const r = await this.ask<{ rc: number }>(req.motion(k, lock ? 5 : 3, { step, param: id, value }, this.info!.ntrk), { key: `mo:${k}:${step}:${id}` });
+    await this.readMotion(k);
+    if (r.rc === 2) this.onEvent({ type: "toast", level: "warn", key: "toast.error", vars: { detail: "MOTION FULL (64)" } });
+  }
+  async delMotion(k: number, step: number, id: number) {
+    await this.ask(req.motion(k, 4, { step, param: id }, this.info!.ntrk));
+    await this.readMotion(k);
+  }
+  async motionPlay(k: number, on: boolean) { await this.ask(req.motion(k, 1, { on }, this.info!.ntrk)); await this.readMotion(k); }
+
+  /** several steps of track k at once, one undo for all of them */
+  async editSteps(k: number, changes: Record<number, Step>, label = "steps") {
+    const cur = this.steps[k];
+    if (!cur) return;
+    const before: Record<number, Step> = {}, after: Record<number, Step> = {};
+    for (const [i, st] of Object.entries(changes)) { before[+i] = { ...cur[+i], notes: [...cur[+i].notes] }; after[+i] = { ...st, notes: [...st.notes] }; }
+    this.undoStack.push({ kind: "steps", label, track: k, before, after, at: Date.now() });
+    this.redoStack = [];
+    for (const [i, st] of Object.entries(after)) cur[+i] = st;          // at once on screen
+    for (const [i, st] of Object.entries(after)) await this.writeStep(k, +i, st);
   }
 
   // ----------------------------------------------------------------------- song ---

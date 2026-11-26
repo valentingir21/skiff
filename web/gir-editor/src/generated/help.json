@@ -1,0 +1,5862 @@
+{
+"engines": {
+"ACID": {
+"doc": "- **Principe** : la voix TB-303 d'**ATEK303** (Javier Melgar / Animatek, d'après Open303), portée en calcul entier et\n  suréchantillonnée 2×. Elle a :\n  - un oscillateur scie ou carré, avec ou sans sub ;\n  - un filtre à diodes résonant ;\n  - l'enveloppe de filtre et l'accent cumulatif de la 303 ;\n  - le slide sans redéclenchement.\n- **Mono** : une note à la fois.\n- EDIT 1 « 303 » :\n  - **WAVE** : SAW, SQR, SAW+SUB, SQR+SUB ;\n  - **CUTOFF**, déf. 40, CC74 ;\n  - **RES**, déf. 90, CC71 ;\n  - **ENV MOD**, déf. 70 (le premier tiers agit peu : c'est la courbe du vrai 303).\n- EDIT 2 « ACCENT » :\n  - **DECAY**, déf. 60 ;\n  - **ACCENT**, déf. 80 (la force de l'accent) ;\n  - **TUNE**, −64 à +63 cents ;\n  - **SLIDE**, déf. 45 (la durée du glissé, environ 30 ms + 2 ms par cran).\n- HOME : CUTOFF, RES, ENV MOD, DECAY.\n\n**Accent et slide** :\n- **L'accent vient du pas ACC** du séquenceur (SEQ › FEEL › TYPE, ou les pas importés). Une touche jouée fort, au\n  clavier ou en MIDI, **n'accentue pas**.\n- **Le slide vient du pas SLD** : la note glisse vers la suivante sans redéclencher les enveloppes.\n- Deux notes liées au clavier (legato) glissent aussi.\n\n**Générateur de lignes acid** (le générateur de patterns d'ATEK303). Sur une piste ACID, **tenir SEQ** et appuyer sur :\n- **G4 « ACID »** : une **nouvelle ligne acid** sur la longueur du pattern. Elle utilise la ROOT et la SCALE de la piste\n  (gamme ramenée à la plus proche des gammes d'ATEK), C2 + ROOT comme base, et une nouvelle graine à chaque appui.\n- **A4 « RHYTHM »** : fait muter le rythme (2 mutations).\n- **B4 « NOTES »** : fait muter les octaves (2 mutations).\n- **C5 « ACC/SLD »** : fait muter accents et slides (3 mutations).\n\nChaque appui compte pour **une annulation** (SAVE tenu). OCT− remet la piste comme à l'ouverture du layer. Vérifié dans\nl'émulateur : le layer montre ACID, RHYTHM, NOTES, ACC/SLD ; G4 affiche « NEW ACID LINE » ; la ligne apparaît sur NOTES\net joue.\n\n**Les anciens patterns** (pas SLD et ACC écrits avec Skiff) jouent comme prévu.\n\n**Usages** : BS 303, BS PHUTURE, BS 303 DIST (saturé), PL 303 (pluck avec delay), LD 303 SCRM.",
+"gir": true,
+"params": {
+"ACCENT": "déf. 80 (la force de l'accent)",
+"CUTOFF": "déf. 40, CC74",
+"DECAY": "déf. 60",
+"ENV MOD": "déf. 70 (le premier tiers agit peu : c'est la courbe du vrai 303).",
+"RES": "déf. 90, CC71",
+"SLIDE": "déf. 45 (la durée du glissé, environ 30 ms + 2 ms par cran).",
+"TUNE": "−64 à +63 cents",
+"WAVE": "SAW, SQR, SAW+SUB, SQR+SUB"
+},
+"titles": [
+"303",
+"ACCENT"
+]
+},
+"ANALOG": {
+"doc": "- EDIT 1 : **WAVE** (SAW, SQR, TRI, SIN, PWM, SYNC, SUB), **DETUNE** (cents, 2ᵉ oscillateur), **MIX** (2ᵉ\n  oscillateur), **NOISE**.\n- EDIT 2 : **CUTOFF**, **RES**, **DRIVE**, **KEYTRK**.\n- CC74 = CUTOFF, CC71 = RES.\n- SYNC : une scie synchronisée dont ENV / LFO → SHP balaient la hauteur. SUB : une scie sur un carré une octave plus bas.",
+"gir": false,
+"home": "CUTOFF, RES, ATTACK, RELEASE",
+"key": "F3",
+"params": {
+"DETUNE": "(cents, 2ᵉ oscillateur)",
+"KEYTRK": ".",
+"MIX": "(2ᵉ oscillateur)",
+"NOISE": ".",
+"WAVE": "(SAW, SQR, TRI, SIN, PWM, SYNC, SUB)"
+},
+"principle": "soustractif : 2 oscillateurs, filtre résonant",
+"titles": [
+"OSC",
+"FLT"
+],
+"uses": "basses (donk, psy roll, rumble, reese), leads, stabs, plucks, FX",
+"voices": "16"
+},
+"DRUM": {
+"doc": "- EDIT 1 : **KIT** (STD, 80, 10, 66, 55, 77, DEEP, TIGHT, PERC, USR1–3 ; « 80 » est le modèle 808, « 10 » un modèle de\n  boîte à rythmes que le code nomme ainsi (à vérifier : lequel)), **PITCH**, **TONE**, **DECAY**.\n- EDIT 2 : **SNAP**, **ACCENT**, **KICK** (PUNCH / ROUND), **DRIVE**.\n- Pages en plus : **RUMBLE**, **RUMBLE 2** (le rumble du kick) et **KICK** (son clic), ci-dessous ; **LANES** (le niveau,\n  l'accord et la durée de chaque voie) et **LANE MIX** (le niveau et le pan).\n- CC74 = TONE.\n- 8 voies : KICK, SNARE, CLAP, CL HAT, OP HAT, TOM, RIM, BELL, sur la carte GM (C2 = 36 = KICK).\n- Le kit DEEP ne supporte pas une DECAY au-delà d'environ 64 : des voix ne finiraient pas.",
+"gir": false,
+"home": "PITCH, TONE, DECAY, SNAP",
+"key": "D5",
+"params": {
+"DECAY": ".",
+"DRIVE": ".",
+"KICK": "(PUNCH / ROUND)",
+"KIT": "(STD, 80, 10, 66, 55, 77, DEEP, TIGHT, PERC, USR1–3 ; « 80 » est le modèle 808, « 10 » un modèle de boîte à rythmes que le code nomme ainsi (à vérifier : lequel))",
+"LANE MIX": "(le niveau et le pan).",
+"LANES": "(le niveau, l'accord et la durée de chaque voie) et",
+"RUMBLE 2": "(le rumble du kick) et"
+},
+"principle": "boîte à rythmes de synthèse, 8 voies, kits STD, 80, 10, 66, 55, 77, DEEP, TIGHT, PERC",
+"titles": [
+"KIT",
+"HIT"
+],
+"uses": "kits",
+"voices": "8 voies"
+},
+"DRUM-X": {
+"doc": "- EDIT 1 : **MORPH** (de A à B), **PITCH**, **COLOR**, **DECAY**.\n- EDIT 2 : **NOISE**, **FM**, **FOLD**, **DRIVE**.\n- Pages **RUMBLE**, **RUMBLE 2** et **KICK** (le rumble et le clic du kick, ci-dessous). Page **SOUND** : un son du kit\n  sur une feuille (SELECT choisit la ligne). Page **LANE MIX**.\n- CC74 = COLOR.\n- **Un seul kit par projet**, partagé par toutes les pistes DRUM-X. Un preset de kit charge son kit, et SAVE tenu le\n  rend.\n- Les 8 kits d'usine : FACTORY, DEEP, CLICK, INDUSTRIAL, SOFT, GLITCH, TRIBAL, LASER.",
+"gir": false,
+"home": "MORPH, PITCH, COLOR, DECAY",
+"key": "E5",
+"params": {
+"DECAY": ".",
+"DRIVE": ".",
+"KICK": "(le rumble et le clic du kick, ci-dessous). Page",
+"LANE MIX": ".",
+"MORPH": "(de A à B)",
+"RUMBLE 2": "et",
+"SOUND": "un son du kit sur une feuille (SELECT choisit la ligne). Page"
+},
+"principle": "kit de 8 sons de synthèse, chacun avec un patch A et un patch B, et MORPH entre les deux",
+"titles": [
+"KIT",
+"HIT"
+],
+"uses": "kits techno, indus, glitch",
+"voices": "8 voies"
+},
+"FM6": {
+"doc": "- EDIT 1 : **ALGO** (PAT = celui du patch, ou 1–32), **FEEDBACK** (−7 à +7), **MOD LVL** (indice de modulation,\n  −100 à +100 %), **RATIO** (−16 à +16 : décale les rapports des modulateurs).\n- EDIT 2 : **MOD ENV** (accélère ou ralentit les enveloppes des modulateurs), **VEL MOD**, **DETUNE**, **PATCH** :\n  - F1 = TINE EP, F2 = BELL, F3 = BASS, F4 = BRASS ;\n  - F5 = PAD, F6 = MARIMBA, F7 = ORGAN, F8 = PLUCK ;\n  - OWN = le patch propre à la piste.\n- Pages en plus :\n  - **OPERATOR** : chaque opérateur (PRESETS choisit l'opérateur, SELECT la ligne : rapport, enveloppe, niveaux) ;\n  - **ALL OPS** : l'algorithme, l'enveloppe de hauteur, le LFO.\n- CC74 = MOD LVL.\n- FM6 garde **les enveloppes de ses patchs** : pas de page ENV. La durée d'un son dépend du patch. Les plucks « cloche »\n  (patch BELL) résonnent environ 4 s.",
+"gir": false,
+"home": "MOD LVL, RATIO, MOD ENV, PATCH",
+"key": "G3",
+"params": {
+"ALGO": "(PAT = celui du patch, ou 1–32)",
+"ALL OPS": "l'algorithme, l'enveloppe de hauteur, le LFO.",
+"FEEDBACK": "(−7 à +7)",
+"MOD ENV": "(accélère ou ralentit les enveloppes des modulateurs)",
+"MOD LVL": "(indice de modulation, −100 à +100 %)",
+"OPERATOR": "chaque opérateur (PRESETS choisit l'opérateur, SELECT la ligne : rapport, enveloppe, niveaux)",
+"RATIO": "(−16 à +16 : décale les rapports des modulateurs)."
+},
+"principle": "FM à 6 opérateurs, 32 algorithmes, 8 patchs d'usine",
+"titles": [
+"OPS",
+"PATCH"
+],
+"uses": "plucks FM, cloches, basses métalliques, orgue house",
+"voices": "6"
+},
+"GRAIN": {
+"doc": "- EDIT 1 : **SOURCE** (PIANO, FLUTE, SAX, USR), **POS**, **SIZE** (10–390 ms), **DENSITY** (1–98 grains/s).\n- EDIT 2 : **PITCH** (±24), **SPREAD**, **RANDOM** (désaccord aléatoire), **TONE**.\n- CC74 = TONE. 3 voix ; T5 et T6 ne le jouent pas.",
+"gir": false,
+"home": "POS, SIZE, DENSITY, PITCH",
+"key": "G4",
+"params": {
+"DENSITY": "(1–98 grains/s).",
+"PITCH": "(±24)",
+"RANDOM": "(désaccord aléatoire)",
+"SIZE": "(10–390 ms)",
+"SOURCE": "(PIANO, FLUTE, SAX, USR)",
+"TONE": "."
+},
+"principle": "granulaire sur les échantillons",
+"titles": [
+"GRAIN",
+"SPRAY"
+],
+"uses": "nappes, textures, glitch",
+"voices": "3"
+},
+"HOOVER": {
+"doc": "- **Principe** : le lead rave des années 90 (le patch « What The » du Roland Alpha Juno, *Mentasm*, *Dominator*). Il\n  combine :\n  - deux scies PWM désaccordées et une impulsion au centre, dont la largeur bouge par un LFO propre à chaque voix ;\n  - un SUB carré une octave plus bas ;\n  - la **plongée** : chaque note frappée part de DIVE demi-tons en dessous (0 à 24) et remonte en D.TIME ;\n  - un drive et un passe-bas résonant.\n- EDIT 1 : **DIVE** (déf. 40), **D.TIME** (temps de remontée, déf. 70), **PWM** (déf. 80), **DETUNE** (cents, déf. 40).\n- EDIT 2 : **CUTOFF** (CC74), **RES** (CC71), **SUB**, **DRIVE**.\n- HOME : DIVE, PWM, DETUNE, CUTOFF.\n- **Voix** : 4.\n- Une note **liée** (legato, pas SLD) **glisse** au lieu de plonger.\n- Le **CHORUS** et le **SPREAD** de la piste font la moitié du son (les presets les utilisent).",
+"gir": true,
+"params": {
+"CHORUS": "et le",
+"CUTOFF": "(CC74)",
+"D.TIME": "(temps de remontée, déf. 70)",
+"DETUNE": "(cents, déf. 40).",
+"DIVE": "(déf. 40)",
+"DRIVE": ".",
+"PWM": "(déf. 80)",
+"RES": "(CC71)",
+"SPREAD": "de la piste font la moitié du son (les presets les utilisent)."
+},
+"titles": [
+"HOOVER",
+"TONE"
+]
+},
+"INDUS": {
+"doc": "- **Principe** :\n  - deux sinus : A à la note, B à **RATIO** (×0,25 à ×8, inharmonique entre les rapports entiers) ;\n  - **MOD** : B module la phase de A (FM : cloches, tôle) ;\n  - **RING** : modulation en anneau (sirènes, robots) ;\n  - **NOISE** : bruit blanc ;\n  - **FOLD** : wavefolder (grain, harmoniques dures) ;\n  - **P.ENV** / **P.DECAY** : chaque note part P.ENV demi-tons au-dessus (0–48) et retombe en P.DECAY (kicks, zaps,\n    impacts) ;\n  - **CUTOFF** et **RES** : un passe-bas d'un pôle et un pic résonant.\n- EDIT 1 « METAL » : **RATIO**, **MOD**, **RING**, **NOISE**.\n- EDIT 2 « HIT » : **FOLD**, **P.ENV**, **P.DECAY**, **RES** (CC71).\n- **CUTOFF** est sur HOME (4ᵉ knob, CC74).\n- HOME : RATIO, MOD, FOLD, CUTOFF.\n- **Voix** : 6.\n- Les routes SHP bougent MOD, les routes CUT bougent CUTOFF.\n- **Usages** : PC KICK SINE, PC KICK GABR (kick gabber), FX LASER, FX ZAP IND, DR FACTORY, BS KICKBASS (kick-basse\n  hardtek).\n\n---",
+"gir": true,
+"params": {
+"CUTOFF": "est sur HOME (4ᵉ knob, CC74).",
+"NOISE": ".",
+"RES": "(CC71)."
+},
+"titles": [
+"METAL",
+"HIT"
+]
+},
+"MINI": {
+"doc": "- **Principe** : un Minimoog d'après **FMini-1** (Guilherme Ruppert). Il a 3 oscillateurs et du bruit, un mélangeur\n  avec 12 dB de marge et un écrêtage, le filtre en échelle avec son contour, et une sortie passe-bas ou passe-haut.\n  **SLOT** charge l'un des **128 patchs de FMini-1** (0–127).\n- EDIT 1 « FILTER » : **CUTOFF** (CC74), **EMPH** (l'emphasis = la résonance, CC71), **CONTOUR** (la quantité\n  d'enveloppe de filtre), **F.ATK**.\n- EDIT 2 « PATCH » : **F.DEC**, **F.SUS**, **MOD** (la modulation), **SLOT** (le patch FMini-1).\n- **OSC 1** : RANGE 1 (LO, 32', 16', 8', 4', 2'), WAVE 1 (TRI, SHARK, SAW, SQR, PLS W, PLS N, SIN), LEVEL 1, NOISE\n  (le niveau du bruit).\n- **OSC 2** : RANGE 2, WAVE 2, **DETUNE 2** (±), LEVEL 2. **OSC 3** : idem.\n- **MINI MOD** : **KBD** (le suivi de clavier du filtre), **MOD TO** (OFF, OSC, FILTER, BOTH), **NOISE** (WHITE / PINK),\n  **OUTPUT** (LP / HP).\n- HOME : CUTOFF, EMPH, CONTOUR, GLIDE.\n- **Voix** : 4.\n- **Les basses sont à la bonne hauteur** : un A1 donne 55 Hz. Les presets de basse remontent leurs oscillateurs pour que\n  le plus grave soit à 8'.\n- **Tourner SLOT recharge le patch** dans les pages OSC. Modifier un oscillateur rend le son « propre à la piste ».\n- Vérifié dans l'émulateur : 8 pages EDIT (FILTER, PATCH, OSC 1, OSC 2, OSC 3, MINI MOD, VOICE, VOICE 2).\n- **À savoir** : au-delà d'EMPH ≈ 111, le filtre auto-oscille d'un coup (fort saut de niveau si CUTOFF est très ouvert).",
+"gir": true,
+"params": {
+"CONTOUR": "(la quantité d'enveloppe de filtre)",
+"CUTOFF": "(CC74)",
+"DETUNE 2": "(±), LEVEL 2.",
+"EMPH": "(l'emphasis = la résonance, CC71)",
+"F.ATK": ".",
+"KBD": "(le suivi de clavier du filtre)",
+"MOD": "(la modulation)",
+"MOD TO": "(OFF, OSC, FILTER, BOTH)",
+"NOISE": "(WHITE / PINK)",
+"OSC 1": "RANGE 1 (LO, 32', 16', 8', 4', 2'), WAVE 1 (TRI, SHARK, SAW, SQR, PLS W, PLS N, SIN), LEVEL 1, NOISE (le niveau du bruit).",
+"OSC 2": "RANGE 2, WAVE 2",
+"OSC 3": "idem.",
+"OUTPUT": "(LP / HP).",
+"SLOT": "(le patch FMini-1)."
+},
+"titles": [
+"FILTER",
+"PATCH"
+]
+},
+"NOISE": {
+"doc": "- EDIT 1 : **MODE** (ANLG bruit + impulsions, DUST impulsions seules, LFSR registre à décalage accordé, META timbre\n  métallique accordé), **COLOR** (blanc → rose → brun), **CUTOFF**, **RES**.\n- EDIT 2 : **KEYTRK**, **DENSITY**, **DRIFT** (dérive lente), **CRUSH**.\n- CC74 = CUTOFF, CC71 = RES.",
+"gir": false,
+"home": "CUTOFF, RES, COLOR, RELEASE",
+"key": "B4",
+"params": {
+"COLOR": "(blanc → rose → brun)",
+"CRUSH": ".",
+"DRIFT": "(dérive lente)",
+"MODE": "(ANLG bruit + impulsions, DUST impulsions seules, LFSR registre à décalage accordé, META timbre métallique accordé)",
+"RES": "."
+},
+"principle": "bruit filtré, impulsions, registres à décalage",
+"titles": [
+"SOURCE",
+"MOVE"
+],
+"uses": "risers, sweeps, hats, textures",
+"voices": "16"
+},
+"PHASE": {
+"doc": "- EDIT 1 : **WAVE** (SAW, SQR, PLS, DSIN, SPLS, RSAW, RTRI, RTRP), **WAVE2** (–, ou une 2ᵉ onde en alternance),\n  **DCW** (la quantité de distorsion), **ENV** (l'enveloppe vers DCW).\n- EDIT 2 : **DETUNE** (une 2ᵉ ligne désaccordée), **LINE** (MIX ou RING), **SUB** (sinus une octave plus bas), **FOLD**\n  (wavefolder).\n- CC74 = DCW.\n- La 2ᵉ ligne (DETUNE > 0 ou LINE RING) double le coût CPU de la voix.",
+"gir": false,
+"home": "DCW, ENV, DETUNE, RELEASE",
+"key": "A3",
+"params": {
+"DCW": "(la quantité de distorsion)",
+"DETUNE": "(une 2ᵉ ligne désaccordée)",
+"ENV": "(l'enveloppe vers DCW).",
+"FOLD": "(wavefolder).",
+"LINE": "(MIX ou RING)",
+"SUB": "(sinus une octave plus bas)",
+"WAVE": "(SAW, SQR, PLS, DSIN, SPLS, RSAW, RTRI, RTRP)",
+"WAVE2": "(–, ou une 2ᵉ onde en alternance)"
+},
+"principle": "distorsion de phase (type Casio CZ)",
+"titles": [
+"PHASE",
+"LINE"
+],
+"uses": "stabs et basses « résonantes sans filtre », pads",
+"voices": "16"
+},
+"PHYS": {
+"doc": "- EDIT 1 : **MODEL** (MODAL lames et cloches, STRNG corde, MEMB peau, SYMP corde + cordes sympathiques), **STRUCT**,\n  **BRIGHT**, **DAMP**.\n- EDIT 2 : **POS**, **ACCENT**, **BOW** (frottement continu ; pour MEMB : la hauteur qui plonge), **EXCITE** (le son de\n  l'excitateur dans la sortie).\n- CC74 = BRIGHT. 3 voix ; T5 et T6 ne le jouent pas.",
+"gir": false,
+"home": "STRUCT, BRIGHT, DAMP, POS",
+"key": "A4",
+"params": {
+"BOW": "(frottement continu ; pour MEMB : la hauteur qui plonge)",
+"DAMP": ".",
+"EXCITE": "(le son de l'excitateur dans la sortie).",
+"MODEL": "(MODAL lames et cloches, STRNG corde, MEMB peau, SYMP corde + cordes sympathiques)"
+},
+"principle": "modèles physiques : MODAL, STRNG, MEMB, SYMP",
+"titles": [
+"BODY",
+"EXCITE"
+],
+"uses": "percussions, cordes pincées, drones",
+"voices": "3"
+},
+"SAMPLE": {
+"doc": "- EDIT 1 : **SET** (PIANO, FLUTE, SAX, USR1–3), **PITCH** (±24), **BITS**, **LOOP**.\n- EDIT 2 : **CUTOFF**, –, **DRIVE**, –.\n- Page **SAMPLES** (sur un set USR) : SAMPLE, son LEVEL, REVERB, DELAY.\n- CC74 = CUTOFF.\n- Les échantillons USR se chargent avec l'éditeur web (onglet Samples).",
+"gir": false,
+"home": "SET, CUTOFF, ATTACK, RELEASE",
+"key": "C4",
+"params": {
+"CUTOFF": "–",
+"DRIVE": "–.",
+"LOOP": ".",
+"PITCH": "(±24)",
+"SAMPLES": "(sur un set USR) : SAMPLE, son LEVEL, REVERB, DELAY.",
+"SET": "(PIANO, FLUTE, SAX, USR1–3)"
+},
+"principle": "instruments échantillonnés (PIANO, FLUTE, SAX, USR1–3)",
+"titles": [
+"SET",
+"TONE"
+],
+"uses": "—",
+"voices": "16"
+},
+"SUPERSAW": {
+"doc": "- **Principe** : 7 scies par voix, avec les décalages et la courbe de DETUNE mesurés sur le JP-8000 (analyse d'Adam\n  Szabo). MIX règle les 6 scies autour face à celle du centre. Un passe-haut suit la note (HPF 64 = à la fondamentale,\n  comme le JP-8000), puis viennent DRIVE et un passe-bas résonant. SUB ajoute un carré une octave plus bas.\n- EDIT 1 : **DETUNE** (déf. 64 ; presque immobile jusqu'à la moitié, puis très large), **MIX** (déf. 90), **CUTOFF**\n  (déf. 110), **RES** (déf. 10).\n- EDIT 2 : **HPF** (déf. 64), **DRIVE**, **KEYTRK** (déf. 64), **SUB**.\n- HOME : DETUNE, MIX, CUTOFF, RELEASE. CC74 = CUTOFF, CC71 = RES.\n- Les routes SHP (ENV, LFO, matrice) bougent DETUNE.\n- **Voix** : 6 par piste, des accords polyphoniques. L'unisson ANALOG, lui, empile une seule note sur 8 voix.\n- **Largeur** : SPREAD de la piste (VOICE 2) et CHORUS.\n- **Usages** : leads et pads trance (LD SS ANTHEM, PA SS SWELL), plucks (PL SS TRANCE), stabs, basse de contretemps.",
+"gir": true,
+"params": {
+"CUTOFF": "(déf. 110)",
+"DETUNE": "(déf. 64 ; presque immobile jusqu'à la moitié, puis très large)",
+"HPF": "(déf. 64)",
+"KEYTRK": "(déf. 64)",
+"MIX": "(déf. 90)",
+"RES": "(déf. 10).",
+"SUB": "."
+},
+"titles": [
+"SAW",
+"FLT"
+]
+},
+"TRIO": {
+"doc": "- EDIT 1 :\n  - **WAVE** : 16 jeux SAW3, PLS3, PPT, SST, TRI3, S&T, P&S, P+N, NOIS, SYNC, SYNCP, SYNC3, RING, RING3, R+S, R+SP ;\n  - **PITCH2** et **PITCH3** (±24 demi-tons) ;\n  - **DETUNE**.\n- EDIT 2 : **MODE** (LP, BP, HP, NOT), **CUTOFF**, **RES**, **PW**.\n- CC74 = CUTOFF, CC71 = RES.\n- **Astuce** : PITCH2 = +3 et PITCH3 = +7 donnent une triade mineure sur une seule touche (ST TRIO MIN, le stab de\n  *The Bells*).",
+"gir": false,
+"home": "CUTOFF, RES, PW, PITCH2",
+"key": "E4",
+"params": {
+"DETUNE": ".",
+"MODE": "(LP, BP, HP, NOT)",
+"PITCH2": "et",
+"PITCH3": "(±24 demi-tons)",
+"PW": ".",
+"WAVE": "16 jeux SAW3, PLS3, PPT, SST, TRI3, S&T, P&S, P+N, NOIS, SYNC, SYNCP, SYNC3, RING, RING3, R+S, R+SP"
+},
+"principle": "3 oscillateurs « puce 8 bits », sync, anneau, filtre multimode",
+"titles": [
+"OSC",
+"TONE"
+],
+"uses": "stabs d'accord en une touche, chip, cowbell",
+"voices": "16"
+}
+},
+"pages": {
+"ARP/ARP": {
+"knobs": [
+"MODE : OFF, UP, DN, UPDN, RND, ORD, REPEAT, DNUP, UP+8, CONV, DIVG, PINKY, THUMB, WALK, CHORD",
+"RATE : 1/4, 1/8, 1/16, 1/32, 8T, 16T, 1/2, 1/1, 2BAR, 4BAR ; déf. 1/16",
+"OCTAVE 1–4",
+"GATE, déf. 50 %"
+],
+"what": ""
+},
+"ARP/ARP 2": {
+"knobs": [
+"SWING, 0–100 %",
+"CHANCE (probabilité de chaque note), déf. 100 %",
+"HOLD : OFF / ON (avec MODE OFF : KBD HOLD, les notes tiennent)",
+"ORDER : NOTE ou PLAYED"
+],
+"what": ""
+},
+"EDIT/KICK": {
+"knobs": [
+"K.CLICK",
+"K.PUNCH",
+"—",
+"—"
+],
+"what": "DRUM, DRUM-X"
+},
+"EDIT/LANE MIX": {
+"knobs": [
+"LANE",
+"LEVEL",
+"PAN",
+"—"
+],
+"what": "DRUM, DRUM-X"
+},
+"EDIT/LANES": {
+"knobs": [
+"LANE (la voie : KICK, SNARE, CLAP, CL HAT, OP HAT, TOM, RIM, BELL)",
+"LEVEL",
+"TUNE",
+"DECAY"
+],
+"what": "DRUM"
+},
+"EDIT/RUMBLE": {
+"knobs": [
+"RUMBLE : la quantité de rumble ; 0 = coupé, rien n'est calculé (0–127 (%), déf. 0)",
+"R.SLICE : le motif du rumble entre deux kicks, calé sur le tempo (ci-dessous) (CLASSIC, OFFBEAT, DOUBLE, ROLL, GATE ; déf. CLASSIC)",
+"R.DECAY : la longueur de la queue (de ~0,3 s à ~3 s) (0–127, déf. 80)",
+"R.TONE : la coupure du passe-bas résonant, de 40 à 300 Hz : de sourd à grondant (0–127, déf. 50)"
+],
+"what": "DRUM, DRUM-X"
+},
+"EDIT/RUMBLE 2": {
+"knobs": [
+"R.TUNE : la note du grave (A = 55 Hz). E à B dans l'octave 1, C à D# dans l'octave 2 (41 à 78 Hz). OFF : la reverb seule, un grondement sans note (OFF, C, C#, … B ; déf. A)",
+"R.DRIVE : la saturation (x1 à x16, niveau compensé) : de rond à rugueux (0–127, déf. 60)",
+"R.DUCK : la remontée : sous chaque kick, le rumble tombe à zéro en ~5 ms, puis remonte en 20 ms (bas) à 600 ms (haut). 0 = pas de ducking (0–127, déf. 64)",
+"R.ATTACK : le départ : en CLASSIC, un fondu d'entrée de 0 à 300 ms à partir du kick (le rumble arrive plus tard, « derrière » le kick) ; dans les motifs, la montée de chaque impulsion (de nette à gonflée) (0–127, déf. 0)"
+],
+"what": "DRUM, DRUM-X"
+},
+"EDIT/VOICE": {
+"knobs": [
+"VOICE : POLY, MONO, LEG (legato), UNI (unisson : 8 voix empilées)",
+"GLIDE (portamento), CC5",
+"GL MODE : RATE ou TIME",
+"PRIORITY : LAST, LOW, HIGH"
+],
+"what": ""
+},
+"EDIT/VOICE 2": {
+"knobs": [
+"ALLOC : ROT ou REUSE",
+"DETUNE (le désaccord de l'unisson), déf. 40",
+"SPREAD (les voix étalées gauche / droite), déf. 0",
+"—"
+],
+"what": ""
+},
+"ENV/ENV": {
+"knobs": [
+"ATTACK, 1 ms–10 s, déf. 10 (≈2 ms), CC73",
+"DECAY, déf. 70 (≈160 ms), CC75",
+"SUSTAIN, 0–100 %, déf. 90",
+"RELEASE, déf. 60 (≈80 ms), CC72"
+],
+"what": "volume de la note"
+},
+"ENV/ENV 2": {
+"knobs": [
+"ATTACK, déf. 0",
+"DECAY, déf. 60",
+"SUSTAIN, déf. 0",
+"RELEASE, déf. 40"
+],
+"what": "enveloppe de modulation, une source de MOD"
+},
+"FX/DELAY": {
+"knobs": [
+"SEND (l'envoi de la piste)",
+"TIME (global)",
+"FEEDBACK (global)",
+"COLOR (global) — PRESETS : MODE"
+],
+"what": ""
+},
+"FX/DRIVE": {
+"knobs": [
+"DIST (quantité)",
+"TYPE : SOFT, HARD, FOLD, CRUSH, FUZZ",
+"TONE, −100 à +100 %",
+"—"
+],
+"what": ""
+},
+"FX/DUCK": {
+"knobs": [
+"BY : OFF ou T1–T6 (la piste sous laquelle on s'efface)",
+"DEPTH, déf. 96 (100 % = silence)",
+"RELEASE, déf. ≈199 ms",
+"—"
+],
+"what": "sidechain"
+},
+"FX/FX": {
+"knobs": [
+"DIST, 0–100 %, déf. 0",
+"CHORUS, déf. 24, CC93",
+"DELAY, déf. 28, CC94",
+"REVERB, déf. 36, CC91"
+],
+"what": "les envois"
+},
+"FX/INSERT": {
+"knobs": [
+"TYPE : OFF, SOFT, HARD, FOLD, FUZZ, CRUSH, PHASR, FLANG, CHOR, FILTR",
+"A",
+"B",
+"C — PRESETS : MIX (déf. 100 %)"
+],
+"what": "un effet en série sur la piste"
+},
+"FX/REVERB": {
+"knobs": [
+"SEND",
+"TYPE (global)",
+"SIZE (global)",
+"DAMP (global)"
+],
+"what": ""
+},
+"FX/SLICER": {
+"knobs": [
+"SLICER : OFF, GATE, STUT",
+"PATTERN 1–16",
+"RATE : 1/8, 8T, 1/16, 16T, 1/32, 32T",
+"DEPTH, déf. 100 %"
+],
+"what": "hachage rythmique"
+},
+"GLO/CHORUS": {
+"knobs": [
+"RATE, déf. ≈0,4 Hz",
+"DEPTH, déf. 60",
+"MODE : CHORUS, FLANGER, PHASER",
+"FEEDBACK"
+],
+"what": "5/6, global"
+},
+"GLO/DELAY": {
+"knobs": [
+"TIME : 1/4, 1/8, 1/16, 1/32, 8T, 16T, 1/2, 1/1, 2BAR, 4BAR, 1/8D, 1/16D, 1/4D ; déf. 1/8",
+"FEEDBACK, 0–120 %, déf. 60",
+"COLOR, déf. 70",
+"MIX, déf. 90 — PRESETS : MODE MONO, STEREO, PING"
+],
+"what": "3/6, global"
+},
+"GLO/EQ": {
+"knobs": [
+"LOW (< 200 Hz) : KILL … 0 dB (au milieu, 64) … +6 dB, CC24",
+"MID (200 Hz – 2,5 kHz), CC25",
+"HIGH (> 2,5 kHz), CC26",
+"DEPTH 0–127 (devant ↔ au fond), CC27"
+],
+"what": "2/6 Gir"
+},
+"GLO/GLOBAL": {
+"knobs": [
+"BPM, 40–240, déf. 120",
+"SWING+ (s'ajoute au SWING des patterns), 0–100 %",
+"—",
+"—"
+],
+"what": "6/6"
+},
+"GLO/MIXER": {
+"knobs": [
+"LEVEL (dB), CC7",
+"PAN, CC10",
+"REVERB (l'envoi)",
+"MUTE (OFF / ON)"
+],
+"what": "1/6"
+},
+"GLO/REVERB": {
+"knobs": [
+"TYPE : ROOM, SPRING, HALL",
+"SIZE, déf. 90",
+"DAMP, déf. 60",
+"—"
+],
+"what": "4/6, global"
+},
+"LFO/LFO": {
+"knobs": [
+"RATE, 0,05–40 Hz, déf. 1,1 Hz",
+"WAVE : SIN, TRI, SAW, SQR, S&H",
+"PHASE, 0–127 (phase de départ)",
+"FADE (temps de montée de la profondeur)"
+],
+"what": ""
+},
+"LFO/LFO 2": {
+"knobs": [
+"SYNC : OFF (RATE en Hz) ou 4BAR, 2BAR, 1/1, 1/2, 1/4, 1/8, 8T, 1/16, 16T, 1/32",
+"TRIG : NOTE (repart à chaque note) ou FREE",
+"POLARITY : BI (autour de la valeur) ou UNI (d'un seul côté)",
+"ENV SYNC : OFF ou ON (ENV en valeurs de note)"
+],
+"what": ""
+},
+"LFO/MOD": {
+"knobs": [
+"ROUTE 1–11 (voir ci-dessous)",
+"selon la route",
+"selon la route",
+"AMOUNT, −100 à +100 %"
+],
+"what": ""
+},
+"SAVE/PATTERNS": {
+"knobs": [
+"PATTERN 01–64",
+"LENGTH (affichage)",
+"USED (nombre d'entrées qui l'utilisent)",
+"ACTION : CLEAR, EMPTY, UNUSED (OCT+, à l'arrêt, après confirmation)"
+],
+"what": "le pool de 64"
+},
+"SAVE/PRESETS": {
+"knobs": [
+"No. (le son ; = PRESETS)",
+"ENG (saute au premier son du moteur suivant)",
+"FAV (à droite : favori, à gauche : retiré)",
+"LIST : ALL, FAV, BASS, LEAD, PAD, KEYS, PLUCK, DRUM, FX"
+],
+"what": ""
+},
+"SAVE/PROJECT": {
+"knobs": [
+"SLOT 1–4",
+"DELETE (un cran plus loin : NAME, renommer)",
+"LOAD, ou NEW sur un slot vide ; plus loin : CLEAR SONG, CLEAR TRACKS",
+"SAVE (OCT+ → NAME → OCT+)"
+],
+"what": "4 projets, A–D"
+},
+"SAVE/USER": {
+"knobs": [
+"SLOT U01–U32",
+"LOAD (OCT+)",
+"ERASE (OCT+, après confirmation)",
+"SAVE (OCT+ → écran NAME → OCT+)"
+],
+"what": "32 sons utilisateur"
+},
+"SCL/CHORD": {
+"knobs": [
+"CHORD : OFF, DIA3, DIA7, MAJ, MIN, DOM7, MAJ7, MIN7, SUS4, POW",
+"VOICING : CLOSE, OPEN, INV1, INV2, +OCT",
+"STRUM, ms entre les notes",
+"DIR : DOWN, UP, ALT"
+],
+"what": "une touche = un accord"
+},
+"SCL/FOLLOW": {
+"knobs": [
+"FOLLOW : OFF, T1–T6",
+"MODE : KEY, SCALE, FIT",
+"NOTE : ROOT, LOW, HIGH, LAST",
+"—"
+],
+"what": "suivre les accords d'une autre piste"
+},
+"SCL/SCALE": {
+"knobs": [
+"ROOT : C … B",
+"SCALE : CHR, MAJ, MIN, DOR, MIX, PEN, MPEN, HARM, PHRY, LYD, LOC, MEL, BLUES, WHOLE, DIMHW, DIMWH",
+"QUANTIZE : OFF, SNAP, WHITE, SEQ, SEQ+T, SOLO",
+"TRANSP, ±24 demi-tons"
+],
+"what": ""
+},
+"SEQ/AUTOMATION": {
+"knobs": [
+"ROW (la ligne)",
+"STEP (le pas)",
+"PARAM (le réglage)",
+"VALUE (la valeur)"
+],
+"what": ""
+},
+"SEQ/FEEL": {
+"knobs": [
+"CHANCE : OFF, 1–100 %, puis conditions FILL, !FILL, 1:2 … 4:4",
+"RATCHET : ×1–×4, FLAM",
+"NUDGE, −32 à +31 soixante-quatrièmes de pas",
+"TYPE : « - », ACC, SLD, A+S (accent + slide)"
+],
+"what": "16 tuiles"
+},
+"SEQ/NOTES": {
+"knobs": [
+"LANE",
+"HIT",
+"ACC",
+"VELOCITY"
+],
+"what": "sur une piste DRUM / DRUM-X grille"
+},
+"SEQ/PATTERN": {
+"knobs": [
+"LENGTH 1–64",
+"DIV : 1/4 … 1/32, triolets, 1/2, 1/1, 2BAR, 4BAR ; déf. 1/16",
+"SWING, 0–100 %",
+"GATE, 1–100 %, déf. 100 %"
+],
+"what": ""
+},
+"SEQ/SONG": {
+"knobs": [
+"l'entrée A–P",
+"ce qu'on y met : REST, un pattern, NEW, COPY, COPY+, CLEAR, SOUND, NO SOUND (OCT+ applique)",
+"REPS : CHAIN, 1x–16x",
+"SONG : OFF, ON, ONCE"
+],
+"what": ""
+}
+},
+"reference": [
+{
+"action": "tourner",
+"cc": "",
+"control": "MASTER",
+"effect": "Volume général (haut-parleur, casque, USB si USB LEVEL=MASTER)",
+"note": "Règle aussi le clic",
+"range": "0–100 %",
+"where": "Partout"
+},
+{
+"action": "tourner",
+"cc": "CC87 (REMOTE)",
+"control": "SELECT",
+"effect": "Page précédente/suivante de la famille",
+"note": "Dans le MENU : onglet",
+"range": "",
+"where": "Partout (BPM LOCK ON)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "SELECT",
+"effect": "Tempo",
+"note": "",
+"range": "40–240 BPM",
+"where": "Partout (BPM LOCK OFF)"
+},
+{
+"action": "maintenu GLO, tourner SELECT",
+"cc": "",
+"control": "GLO + SELECT",
+"effect": "Tempo",
+"note": "",
+"range": "40–240 BPM",
+"where": "Partout"
+},
+{
+"action": "tourner",
+"cc": "CC86 (REMOTE)",
+"control": "PRESETS",
+"effect": "Son suivant/précédent (filtré par LIST)",
+"note": "Une suite de crans = une annulation",
+"range": "",
+"where": "HOME, pages de son"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "PRESETS",
+"effect": "Curseur de pas",
+"note": "",
+"range": "1–64",
+"where": "SEQ › NOTES, FEEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "PRESETS",
+"effect": "Direction",
+"note": "",
+"range": "FWD, RVRS, PING, RAND",
+"where": "SEQ › PATTERN"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "PRESETS",
+"effect": "MODE du delay",
+"note": "",
+"range": "MONO, STEREO, PING",
+"where": "GLO › DELAY, FX › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "PRESETS",
+"effect": "MIX de l'insert",
+"note": "",
+"range": "0–100 %",
+"where": "FX › INSERT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "PRESETS",
+"effect": "Choisir la ligne",
+"note": "",
+"range": "",
+"where": "Listes (USER, PATTERNS, PROJECT, AUTOMATION, SONG)"
+},
+{
+"action": "maintenu HOME, tourner",
+"cc": "",
+"control": "SHIFT + PRESETS",
+"effect": "Étendre la sélection sur une plage",
+"note": "",
+"range": "",
+"where": "NOTES, FEEL"
+},
+{
+"action": "tourner",
+"cc": "CC85 (REMOTE)",
+"control": "ALGORITHM",
+"effect": "Choisir la piste",
+"note": "Dans le MENU : onglet",
+"range": "T1–T6",
+"where": "Partout"
+},
+{
+"action": "tourner",
+"cc": "CC116 (REMOTE)",
+"control": "KNOB 1",
+"effect": "Carte 1 de la page",
+"note": "",
+"range": "selon la page",
+"where": "Partout"
+},
+{
+"action": "tourner",
+"cc": "CC117 (REMOTE)",
+"control": "KNOB 2",
+"effect": "Carte 2 de la page",
+"note": "",
+"range": "selon la page",
+"where": "Partout"
+},
+{
+"action": "tourner",
+"cc": "CC118 (REMOTE)",
+"control": "KNOB 3",
+"effect": "Carte 3 de la page",
+"note": "",
+"range": "selon la page",
+"where": "Partout"
+},
+{
+"action": "tourner",
+"cc": "CC119 (REMOTE)",
+"control": "KNOB 4",
+"effect": "Carte 4 de la page",
+"note": "",
+"range": "selon la page",
+"where": "Partout"
+},
+{
+"action": "maintenir un pas, tourner",
+"cc": "",
+"control": "KNOB 1–4",
+"effect": "Lock : valeur propre au pas",
+"note": "Knobs de la dernière page de son",
+"range": "",
+"where": "SEQ › NOTES (pas tenu)"
+},
+{
+"action": "maintenu LFO, tourner",
+"cc": "",
+"control": "LFO + KNOB 1–4",
+"effect": "MOMENTARY : valeur temporaire",
+"note": "Revient selon RETURN ; OCT+ garde",
+"range": "",
+"where": "HOME, page de son, FX, MIXER, EQ"
+},
+{
+"action": "court",
+"cc": "CC114 (REMOTE)",
+"control": "OCT−",
+"effect": "Octave −1",
+"note": "",
+"range": "−3 à +3",
+"where": "Partout"
+},
+{
+"action": "court",
+"cc": "CC115 (REMOTE)",
+"control": "OCT+",
+"effect": "Octave +1",
+"note": "",
+"range": "−3 à +3",
+"where": "Partout"
+},
+{
+"action": "court ensemble",
+"cc": "",
+"control": "OCT− + OCT+",
+"effect": "Octave à 0",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "court",
+"cc": "",
+"control": "OCT+",
+"effect": "Faire (SAVE, LOAD, CLEAR…)",
+"note": "",
+"range": "",
+"where": "Pages d'action, dialogues"
+},
+{
+"action": "court",
+"cc": "",
+"control": "OCT−",
+"effect": "Annuler / revenir (sinon HOME)",
+"note": "",
+"range": "",
+"where": "Pages d'action, dialogues"
+},
+{
+"action": "court",
+"cc": "",
+"control": "OCT− / OCT+",
+"effect": "Annuler plus loin / refaire",
+"note": "",
+"range": "6 niveaux",
+"where": "Boîte d'annulation"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + OCT−",
+"effect": "Copier la sélection",
+"note": "",
+"range": "",
+"where": "NOTES, FEEL"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + OCT+",
+"effect": "Coller",
+"note": "",
+"range": "",
+"where": "NOTES, FEEL"
+},
+{
+"action": "maintenus 5 s",
+"cc": "",
+"control": "OCT− + OCT+",
+"effect": "Mode démarrage de la puce (disque WL82 UBOOT1.00)",
+"note": "Réparation",
+"range": "",
+"where": "Démarrage"
+},
+{
+"action": "court (relâché)",
+"cc": "CC102 (REMOTE)",
+"control": "FX",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "FX, DELAY, REVERB, DRIVE, INSERT, SLICER, DUCK",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC103 (REMOTE)",
+"control": "SEL",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "SCALE, CHORD, FOLLOW",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC104 (REMOTE)",
+"control": "ENV",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "ENV, ENV 2",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC105 (REMOTE)",
+"control": "LFO",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "LFO, LFO 2, MOD",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC106 (REMOTE)",
+"control": "EDIT",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "EDIT 1, EDIT 2, pages du moteur, VOICE, VOICE 2",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC107 (REMOTE)",
+"control": "GLO",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "MIXER, EQ, DELAY, REVERB, CHORUS, GLOBAL",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC108 (REMOTE)",
+"control": "HOME",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "HOME",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC109 (REMOTE)",
+"control": "SAVE",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "PRESETS, USER, PATTERNS, PROJECT",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC110 (REMOTE)",
+"control": "ARP",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "ARP, ARP 2",
+"where": "Partout"
+},
+{
+"action": "court (relâché)",
+"cc": "CC111 (REMOTE)",
+"control": "SEQ",
+"effect": "Ouvre la famille ; de nouveau : page suivante",
+"note": "Rouvre la dernière page de la famille",
+"range": "NOTES, FEEL, PATTERN, AUTOMATION, SONG",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "FX",
+"effect": "Layer FX : effets de performance",
+"note": "Voir lignes « Layer FX »",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "SEL",
+"effect": "Layer SEL : une touche = ROOT",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "EDIT",
+"effect": "Layer EDIT : choisir le moteur",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "GLO",
+"effect": "Layer GLO : solos, mutes, FILL, TAP, niveaux",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "ARP",
+"effect": "Layer PERFORM",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "SEQ",
+"effect": "Layer SEQ TOOLS",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "LFO",
+"effect": "MOMENTARY avec les knobs",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "HOME",
+"effect": "SHIFT : carte de toutes les commandes",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu puis lâché seul",
+"cc": "",
+"control": "HOME",
+"effect": "Ouvre le MENU",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "court",
+"cc": "",
+"control": "HOME",
+"effect": "Bascule vue pistes / scope",
+"note": "",
+"range": "",
+"where": "HOME"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "SAVE",
+"effect": "Annuler (un niveau)",
+"note": "",
+"range": "6 niveaux",
+"where": "Partout"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + SAVE",
+"effect": "TAKE (dernière boucle) / FREE TAKE (à l'arrêt)",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + REC",
+"effect": "Layer REC verrouillé",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + bouton de layer",
+"effect": "Verrouille le layer (LOCKED)",
+"note": "Le bouton le referme",
+"range": "FX, GLO, SEL, EDIT, ARP, SEQ",
+"where": "Partout"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + EDIT",
+"effect": "Supprimer la sélection",
+"note": "",
+"range": "",
+"where": "NOTES, FEEL"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + EDIT",
+"effect": "Vider l'entrée",
+"note": "SAVE tenu la rend",
+"range": "",
+"where": "SEQ › SONG"
+},
+{
+"action": "maintenu HOME",
+"cc": "",
+"control": "SHIFT + PLAY",
+"effect": "Jouer la song depuis l'entrée",
+"note": "",
+"range": "",
+"where": "SEQ › SONG"
+},
+{
+"action": "court",
+"cc": "CC112 (REMOTE)",
+"control": "PLAY",
+"effect": "Démarrer / arrêter",
+"note": "Marche aussi dans le MENU",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "maintenu GLO",
+"cc": "",
+"control": "GLO + PLAY",
+"effect": "RESTART : du début sans arrêter",
+"note": "",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "court (pression)",
+"cc": "CC113 (REMOTE)",
+"control": "REC",
+"effect": "Armer la piste ; à l'arrêt démarre aussi (sauf piano roll)",
+"note": "Sur piste armée : désarme tout",
+"range": "",
+"where": "Partout"
+},
+{
+"action": "court",
+"cc": "",
+"control": "EDIT",
+"effect": "Efface le pas sous le curseur",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES, REC armé"
+},
+{
+"action": "court",
+"cc": "",
+"control": "EDIT",
+"effect": "Efface les locks du pas",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES, pas tenu"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F3",
+"effect": "Moteur ANALOG",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G3",
+"effect": "Moteur FM6",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche A3",
+"effect": "Moteur PHASE",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche B3",
+"effect": "Moteur SUPERSAW",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche C4",
+"effect": "Moteur SAMPLE",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche D4",
+"effect": "Moteur ACID",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche E4",
+"effect": "Moteur TRIO",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F4",
+"effect": "Moteur MINI",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G4",
+"effect": "Moteur GRAIN",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche A4",
+"effect": "Moteur PHYS",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche B4",
+"effect": "Moteur NOISE",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche C5",
+"effect": "Moteur HOOVER",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche D5",
+"effect": "Moteur DRUM",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche E5",
+"effect": "Moteur DRUM-X",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F5",
+"effect": "Moteur INDUS",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G5",
+"effect": "INIT : son de départ (confirmer OCT+)",
+"note": "",
+"range": "",
+"where": "Layer EDIT (EDIT tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noires 1–8",
+"effect": "Couper/rallumer la voie",
+"note": "OCT+ : toutes rallumées",
+"range": "KICK…BELL",
+"where": "Layer EDIT (piste DRUM/DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ENG (moteur)",
+"note": "",
+"range": "",
+"where": "Layer EDIT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "No. (son)",
+"note": "",
+"range": "",
+"where": "Layer EDIT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "FAV",
+"note": "",
+"range": "",
+"where": "Layer EDIT"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche F3",
+"effect": "SOLO T1",
+"note": "",
+"range": "",
+"where": "Layer GLO (GLO tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche G3",
+"effect": "SOLO T2",
+"note": "",
+"range": "",
+"where": "Layer GLO (GLO tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche A3",
+"effect": "SOLO T3",
+"note": "",
+"range": "",
+"where": "Layer GLO (GLO tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche B3",
+"effect": "SOLO T4",
+"note": "",
+"range": "",
+"where": "Layer GLO (GLO tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche C4",
+"effect": "SOLO T5",
+"note": "",
+"range": "",
+"where": "Layer GLO (GLO tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche D4",
+"effect": "SOLO T6",
+"note": "",
+"range": "",
+"where": "Layer GLO (GLO tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche E4",
+"effect": "UNMUTE ALL",
+"note": "",
+"range": "",
+"where": "Layer GLO"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche F4",
+"effect": "FILL (pas en condition FILL)",
+"note": "",
+"range": "",
+"where": "Layer GLO"
+},
+{
+"action": "appuis en rythme",
+"cc": "",
+"control": "Touche G4",
+"effect": "TAP tempo",
+"note": "",
+"range": "",
+"where": "Layer GLO"
+},
+{
+"action": "court / maintenu",
+"cc": "",
+"control": "Touche F#3",
+"effect": "MUTE T1 (court : bascule ; maintenu : coupe tant que tenu)",
+"note": "",
+"range": "",
+"where": "Layers GLO, FX, PERFORM"
+},
+{
+"action": "court / maintenu",
+"cc": "",
+"control": "Touche G#3",
+"effect": "MUTE T2 (court : bascule ; maintenu : coupe tant que tenu)",
+"note": "",
+"range": "",
+"where": "Layers GLO, FX, PERFORM"
+},
+{
+"action": "court / maintenu",
+"cc": "",
+"control": "Touche A#3",
+"effect": "MUTE T3 (court : bascule ; maintenu : coupe tant que tenu)",
+"note": "",
+"range": "",
+"where": "Layers GLO, FX, PERFORM"
+},
+{
+"action": "court / maintenu",
+"cc": "",
+"control": "Touche C#4",
+"effect": "MUTE T4 (court : bascule ; maintenu : coupe tant que tenu)",
+"note": "",
+"range": "",
+"where": "Layers GLO, FX, PERFORM"
+},
+{
+"action": "court / maintenu",
+"cc": "",
+"control": "Touche D#4",
+"effect": "MUTE T5 (court : bascule ; maintenu : coupe tant que tenu)",
+"note": "",
+"range": "",
+"where": "Layers GLO, FX, PERFORM"
+},
+{
+"action": "court / maintenu",
+"cc": "",
+"control": "Touche F#4",
+"effect": "MUTE T6 (court : bascule ; maintenu : coupe tant que tenu)",
+"note": "",
+"range": "",
+"where": "Layers GLO, FX, PERFORM"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "Niveau d'une des 4 pistes affichées",
+"note": "",
+"range": "",
+"where": "Layer GLO"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "Niveau d'une des 4 pistes affichées",
+"note": "",
+"range": "",
+"where": "Layer GLO"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "Niveau d'une des 4 pistes affichées",
+"note": "",
+"range": "",
+"where": "Layer GLO"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "Niveau d'une des 4 pistes affichées",
+"note": "",
+"range": "",
+"where": "Layer GLO"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche F3",
+"effect": "Effet REPEAT 1/8",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche G3",
+"effect": "Effet REPEAT 1/16",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche A3",
+"effect": "Effet REPEAT 1/32",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche B3",
+"effect": "Effet REVERSE",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche C4",
+"effect": "Effet LPF (se ferme sur 1 mesure)",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche D4",
+"effect": "Effet HPF (s'ouvre sur 1 mesure)",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche E4",
+"effect": "Effet TAPE STOP",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche F4",
+"effect": "Effet FREEZE",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche G4",
+"effect": "Effet OCT UP",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche A4",
+"effect": "Effet OCT DN",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche B4",
+"effect": "Effet GATE (double croches)",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche C5",
+"effect": "Effet DUB (mix dans le delay)",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche D5",
+"effect": "Effet FLANGE",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "maintenu",
+"cc": "",
+"control": "Touche E5",
+"effect": "Effet VINYL",
+"note": "Verrouillé (SHIFT+FX) : appui = marche/arrêt",
+"range": "",
+"where": "Layer FX (FX tenu)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "FILTER (gauche passe-bas, droite passe-haut)",
+"note": "Revient au relâchement ; FX+OCT+ garde",
+"range": "",
+"where": "Layer FX"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "CRUSH",
+"note": "Revient au relâchement ; FX+OCT+ garde",
+"range": "",
+"where": "Layer FX"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "THROW (mix vers delay+reverb)",
+"note": "Revient au relâchement ; FX+OCT+ garde",
+"range": "",
+"where": "Layer FX"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DEPTH (quantité d'effet)",
+"note": "Revient au relâchement ; FX+OCT+ garde",
+"range": "",
+"where": "Layer FX"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F3",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G3",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche A3",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche B3",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche C4",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche D4",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche E4",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F4",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G4",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche A4",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche B4",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche C5",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche D5",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche E5",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F5",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G5",
+"effect": "ROOT = nom de la note de la touche",
+"note": "",
+"range": "",
+"where": "Layer SEL (SEL tenu)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ROOT",
+"note": "",
+"range": "",
+"where": "Layer SEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "SCALE",
+"note": "",
+"range": "",
+"where": "Layer SEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "CHORD",
+"note": "",
+"range": "",
+"where": "Layer SEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "VOICING",
+"note": "",
+"range": "",
+"where": "Layer SEL"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F3",
+"effect": "CLEAR",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G3",
+"effect": "REVERSE",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche A3",
+"effect": "SHIFT <",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche B3",
+"effect": "SHIFT >",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche C4",
+"effect": "RANDOM",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche D4",
+"effect": "COOK",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche E4",
+"effect": "BEAT (DRUM)",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F4",
+"effect": "EUCLID (OCT+ applique)",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G4",
+"effect": "DRUM : CLEAR voie / ACID : nouvelle ligne acid",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche A4",
+"effect": "DRUM : REVERSE voie / ACID : RHYTHM",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche B4",
+"effect": "DRUM : FILL voie / ACID : NOTES (octaves)",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche C5",
+"effect": "DRUM : RANDOM voie / ACID : ACC/SLD",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche D5",
+"effect": "DOUBLE",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche E5",
+"effect": "HALF",
+"note": "Une annulation par appui",
+"range": "",
+"where": "Layer SEQ TOOLS (SEQ tenu)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "LENGTH",
+"note": "",
+"range": "",
+"where": "Layer SEQ TOOLS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DIV",
+"note": "",
+"range": "",
+"where": "Layer SEQ TOOLS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SWING",
+"note": "",
+"range": "",
+"where": "Layer SEQ TOOLS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "GATE",
+"note": "",
+"range": "",
+"where": "Layer SEQ TOOLS"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noires 1–8",
+"effect": "Choisir la voie des outils",
+"note": "",
+"range": "",
+"where": "Layer SEQ TOOLS (DRUM)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche F3",
+"effect": "CLEAR (maintenu : efface la séquence)",
+"note": "",
+"range": "",
+"where": "Layer REC (SHIFT+REC)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche G3",
+"effect": "CLICK OFF/REC/ON",
+"note": "",
+"range": "",
+"where": "Layer REC (SHIFT+REC)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche A3",
+"effect": "COUNT-IN OFF/1 BAR/2 BARS",
+"note": "",
+"range": "",
+"where": "Layer REC (SHIFT+REC)"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touche B3",
+"effect": "CLICK LEVEL LOW/MID/HIGH",
+"note": "",
+"range": "",
+"where": "Layer REC (SHIFT+REC)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CLICK",
+"note": "",
+"range": "",
+"where": "Layer REC"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "COUNT-IN",
+"note": "",
+"range": "",
+"where": "Layer REC"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "CLICK LEVEL",
+"note": "",
+"range": "",
+"where": "Layer REC"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "FEEL",
+"note": "",
+"range": "",
+"where": "Layer REC"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Blanches",
+"effect": "KEYS TRACK : lancer l'entrée A–P / KEYS SCENE : rappeler la scène 1–16",
+"note": "Au point LAUNCH",
+"range": "",
+"where": "Layer PERFORM (ARP tenu)"
+},
+{
+"action": "maintenu SAVE",
+"cc": "",
+"control": "SAVE + blanche",
+"effect": "Enregistrer une scène (KEYS SCENE)",
+"note": "",
+"range": "",
+"where": "Layer PERFORM"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "SELECT",
+"effect": "LAUNCH",
+"note": "",
+"range": "LOOP, BAR, BEAT, NOW",
+"where": "Layer PERFORM"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "PRESETS",
+"effect": "KEYS",
+"note": "",
+"range": "TRACK, SCENE",
+"where": "Layer PERFORM"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "throw CUTOFF",
+"note": "Revient sur 1 mesure ; OCT+ garde",
+"range": "",
+"where": "Layer PERFORM"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "throw REVERB",
+"note": "Revient sur 1 mesure ; OCT+ garde",
+"range": "",
+"where": "Layer PERFORM"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "throw DELAY",
+"note": "Revient sur 1 mesure ; OCT+ garde",
+"range": "",
+"where": "Layer PERFORM"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "throw DIST",
+"note": "Revient sur 1 mesure ; OCT+ garde",
+"range": "",
+"where": "Layer PERFORM"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touches",
+"effect": "Jouer la piste choisie",
+"note": "Notes MIDI sur le canal de la piste",
+"range": "F3–G5 + octave",
+"where": "Jeu"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touches",
+"effect": "Choisir une note de la sélection",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES, REC non armé"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touches",
+"effect": "Écrire au curseur (pas à pas)",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES, REC armé, arrêt"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Touches",
+"effect": "Enregistrer en direct",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES, REC armé, lecture"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Blanches",
+"effect": "Les pas : poser/enlever un coup",
+"note": "",
+"range": "",
+"where": "Grille DRUM"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noires 1–8",
+"effect": "Choisir la voie",
+"note": "",
+"range": "",
+"where": "Grille DRUM"
+},
+{
+"action": "appuis",
+"cc": "",
+"control": "Blanches",
+"effect": "Groupes de lettres AB, CD…0-. (appui répété = lettre suivante)",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noire F#",
+"effect": "curseur à gauche",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noire G#",
+"effect": "ESPACE",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noire A#",
+"effect": "curseur à droite",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noire C#",
+"effect": "effacer",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "appui",
+"cc": "",
+"control": "Noire D#",
+"effect": "lettres/chiffres",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "Déplacer le curseur",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "Choisir le caractère",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "court",
+"cc": "",
+"control": "OCT+ / OCT−",
+"effect": "Enregistrer / annuler",
+"note": "",
+"range": "",
+"where": "NAME"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RES",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "ATTACK",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "WAVE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "MIX",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "NOISE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RES (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DRIVE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "KEYTRK",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MOD LVL",
+"note": "",
+"range": "",
+"where": "HOME (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RATIO",
+"note": "",
+"range": "",
+"where": "HOME (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "MOD ENV",
+"note": "",
+"range": "",
+"where": "HOME (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "PATCH",
+"note": "",
+"range": "",
+"where": "HOME (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ALGO",
+"note": "",
+"range": "",
+"where": "EDIT 1 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "FEEDBACK",
+"note": "",
+"range": "",
+"where": "EDIT 1 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "MOD LVL (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RATIO",
+"note": "",
+"range": "",
+"where": "EDIT 1 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MOD ENV",
+"note": "",
+"range": "",
+"where": "EDIT 2 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "VEL MOD",
+"note": "",
+"range": "",
+"where": "EDIT 2 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "PATCH F1–F8/OWN",
+"note": "",
+"range": "",
+"where": "EDIT 2 (FM6)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DCW",
+"note": "",
+"range": "",
+"where": "HOME (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "ENV",
+"note": "",
+"range": "",
+"where": "HOME (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "HOME (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "HOME (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "WAVE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "WAVE2",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DCW (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "ENV",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "LINE MIX/RING",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SUB",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "FOLD",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHASE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "HOME (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "MIX",
+"note": "",
+"range": "",
+"where": "HOME (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "HOME (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "MIX",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RES (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "HPF",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DRIVE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "KEYTRK",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "SUB",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SUPERSAW)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SET",
+"note": "",
+"range": "",
+"where": "HOME (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "ATTACK",
+"note": "",
+"range": "",
+"where": "HOME (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "HOME (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SET",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PITCH",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "BITS",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "LOOP",
+"note": "",
+"range": "",
+"where": "EDIT 1 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "—",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DRIVE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "—",
+"note": "",
+"range": "",
+"where": "EDIT 2 (SAMPLE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RES",
+"note": "",
+"range": "",
+"where": "HOME (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "ENV MOD",
+"note": "",
+"range": "",
+"where": "HOME (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "HOME (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "WAVE SAW/SQR/SAW+SUB/SQR+SUB",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "RES (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "ENV MOD",
+"note": "",
+"range": "",
+"where": "EDIT 1 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "ACCENT",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "TUNE ±63 ct",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "SLIDE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (ACID)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RES",
+"note": "",
+"range": "",
+"where": "HOME (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "PW",
+"note": "",
+"range": "",
+"where": "HOME (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "PITCH2",
+"note": "",
+"range": "",
+"where": "HOME (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "WAVE (16 jeux)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PITCH2 ±24",
+"note": "",
+"range": "",
+"where": "EDIT 1 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "PITCH3 ±24",
+"note": "",
+"range": "",
+"where": "EDIT 1 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MODE LP/BP/HP/NOT",
+"note": "",
+"range": "",
+"where": "EDIT 2 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "RES (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "PW",
+"note": "",
+"range": "",
+"where": "EDIT 2 (TRIO)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "EMPH",
+"note": "",
+"range": "",
+"where": "HOME (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "CONTOUR",
+"note": "",
+"range": "",
+"where": "HOME (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "GLIDE",
+"note": "",
+"range": "",
+"where": "HOME (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "EMPH (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "CONTOUR",
+"note": "",
+"range": "",
+"where": "EDIT 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "F.ATK",
+"note": "",
+"range": "",
+"where": "EDIT 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "F.DEC",
+"note": "",
+"range": "",
+"where": "EDIT 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "F.SUS",
+"note": "",
+"range": "",
+"where": "EDIT 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "MOD",
+"note": "",
+"range": "",
+"where": "EDIT 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "SLOT 0–127",
+"note": "",
+"range": "",
+"where": "EDIT 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "POS",
+"note": "",
+"range": "",
+"where": "HOME (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "SIZE",
+"note": "",
+"range": "",
+"where": "HOME (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DENSITY",
+"note": "",
+"range": "",
+"where": "HOME (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "PITCH",
+"note": "",
+"range": "",
+"where": "HOME (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SOURCE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "POS",
+"note": "",
+"range": "",
+"where": "EDIT 1 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SIZE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DENSITY",
+"note": "",
+"range": "",
+"where": "EDIT 1 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "PITCH ±24",
+"note": "",
+"range": "",
+"where": "EDIT 2 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "SPREAD",
+"note": "",
+"range": "",
+"where": "EDIT 2 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "RANDOM",
+"note": "",
+"range": "",
+"where": "EDIT 2 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "TONE (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (GRAIN)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "STRUCT",
+"note": "",
+"range": "",
+"where": "HOME (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "BRIGHT",
+"note": "",
+"range": "",
+"where": "HOME (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DAMP",
+"note": "",
+"range": "",
+"where": "HOME (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "POS",
+"note": "",
+"range": "",
+"where": "HOME (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MODEL MODAL/STRNG/MEMB/SYMP",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "STRUCT",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "BRIGHT (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DAMP",
+"note": "",
+"range": "",
+"where": "EDIT 1 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "POS",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "ACCENT",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "BOW",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "EXCITE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (PHYS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RES",
+"note": "",
+"range": "",
+"where": "HOME (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "COLOR",
+"note": "",
+"range": "",
+"where": "HOME (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "HOME (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MODE ANLG/DUST/LFSR/META",
+"note": "",
+"range": "",
+"where": "EDIT 1 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "COLOR",
+"note": "",
+"range": "",
+"where": "EDIT 1 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RES (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "KEYTRK",
+"note": "",
+"range": "",
+"where": "EDIT 2 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DENSITY",
+"note": "",
+"range": "",
+"where": "EDIT 2 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DRIFT",
+"note": "",
+"range": "",
+"where": "EDIT 2 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "CRUSH",
+"note": "",
+"range": "",
+"where": "EDIT 2 (NOISE)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DIVE",
+"note": "",
+"range": "",
+"where": "HOME (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PWM",
+"note": "",
+"range": "",
+"where": "HOME (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "HOME (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DIVE 0–24 st",
+"note": "",
+"range": "",
+"where": "EDIT 1 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "D.TIME",
+"note": "",
+"range": "",
+"where": "EDIT 1 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "PWM",
+"note": "",
+"range": "",
+"where": "EDIT 1 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DETUNE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RES (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SUB",
+"note": "",
+"range": "",
+"where": "EDIT 2 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DRIVE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (HOOVER)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "PITCH",
+"note": "",
+"range": "",
+"where": "HOME (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "TONE",
+"note": "",
+"range": "",
+"where": "HOME (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "HOME (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "SNAP",
+"note": "",
+"range": "",
+"where": "HOME (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "KIT",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PITCH",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "TONE (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SNAP",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "ACCENT",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "KICK PUNCH/ROUND",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DRIVE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MORPH",
+"note": "",
+"range": "",
+"where": "HOME (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PITCH",
+"note": "",
+"range": "",
+"where": "HOME (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "COLOR",
+"note": "",
+"range": "",
+"where": "HOME (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "HOME (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MORPH",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PITCH",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "COLOR (CC74)",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "EDIT 1 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "NOISE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "FM",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "FOLD",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DRIVE",
+"note": "",
+"range": "",
+"where": "EDIT 2 (DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RATIO",
+"note": "",
+"range": "",
+"where": "HOME (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "MOD",
+"note": "",
+"range": "",
+"where": "HOME (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "FOLD",
+"note": "",
+"range": "",
+"where": "HOME (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "CUTOFF (CC74)",
+"note": "",
+"range": "",
+"where": "HOME (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RATIO",
+"note": "",
+"range": "",
+"where": "EDIT 1 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "MOD",
+"note": "",
+"range": "",
+"where": "EDIT 1 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "RING",
+"note": "",
+"range": "",
+"where": "EDIT 1 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "NOISE",
+"note": "",
+"range": "",
+"where": "EDIT 1 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "FOLD",
+"note": "",
+"range": "",
+"where": "EDIT 2 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "P.ENV 0–48 st",
+"note": "",
+"range": "",
+"where": "EDIT 2 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "P.DECAY",
+"note": "",
+"range": "",
+"where": "EDIT 2 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RES (CC71)",
+"note": "",
+"range": "",
+"where": "EDIT 2 (INDUS)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RANGE 1 LO…2'",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "WAVE 1 TRI/SHARK/SAW/SQR/PLS W/PLS N/SIN",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "LEVEL 1",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "NOISE (niveau)",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 1 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RANGE 2",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "WAVE 2",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DETUNE 2",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "LEVEL 2",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 2 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RANGE 3",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 3 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "WAVE 3",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 3 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DETUNE 3",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 3 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "LEVEL 3",
+"note": "",
+"range": "",
+"where": "EDIT › OSC 3 (MINI)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "KBD (suivi de clavier)",
+"note": "",
+"range": "",
+"where": "EDIT › MINI MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "MOD TO OFF/OSC/FILTER/BOTH",
+"note": "",
+"range": "",
+"where": "EDIT › MINI MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "NOISE WHITE/PINK",
+"note": "",
+"range": "",
+"where": "EDIT › MINI MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "OUTPUT LP/HP",
+"note": "",
+"range": "",
+"where": "EDIT › MINI MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CUTOFF",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RES",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "ATTACK",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "HOME (ANALOG)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ATTACK 1 ms–10 s (CC73)",
+"note": "",
+"range": "",
+"where": "ENV › ENV"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DECAY (CC75)",
+"note": "",
+"range": "",
+"where": "ENV › ENV"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SUSTAIN 0–100 %",
+"note": "",
+"range": "",
+"where": "ENV › ENV"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE (CC72)",
+"note": "",
+"range": "",
+"where": "ENV › ENV"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ATTACK",
+"note": "",
+"range": "",
+"where": "ENV › ENV 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "ENV › ENV 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SUSTAIN",
+"note": "",
+"range": "",
+"where": "ENV › ENV 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "ENV › ENV 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RATE 0,05–40 Hz",
+"note": "",
+"range": "",
+"where": "LFO › LFO"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "WAVE SIN/TRI/SAW/SQR/S&H",
+"note": "",
+"range": "",
+"where": "LFO › LFO"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "PHASE",
+"note": "",
+"range": "",
+"where": "LFO › LFO"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "FADE",
+"note": "",
+"range": "",
+"where": "LFO › LFO"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SYNC OFF/4BAR…1/32",
+"note": "",
+"range": "",
+"where": "LFO › LFO 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "TRIG NOTE/FREE",
+"note": "",
+"range": "",
+"where": "LFO › LFO 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "POLARITY BI/UNI",
+"note": "",
+"range": "",
+"where": "LFO › LFO 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "ENV SYNC OFF/ON",
+"note": "",
+"range": "",
+"where": "LFO › LFO 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ROUTE 1–11",
+"note": "",
+"range": "",
+"where": "LFO › MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "SOURCE (routes 8–11)",
+"note": "",
+"range": "",
+"where": "LFO › MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DEST (routes 8–11)",
+"note": "",
+"range": "",
+"where": "LFO › MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "AMOUNT −100…+100 %",
+"note": "",
+"range": "",
+"where": "LFO › MOD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DIST",
+"note": "",
+"range": "",
+"where": "FX › FX"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "CHORUS (CC93)",
+"note": "",
+"range": "",
+"where": "FX › FX"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DELAY (CC94)",
+"note": "",
+"range": "",
+"where": "FX › FX"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "REVERB (CC91)",
+"note": "",
+"range": "",
+"where": "FX › FX"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SEND",
+"note": "",
+"range": "",
+"where": "FX › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "TIME (global)",
+"note": "",
+"range": "",
+"where": "FX › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "FEEDBACK (global)",
+"note": "",
+"range": "",
+"where": "FX › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "COLOR (global)",
+"note": "",
+"range": "",
+"where": "FX › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SEND",
+"note": "",
+"range": "",
+"where": "FX › REVERB"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "TYPE (global)",
+"note": "",
+"range": "",
+"where": "FX › REVERB"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SIZE (global)",
+"note": "",
+"range": "",
+"where": "FX › REVERB"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DAMP (global)",
+"note": "",
+"range": "",
+"where": "FX › REVERB"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "DIST",
+"note": "",
+"range": "",
+"where": "FX › DRIVE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "TYPE SOFT/HARD/FOLD/CRUSH/FUZZ",
+"note": "",
+"range": "",
+"where": "FX › DRIVE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "TONE ±100 %",
+"note": "",
+"range": "",
+"where": "FX › DRIVE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "TYPE OFF…FILTR",
+"note": "",
+"range": "",
+"where": "FX › INSERT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "A",
+"note": "",
+"range": "",
+"where": "FX › INSERT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "B",
+"note": "",
+"range": "",
+"where": "FX › INSERT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "C",
+"note": "",
+"range": "",
+"where": "FX › INSERT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SLICER OFF/GATE/STUT",
+"note": "",
+"range": "",
+"where": "FX › SLICER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PATTERN 1–16",
+"note": "",
+"range": "",
+"where": "FX › SLICER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "RATE 1/8…32T",
+"note": "",
+"range": "",
+"where": "FX › SLICER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DEPTH",
+"note": "",
+"range": "",
+"where": "FX › SLICER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "BY OFF/T1–T6",
+"note": "",
+"range": "",
+"where": "FX › DUCK"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DEPTH",
+"note": "",
+"range": "",
+"where": "FX › DUCK"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "RELEASE",
+"note": "",
+"range": "",
+"where": "FX › DUCK"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ROOT C…B",
+"note": "",
+"range": "",
+"where": "SEL › SCALE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "SCALE (16)",
+"note": "",
+"range": "",
+"where": "SEL › SCALE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "QUANTIZE OFF/SNAP/WHITE/SEQ/SEQ+T/SOLO",
+"note": "",
+"range": "",
+"where": "SEL › SCALE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "TRANSP ±24",
+"note": "",
+"range": "",
+"where": "SEL › SCALE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CHORD OFF…POW",
+"note": "",
+"range": "",
+"where": "SEL › CHORD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "VOICING",
+"note": "",
+"range": "",
+"where": "SEL › CHORD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "STRUM ms",
+"note": "",
+"range": "",
+"where": "SEL › CHORD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DIR DOWN/UP/ALT",
+"note": "",
+"range": "",
+"where": "SEL › CHORD"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "FOLLOW OFF/T1–T6",
+"note": "",
+"range": "",
+"where": "SEL › FOLLOW"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "MODE KEY/SCALE/FIT",
+"note": "",
+"range": "",
+"where": "SEL › FOLLOW"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "NOTE ROOT/LOW/HIGH/LAST",
+"note": "",
+"range": "",
+"where": "SEL › FOLLOW"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "VOICE POLY/MONO/LEG/UNI",
+"note": "",
+"range": "",
+"where": "EDIT › VOICE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "GLIDE (CC5)",
+"note": "",
+"range": "",
+"where": "EDIT › VOICE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "GL MODE RATE/TIME",
+"note": "",
+"range": "",
+"where": "EDIT › VOICE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "PRIORITY LAST/LOW/HIGH",
+"note": "",
+"range": "",
+"where": "EDIT › VOICE"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ALLOC ROT/REUSE",
+"note": "",
+"range": "",
+"where": "EDIT › VOICE 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DETUNE (unisson)",
+"note": "",
+"range": "",
+"where": "EDIT › VOICE 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SPREAD",
+"note": "",
+"range": "",
+"where": "EDIT › VOICE 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "LANE",
+"note": "",
+"range": "",
+"where": "EDIT › LANES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "LEVEL",
+"note": "",
+"range": "",
+"where": "EDIT › LANES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "TUNE",
+"note": "",
+"range": "",
+"where": "EDIT › LANES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DECAY",
+"note": "",
+"range": "",
+"where": "EDIT › LANES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "LANE",
+"note": "",
+"range": "",
+"where": "EDIT › LANE MIX (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "LEVEL",
+"note": "",
+"range": "",
+"where": "EDIT › LANE MIX (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "PAN",
+"note": "",
+"range": "",
+"where": "EDIT › LANE MIX (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RUMBLE : niveau du rumble du kick (Gir)",
+"note": "0 = coupé, rien n'est calculé ",
+"range": "0–127 (%), déf. 0",
+"where": "EDIT › RUMBLE (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "R.SLICE : motif du rumble entre deux kicks, calé sur le tempo et le swing",
+"note": "CLASSIC queue continue ",
+"range": "CLASSIC, OFFBEAT, DOUBLE, ROLL, GATE (déf. CLASSIC)",
+"where": "EDIT › RUMBLE (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "R.DECAY : longueur de la queue",
+"note": "~0,3 s à ~3 s",
+"range": "0–127 (déf. 80)",
+"where": "EDIT › RUMBLE (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "R.TONE : coupure du passe-bas résonant",
+"note": "40 à 300 Hz ",
+"range": "0–127 (déf. 50)",
+"where": "EDIT › RUMBLE (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "R.TUNE : note du grave du rumble",
+"note": "E–B octave 1, C–D# octave 2 (41–78 Hz) ",
+"range": "OFF, C … B (déf. A = 55 Hz)",
+"where": "EDIT › RUMBLE 2 (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "R.DRIVE : saturation du rumble",
+"note": "x1 à x16, niveau compensé ",
+"range": "0–127 (déf. 60)",
+"where": "EDIT › RUMBLE 2 (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "R.DUCK : remontée du rumble après chaque kick",
+"note": "20 à 600 ms ",
+"range": "0–127 (déf. 64)",
+"where": "EDIT › RUMBLE 2 (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "R.ATTACK : départ du rumble",
+"note": "CLASSIC : fondu d'entrée 0 à 300 ms depuis le kick ",
+"range": "0–127 (déf. 0)",
+"where": "EDIT › RUMBLE 2 (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "K.CLICK : clic du kick (tok qui plonge de 2,4 kHz + souffle de bruit)",
+"note": "0 = le kick tel qu'il était ",
+"range": "0–127 (déf. 0)",
+"where": "EDIT › KICK (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "K.PUNCH : attaque relevée (x4 max), corps creusé (−6 dB max)",
+"note": "transient shaper ",
+"range": "0–127 (déf. 0)",
+"where": "EDIT › KICK (DRUM, DRUM-X)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "LEVEL (CC7)",
+"note": "",
+"range": "",
+"where": "GLO › MIXER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "PAN (CC10)",
+"note": "",
+"range": "",
+"where": "GLO › MIXER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "REVERB (envoi)",
+"note": "",
+"range": "",
+"where": "GLO › MIXER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "MUTE",
+"note": "",
+"range": "",
+"where": "GLO › MIXER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "LOW KILL…0 dB…+6 dB (CC24)",
+"note": "",
+"range": "",
+"where": "GLO › EQ (Gir)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "MID (CC25)",
+"note": "",
+"range": "",
+"where": "GLO › EQ (Gir)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "HIGH (CC26)",
+"note": "",
+"range": "",
+"where": "GLO › EQ (Gir)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "DEPTH 0–127 (CC27)",
+"note": "",
+"range": "",
+"where": "GLO › EQ (Gir)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "TIME 1/4…4BAR, 1/8D…",
+"note": "",
+"range": "",
+"where": "GLO › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "FEEDBACK 0–120 %",
+"note": "",
+"range": "",
+"where": "GLO › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "COLOR",
+"note": "",
+"range": "",
+"where": "GLO › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "MIX",
+"note": "",
+"range": "",
+"where": "GLO › DELAY"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "TYPE ROOM/SPRING/HALL",
+"note": "",
+"range": "",
+"where": "GLO › REVERB"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "SIZE",
+"note": "",
+"range": "",
+"where": "GLO › REVERB"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "DAMP",
+"note": "",
+"range": "",
+"where": "GLO › REVERB"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "RATE",
+"note": "",
+"range": "",
+"where": "GLO › CHORUS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DEPTH",
+"note": "",
+"range": "",
+"where": "GLO › CHORUS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "MODE CHORUS/FLANGER/PHASER",
+"note": "",
+"range": "",
+"where": "GLO › CHORUS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "FEEDBACK",
+"note": "",
+"range": "",
+"where": "GLO › CHORUS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "BPM 40–240",
+"note": "",
+"range": "",
+"where": "GLO › GLOBAL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "SWING+ 0–100 %",
+"note": "",
+"range": "",
+"where": "GLO › GLOBAL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "No.",
+"note": "",
+"range": "",
+"where": "SAVE › PRESETS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "ENG",
+"note": "",
+"range": "",
+"where": "SAVE › PRESETS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "FAV",
+"note": "",
+"range": "",
+"where": "SAVE › PRESETS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "LIST ALL/FAV/BASS/LEAD/PAD/KEYS/PLUCK/DRUM/FX",
+"note": "",
+"range": "",
+"where": "SAVE › PRESETS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SLOT U01–U32",
+"note": "",
+"range": "",
+"where": "SAVE › USER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "LOAD",
+"note": "",
+"range": "",
+"where": "SAVE › USER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "ERASE",
+"note": "",
+"range": "",
+"where": "SAVE › USER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "SAVE",
+"note": "",
+"range": "",
+"where": "SAVE › USER"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "PATTERN 01–64",
+"note": "",
+"range": "",
+"where": "SAVE › PATTERNS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "LENGTH",
+"note": "",
+"range": "",
+"where": "SAVE › PATTERNS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "USED",
+"note": "",
+"range": "",
+"where": "SAVE › PATTERNS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "ACTION CLEAR/EMPTY/UNUSED",
+"note": "",
+"range": "",
+"where": "SAVE › PATTERNS"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SLOT 1–4",
+"note": "",
+"range": "",
+"where": "SAVE › PROJECT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DELETE / NAME",
+"note": "",
+"range": "",
+"where": "SAVE › PROJECT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "LOAD / NEW / CLEAR SONG / CLEAR TRACKS",
+"note": "",
+"range": "",
+"where": "SAVE › PROJECT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "SAVE",
+"note": "",
+"range": "",
+"where": "SAVE › PROJECT"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "MODE (15)",
+"note": "",
+"range": "",
+"where": "ARP › ARP"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RATE",
+"note": "",
+"range": "",
+"where": "ARP › ARP"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "OCTAVE 1–4",
+"note": "",
+"range": "",
+"where": "ARP › ARP"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "GATE",
+"note": "",
+"range": "",
+"where": "ARP › ARP"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "SWING",
+"note": "",
+"range": "",
+"where": "ARP › ARP 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "CHANCE",
+"note": "",
+"range": "",
+"where": "ARP › ARP 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "HOLD",
+"note": "",
+"range": "",
+"where": "ARP › ARP 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "ORDER NOTE/PLAYED",
+"note": "",
+"range": "",
+"where": "ARP › ARP 2"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "PITCH",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "START",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "LENGTH",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "VELOCITY",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "LANE",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "HIT",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "ACC",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "VELOCITY",
+"note": "",
+"range": "",
+"where": "SEQ › NOTES (DRUM)"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "CHANCE OFF/1–100 %/FILL…4:4",
+"note": "",
+"range": "",
+"where": "SEQ › FEEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "RATCHET ×1–4/FLAM",
+"note": "",
+"range": "",
+"where": "SEQ › FEEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "NUDGE −32…+31",
+"note": "",
+"range": "",
+"where": "SEQ › FEEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "TYPE -/ACC/SLD/A+S",
+"note": "",
+"range": "",
+"where": "SEQ › FEEL"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "LENGTH 1–64",
+"note": "",
+"range": "",
+"where": "SEQ › PATTERN"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "DIV",
+"note": "",
+"range": "",
+"where": "SEQ › PATTERN"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "SWING",
+"note": "",
+"range": "",
+"where": "SEQ › PATTERN"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "GATE",
+"note": "",
+"range": "",
+"where": "SEQ › PATTERN"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "ROW",
+"note": "",
+"range": "",
+"where": "SEQ › AUTOMATION"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "STEP",
+"note": "",
+"range": "",
+"where": "SEQ › AUTOMATION"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "PARAM",
+"note": "",
+"range": "",
+"where": "SEQ › AUTOMATION"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "VALUE",
+"note": "",
+"range": "",
+"where": "SEQ › AUTOMATION"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 1",
+"effect": "Entrée A–P",
+"note": "",
+"range": "",
+"where": "SEQ › SONG"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 2",
+"effect": "Contenu REST/pattern/NEW/COPY/COPY+/CLEAR/SOUND/NO SOUND",
+"note": "",
+"range": "",
+"where": "SEQ › SONG"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 3",
+"effect": "REPS CHAIN/1x–16x",
+"note": "",
+"range": "",
+"where": "SEQ › SONG"
+},
+{
+"action": "tourner",
+"cc": "",
+"control": "KNOB 4",
+"effect": "SONG OFF/ON/ONCE",
+"note": "",
+"range": "",
+"where": "SEQ › SONG"
+},
+{
+"action": "maintenu LFO, tourner à gauche",
+"cc": "",
+"control": "LFO + KNOB 1",
+"effect": "Kill momentané de LOW",
+"note": "Lâcher LFO : retour (RETURN)",
+"range": "",
+"where": "GLO › EQ"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "THEME",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › DISPLAY"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "PLAYHEAD",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › DISPLAY"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "LARGE",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › DISPLAY"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "ANIM",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › DISPLAY"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "LEDS",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › DISPLAY"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "SCREEN OFF",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › DISPLAY"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "HINTS",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › DISPLAY"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "HOLD",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › CONTROL"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "KNOB ACCEL",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › CONTROL"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "BPM LOCK",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › CONTROL"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "SCALE LEDS",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › CONTROL"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "STEP PREVIEW",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › CONTROL"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "RETURN",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › CONTROL"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "KEEP SENDS",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › CONTROL"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "SPEAKER EQ",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "USB LEVEL",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "CLICK",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "CLICK LEVEL",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "COUNT-IN",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "TUNE",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "SYNC OUT",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "SYNC PPQN",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "SYNC INVERT",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › AUDIO"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "RESTORE LAST",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › SYSTEM"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "CPU",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › SYSTEM"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "CPU CLOCK",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › SYSTEM"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "HARDWARE CALIBRATION",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › SYSTEM"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "RESET SETTINGS",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › SYSTEM"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "ABOUT",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › SYSTEM"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "CLOCK",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "CLOCK OUT",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "MIDI IN",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "AUTO CHANNEL",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "T1–T6 CHANNEL",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "NOTES OUT",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "CC OUT",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "THRU",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "REMOTE",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "MIDI LEARN",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+},
+{
+"action": "PRESETS (ligne) + KNOB 1–4 / OCT±",
+"cc": "",
+"control": "LEARN CLEAR",
+"effect": "Réglage du menu (voir manuel section 12)",
+"note": "",
+"range": "",
+"where": "MENU › MIDI"
+}
+],
+"sections": {
+"ACID (Gir) — « 303 » / « ACCENT »": "- **Principe** : la voix TB-303 d'**ATEK303** (Javier Melgar / Animatek, d'après Open303), portée en calcul entier et\n  suréchantillonnée 2×. Elle a :\n  - un oscillateur scie ou carré, avec ou sans sub ;\n  - un filtre à diodes résonant ;\n  - l'enveloppe de filtre et l'accent cumulatif de la 303 ;\n  - le slide sans redéclenchement.\n- **Mono** : une note à la fois.\n- EDIT 1 « 303 » :\n  - **WAVE** : SAW, SQR, SAW+SUB, SQR+SUB ;\n  - **CUTOFF**, déf. 40, CC74 ;\n  - **RES**, déf. 90, CC71 ;\n  - **ENV MOD**, déf. 70 (le premier tiers agit peu : c'est la courbe du vrai 303).\n- EDIT 2 « ACCENT » :\n  - **DECAY**, déf. 60 ;\n  - **ACCENT**, déf. 80 (la force de l'accent) ;\n  - **TUNE**, −64 à +63 cents ;\n  - **SLIDE**, déf. 45 (la durée du glissé, environ 30 ms + 2 ms par cran).\n- HOME : CUTOFF, RES, ENV MOD, DECAY.\n\n**Accent et slide** :\n- **L'accent vient du pas ACC** du séquenceur (SEQ › FEEL › TYPE, ou les pas importés). Une touche jouée fort, au\n  clavier ou en MIDI, **n'accentue pas**.\n- **Le slide vient du pas SLD** : la note glisse vers la suivante sans redéclencher les enveloppes.\n- Deux notes liées au clavier (legato) glissent aussi.\n\n**Générateur de lignes acid** (le générateur de patterns d'ATEK303). Sur une piste ACID, **tenir SEQ** et appuyer sur :\n- **G4 « ACID »** : une **nouvelle ligne acid** sur la longueur du pattern. Elle utilise la ROOT et la SCALE de la piste\n  (gamme ramenée à la plus proche des gammes d'ATEK), C2 + ROOT comme base, et une nouvelle graine à chaque appui.\n- **A4 « RHYTHM »** : fait muter le rythme (2 mutations).\n- **B4 « NOTES »** : fait muter les octaves (2 mutations).\n- **C5 « ACC/SLD »** : fait muter accents et slides (3 mutations).\n\nChaque appui compte pour **une annulation** (SAVE tenu). OCT− remet la piste comme à l'ouverture du layer. Vérifié dans\nl'émulateur : le layer montre ACID, RHYTHM, NOTES, ACC/SLD ; G4 affiche « NEW ACID LINE » ; la ligne apparaît sur NOTES\net joue.\n\n**Les anciens patterns** (pas SLD et ACC écrits avec Skiff) jouent comme prévu.\n\n**Usages** : BS 303, BS PHUTURE, BS 303 DIST (saturé), PL 303 (pluck avec delay), LD 303 SCRM.",
+"L'isolateur et DEPTH (Gir) — page GLO › EQ": "Pour y aller : **GLO**, puis **GLO** encore. La page s'applique à la **piste choisie** (ALGORITHM).\n\n| KNOB 1 | KNOB 2 | KNOB 3 | KNOB 4 |\n|---|---|---|---|\n| **LOW** (< 200 Hz) | **MID** (200 Hz – 2,5 kHz) | **HIGH** (> 2,5 kHz) | **DEPTH** |\n\n- Les valeurs s'affichent en dB : **KILL**, −36, −18, −7,5, **0** (au milieu de la course, 64/127), +3, **+6 dB**.\n- **0 dB au milieu** : la piste sonne exactement comme sans EQ, et le calcul ne tourne même pas.\n- À gauche, la bande baisse de plus en plus vite jusqu'à **KILL**. Mesuré : −36 dB pour LOW, −25 dB pour MID, −41 dB\n  pour HIGH. À droite, jusqu'à **+6 dB**.\n- Les coupures sont des filtres Butterworth du 3ᵉ ordre (18 dB/oct). La somme des 3 bandes à 0 dB est plate à 0,01 dB\n  près.\n- **DEPTH** va de 0 (devant, rien ne change) à 127 (au fond). En montant :\n  - le niveau baisse jusqu'à −6 dB ;\n  - les aigus s'éteignent (jusqu'à −12 dB de plus sur HIGH) ;\n  - l'envoi de reverb monte (jusqu'à +60 % de ce qui lui manque).\n\n  C'est un **décalage** : LEVEL, l'envoi de reverb et HIGH gardent leurs propres valeurs.\n- Le traitement se fait sur le signal mono de la piste, **avant le PAN**. Aucun clic, même en passant de KILL à +6 dB.\n- **Kill momentané** (comme un isolateur DJ) :\n  1. **tenir LFO** et tourner **KNOB 1 (LOW)** tout à gauche (KILL) ;\n  2. **lâcher LFO** : LOW revient à sa valeur, en 1 mesure par défaut (MENU › CONTROL › RETURN).\n\n  OCT+, LFO tenu, garde la valeur. Vérifié dans l'émulateur : l'écran affiche « LOW KILL » et « MOMENTARY », puis\n  « BACK » au relâchement.\n- **MIDI** : CC24 LOW, CC25 MID, CC26 HIGH, CC27 DEPTH, sur le canal de la piste.\n- LOW, MID, HIGH et DEPTH sont **enregistrés dans les projets** et gardés au changement de son (comme LEVEL et PAN).\n  Un projet d'avant Gir se charge à 0 dB / DEPTH 0. On peut les locker et les automatiser.\n- La matrice de modulation ne les vise pas.",
+"La page KICK (Gir) — un kick qui claque, DRUM et DRUM-X": "La plupart des kicks de DRUM sont ronds, comme une 808 : un corps sans clic. Mesurés, leur clic (2 à 6 kHz dans les 15\npremières ms) était de 35 à 61 dB sous le kick. La page **KICK** (EDIT, juste après RUMBLE 2) ajoute ce qui fait claquer\nun kick techno :\n\n| Knob | Réglage | Plage | Rôle |\n|---|---|---|---|\n| KNOB 1 | **K.CLICK** | 0–127, déf. 0 | un **tok** (une sinusoïde qui plonge de 2,4 kHz vers le corps en ~3 ms : la plongée de hauteur rapide d'un 909 ou d'un kick hard techno) et un **souffle** de bruit de 1,5 ms (la batte) |\n| KNOB 2 | **K.PUNCH** | 0–127, déf. 0 | un *transient shaper* : les ~10 premières ms du corps montent (jusqu'à x4), le reste du corps descend (jusqu'à −6 dB, il remonte en ~0,2 s) ; la place est faite pour le rumble |\n\n- Les deux passent **avant le DRIVE du kit** : un kit saturé écrase le clic avec le corps, comme une vraie chaîne de\n  kick hard techno.\n- **0 et 0 : rien n'est calculé**, le kick est celui d'avant, à l'octet près. Les kits de Skiff restent à 0.\n- **Réglés sur 34 kits techno** : chacun a désormais un clic à au moins −30 dB pour les styles durs (hard techno,\n  schranz, gabber, indus, rave, hardgroove, tribe, warehouse) et à au moins −32 dB pour la techno (Berlin, Detroit,\n  minimal, acid, dub, deep). Les kits qui claquaient déjà (la plupart des KT DX, KT HARD 909, KT INDUS HRD) sont restés\n  tels quels.\n- **Kits faits pour claquer** : **KT PUNCH 909** (909 saturé), **KT TOK SCHRZ** (le « tok » court du schranz),\n  **KT GABBR HIT** (gabber, FUZZ), **KT WAREH KCK** (warehouse, DRUM-X).\n- Le rumble ne couvre pas le clic : il est ducké sous l'attaque, au moins 20 dB sous le kick pendant ses 15 premières\n  ms (testé sur chaque kit à rumble).\n\n**Le reste**\n- **Projets et sons** : les 10 réglages (RUMBLE, R.SLICE, R.DECAY, R.TONE, R.TUNE, R.DRIVE, R.DUCK, R.ATTACK, K.CLICK,\n  K.PUNCH) sont enregistrés avec le son (preset utilisateur, projet), et chaque preset de kit les règle. Un projet\n  d'avant Gir 1.0 se charge avec RUMBLE 0, CLASSIC, et sans clic. On peut les **locker** sur un pas, les\n  **automatiser** et les apprendre en **MIDI LEARN** (pas de CC fixe).\n- **Coût** : environ 1 % d'un cœur par rumble actif, un peu plus pendant le clic d'un kick. Pire cas mesuré en\n  2 CORES, l'isolateur sur les 6 pistes et deux kits à rumble au plus lourd (ROLL, clic et punch à fond) : **78 %** du\n  cœur le plus chargé (79 % sans rumble).\n- WAV : `wav_rumble/` (les kits à rumble), `wav_correctifs/` (les motifs, R.ATTACK, les kicks avant / après, une boucle\n  hard techno).",
+"Le RUMBLE (Gir) — sur le kick de DRUM et DRUM-X": "En hard techno et en techno industrielle, le **rumble** est la queue grave, sombre et saturée qui suit chaque kick et\nremplit l'espace jusqu'au suivant. Dans un logiciel, on l'obtient ainsi : on envoie le kick dans une grosse reverb, on\nla filtre en passe-bas, on la sature, on la fait disparaître sous chaque kick (sidechain), et on l'accorde. La reverb de\nla FM-1 est partagée par toutes les pistes. Le rumble de Gir est donc **dans le moteur de batterie** : une petite reverb\nqui ne reçoit **que le kick** de la piste.\n\nPour y aller : sur une piste DRUM ou DRUM-X, **EDIT**, puis **EDIT** jusqu'à la page **RUMBLE** (3ᵉ page) ; **RUMBLE 2**\njuste après, puis **KICK** (le clic du kick, plus bas). Les réglages joués en live sont sur la première page.\n\n| Page | Knob | Réglage | Plage | Rôle |\n|---|---|---|---|---|\n| RUMBLE | KNOB 1 | **RUMBLE** | 0–127 (%), déf. 0 | la quantité de rumble ; **0 = coupé, rien n'est calculé** |\n| RUMBLE | KNOB 2 | **R.SLICE** | CLASSIC, OFFBEAT, DOUBLE, ROLL, GATE ; déf. CLASSIC | le motif du rumble entre deux kicks, calé sur le tempo (ci-dessous) |\n| RUMBLE | KNOB 3 | **R.DECAY** | 0–127, déf. 80 | la longueur de la queue (de ~0,3 s à ~3 s) |\n| RUMBLE | KNOB 4 | **R.TONE** | 0–127, déf. 50 | la coupure du passe-bas résonant, de 40 à 300 Hz : de sourd à grondant |\n| RUMBLE 2 | KNOB 1 | **R.TUNE** | OFF, C, C#, … B ; déf. A | la note du grave (A = 55 Hz). E à B dans l'octave 1, C à D# dans l'octave 2 (41 à 78 Hz). OFF : la reverb seule, un grondement sans note |\n| RUMBLE 2 | KNOB 2 | **R.DRIVE** | 0–127, déf. 60 | la saturation (x1 à x16, niveau compensé) : de rond à rugueux |\n| RUMBLE 2 | KNOB 3 | **R.DUCK** | 0–127, déf. 64 | **la remontée** : sous chaque kick, le rumble tombe à zéro en ~5 ms, puis remonte en 20 ms (bas) à 600 ms (haut). **0 = pas de ducking** |\n| RUMBLE 2 | KNOB 4 | **R.ATTACK** | 0–127, déf. 0 | **le départ** : en CLASSIC, un fondu d'entrée de 0 à 300 ms à partir du kick (le rumble arrive plus tard, « derrière » le kick) ; dans les motifs, la montée de chaque impulsion (de nette à gonflée) |\n\n**R.SLICE : le motif du rumble**\n\nLe motif découpe le rumble sur les doubles croches du temps (la 1ʳᵉ est celle du kick, toujours ducké). Il suit le tempo,\nl'horloge externe et le **swing** du projet (les doubles croches impaires sont décalées comme celles du séquenceur).\n\n| Motif | Impulsions entre deux kicks | Pour |\n|---|---|---|\n| **CLASSIC** | aucune : la queue continue (comme avant) | le rumble classique |\n| **OFFBEAT** | une, sur le contretemps (la 3ᵉ double croche) | un grave qui répond au kick, façon basse de contretemps |\n| **DOUBLE** | deux, sur les 2ᵉ et 4ᵉ doubles croches | le « double rumble » de la hard techno |\n| **ROLL** | trois, sur les 2ᵉ, 3ᵉ et 4ᵉ doubles croches | le rumble qui roule (rolling) |\n| **GATE** | trois, coupées à la demi-double croche | un rumble haché, plus sec |\n\nChaque impulsion monte en 1 ms au moins (R.ATTACK l'allonge) et redescend en ~2 ms : aucun clic. L'ensemble reste ducké\nsous le kick.\n\n**R.DUCK et R.ATTACK, la différence** : R.DUCK règle la **remontée** après l'effacement sous le kick (la vitesse du\npompage). R.ATTACK règle le **départ** : en CLASSIC, un retard progressif depuis le kick ; dans les motifs, la montée de\nchaque impulsion. Avec R.ATTACK à 0 (par défaut), le rumble est celui des versions précédentes.\n\n**Comment ça marche**\n- Le kick seul (la voie KICK, avant le DRIVE du kit) passe dans une petite reverb (3 filtres en peigne et un passe-tout),\n  puis, si R.TUNE n'est pas OFF, dans un peigne accordé sur la note. Viennent ensuite un passe-bas résonant, la\n  saturation, deux pôles qui ne gardent que le grave (au plus 400 Hz), le ducking et le motif.\n- **Son niveau** : RUMBLE, puis le LEVEL et le PAN de la voie KICK (LANE MIX, LANES), puis la piste. Il rejoint la piste\n  **après son FX › DRIVE** : la distorsion de la piste ne le change pas en grésillement aigu. Il passe ensuite par\n  l'INSERT, l'isolateur, les envois et le niveau, comme le reste de la piste. Couper la voie KICK (EDIT tenu + sa noire)\n  coupe aussi son rumble.\n- **Le ducking est interne** : il marche sans le FX › DUCK de la piste.\n- **La phase se règle seule** : pendant chaque temps, le rumble compare sa phase à la traîne du kick ; au kick suivant,\n  pendant le ducking, il prend celle qui **s'ajoute** au kick. Cela demande R.DUCK > 0.\n- **Remise à zéro** : au changement de kit, à chaque PLAY, et quand RUMBLE passe à 0. L'état du rumble repart de zéro\n  après un fondu de 3 ms, sans clic. Un garde-fou fait de même si son filtre restait bloqué en butée.\n- **Accorder** : R.TUNE sur la tonalité du morceau (la note de la basse).\n- La voix du kick reste allumée tant que la queue sonne, puis s'éteint d'elle-même.\n- Le rumble ne s'applique pas aux kits d'échantillons utilisateur (USR1–3 de DRUM).\n\n**Réglages de départ**\n- **Hard techno à 150** : RUMBLE 70–90, R.SLICE CLASSIC ou DOUBLE, R.TUNE sur la tonalité, R.DECAY 80, R.DRIVE 70,\n  R.TONE 50, R.DUCK 60.\n- **Schranz** : R.SLICE ROLL, R.DECAY 70, R.DRIVE 100, R.TONE 60, R.DUCK 44.\n- **Industriel** : R.DECAY 96, R.DRIVE 110, R.TONE 40 (très sombre), R.DUCK 72.\n- **Deep / hypnotique** : R.DECAY 106 (long), R.DRIVE 30 (rond), R.TONE 34, R.DUCK 86, R.ATTACK 40.\n\n**Les kits qui l'ont** (PRESETS.md, table des kits)\n- **Avec un rumble réglé, accordé en A** (31 kits) :\n  - les 7 kits **KT RMB HARD**, **KT RMB SCHRZ**, **KT RMB DEEP**, **KT RMB DOUBL** (DRUM) ; **KT RMB INDUS**, **KT RMB\n    WAREH**, **KT RMB ROLL** (DRUM-X) ;\n  - les 4 kits à kick claquant **KT PUNCH 909**, **KT TOK SCHRZ**, **KT GABBR HIT** (DRUM), **KT WAREH KCK** (DRUM-X) ;\n  - les kits techno KT HARD, KT HARDTECH, KT BERLIN, KT SCHRANZ, KT HARDGROOV, KT GABBER, KT TRIBE, KT INDUS HRD,\n    KT RAVE 90S, KT DEEP VERB, KT HARD 909 (DRUM) ; KT INDUS, KT DX BERLIN, KT DX METAL, KT DX HARD, KT DX SCHRNZ,\n    KT DX TRIBE, KT DX GABBER, KT DX LOW, KT DX DIRTY (DRUM-X).\n- **Avec un motif** : KT RMB DOUBL (DOUBLE), KT TOK SCHRZ et KT RMB ROLL (ROLL), KT WAREH KCK (OFFBEAT).\n- **Tous les autres kits sont à RUMBLE 0**, donc identiques à avant : ceux de Skiff et les kits techno sans grave roulant\n  (KT DETROIT, KT MINIMAL, KT DUB…). Le rumble s'y règle quand même, à la main.",
+"Outils (SEQ tenu = SEQ TOOLS)": "- Sur toute piste :\n  - F3 CLEAR, G3 REVERSE ;\n  - A3 / B3 SHIFT < >, décalage d'un pas ;\n  - C4 RANDOM (une séquence au hasard), D4 COOK (petites variations) ;\n  - F4 EUCLID (des coups répartis : régler, puis OCT+ applique) ;\n  - D5 DOUBLE et E5 HALF (la longueur ×2 ou ÷2).\n- Sur une piste **DRUM** : E4 BEAT (un rythme), et G4–C5 les outils de la voie choisie (CLEAR, REVERSE, FILL, RANDOM),\n  la voie choisie avec les noires 1–8.\n- Sur une piste **ACID** : G4–C5 sont le **générateur de lignes acid** (section 6).\n- KNOB 1–4 = LENGTH, DIV, SWING, GATE.\n- Chaque outil compte pour une annulation. OCT− remet la piste comme à l'ouverture du layer."
+},
+"source": "livraison/FINAL/MANUEL-GIR.md, REFERENCE-CONTROLES.csv (tools/gen_editor_help.py)"
+}

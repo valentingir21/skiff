@@ -1,0 +1,27 @@
+{
+  "name": "gir-editor",
+  "private": true,
+  "version": "1.0.0-rc1",
+  "description": "Gir Editor: the editor of the Gir firmware for the M-VAVE FM-1",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "proto": "node scripts/extract-proto.mjs",
+    "dev": "npm run proto && vite",
+    "build": "npm run proto && vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "npm run proto && vitest run",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@playwright/test": "^1.65.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.2",
+    "svelte": "^5.59.2",
+    "svelte-check": "^4.7.8",
+    "typescript": "^5.9.3",
+    "vite": "^8.4.0",
+    "vitest": "^5.1.2"
+  }
+}

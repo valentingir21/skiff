@@ -1,0 +1,6 @@
+node_modules/
+dist/
+src/lib/legacy/proto.js
+test-results/
+playwright-report/
+src/lib/legacy/proto.d.ts

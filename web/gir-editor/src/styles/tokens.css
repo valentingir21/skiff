@@ -1,0 +1,74 @@
+/* SPDX-License-Identifier: GPL-3.0-only */
+/* Gir Editor's design tokens. Dark by default: near-black ground, layered surfaces, the FM-1's own track colours
+   (the SKIFF palette, firmware tools/gen_ui_palettes.py: exact RGB565 values), orange accent. */
+@font-face {
+  font-family: "DotGothic16";
+  src: url("../assets/fonts/DotGothic16-subset.woff") format("woff");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fukiai";
+  src: url("../assets/fonts/fukiai.ttf") format("truetype");
+  font-display: block;
+}
+
+:root {
+  color-scheme: dark;
+  /* ground and surfaces, darkest to lightest */
+  --bg: #09090a;
+  --bg-2: #0e0e10;
+  --surf: #141416;
+  --surf-2: #1a1a1d;
+  --surf-3: #212125;
+  --surf-4: #2a2a2f;
+  --line: #26262b;
+  --line-2: #34343a;
+  /* text */
+  --fg: #f4f2f5;
+  --fg-2: #c9c6cd;
+  --dim: #8d8a93;
+  --mute: #5f5d65;
+  /* accent and states */
+  --accent: #ff5931;
+  --accent-2: #ff7a55;
+  --accent-ink: #1a0802;
+  --accent-soft: rgb(255 89 49 / 14%);
+  --ok: #a4e631;
+  --warn: #ffbe00;
+  --err: #ff4d5e;
+  --info: #20c2b4;
+  /* the six tracks (FM-1 SKIFF palette) */
+  --t1: #ff5931;
+  --t2: #20c2b4;
+  --t3: #ffbe00;
+  --t4: #9481ff;
+  --t5: #ff6dac;
+  --t6: #a4e631;
+  /* type */
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-dot: "DotGothic16", "Inter", ui-monospace, monospace;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --fs-xs: 11px;
+  --fs-s: 12px;
+  --fs-m: 13px;
+  --fs-l: 15px;
+  --fs-xl: 19px;
+  --fs-xxl: 28px;
+  /* shape */
+  --r-s: 5px;
+  --r-m: 8px;
+  --r-l: 12px;
+  --r-xl: 18px;
+  --shadow-1: 0 1px 0 rgb(255 255 255 / 3%) inset, 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 10px 30px rgb(0 0 0 / 45%), 0 1px 0 rgb(255 255 255 / 4%) inset;
+  --shadow-pop: 0 18px 60px rgb(0 0 0 / 60%), 0 0 0 1px var(--line-2);
+  /* motion: quick, never in the way */
+  --t-fast: 90ms;
+  --t-med: 140ms;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* layout */
+  --topbar-h: 56px;
+  --tracks-w: 232px;
+  --nav-w: 68px;
+  --focus: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}

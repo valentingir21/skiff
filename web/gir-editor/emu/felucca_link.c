@@ -67,6 +67,27 @@ static void lk_wdt_feed(void)                       /* (a flash write while play
 static void web_cast_block(void) {}                /* (cast_follow.c's replay hook: nothing to replay here) */
 #endif
 
+#if FELUCCA_PANEL
+/* PANEL (cmd 84) sets the virtual contacts a unit's key scan merges (hal/fm1_input.h: vbtn, vkey); the web build has no
+ * scan (the page sets fm1_in.buttons / notes with their edges, felucca_web.c web_buttons / web_keys), so they are merged
+ * here, as that scan would: held while held, with their press and release edges */
+static uint32_t lk_pb, lk_pk;                       /* the panel's buttons (matrix ids) and keys merged last */
+static void lk_panel_sync(void)
+{
+    uint32_t b = (fm1_in.buttons & ~lk_pb) | fm1_in.vbtn, k = (fm1_in.notes & ~lk_pk) | fm1_in.vkey;
+    uint32_t ob = fm1_in.buttons, ok = fm1_in.notes;
+    lk_pb = fm1_in.vbtn;
+    lk_pk = fm1_in.vkey;
+    web_pressed |= b & ~ob;
+    web_released |= ob & ~b;
+    fm1_in.buttons = b;
+    web_notes_pressed |= k & ~ok;
+    fm1_in.notes = k;
+}
+#else
+static void lk_panel_sync(void) {}
+#endif
+
 EXPORT uint8_t *link_in_buf(void)
 {
     static uint8_t in[702];
@@ -85,11 +106,18 @@ EXPORT int32_t link_in(uint32_t n)
         lk_f[i] = in[i + 1u];
     lk_n = n - 2u;
     lk_ready = 1;
+    usb.config = 1;                                 /* (a host is there: ed_sync pushes only to a configured USB) */
     ed_service();
     lk_ready = 0;
+    lk_panel_sync();
     return 0;
 }
-EXPORT void link_service(void) { ed_service(); }
+EXPORT void link_service(void)
+{
+    usb.config = 1;
+    ed_service();
+    lk_panel_sync();
+}
 EXPORT uint8_t *link_out_buf(void) { return lk_out; }
 EXPORT uint32_t link_out_len(void) { return lk_out_n; }
 EXPORT void link_out_clear(void) { lk_out_n = 0; }

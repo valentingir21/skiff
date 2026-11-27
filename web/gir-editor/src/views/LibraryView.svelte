@@ -113,11 +113,11 @@
           {#if s.used}<span class="en">{engName(s.engine)}</span>{/if}
           <span class="acts">
             {#if s.used}
-              <button onclick={() => device.loadUser(k, s.slot).catch((e) => toast("err", e.message))} title={t("lib.load") + ` T${k + 1}`} style="color:{TRACK_COLORS[k]}">▶</button>
-              <button onclick={() => slotToLib(s.slot)} title={t("lib.toComputer")}>↓</button>
-              <button onclick={() => erase(s.slot)} title={t("lib.erase")}>×</button>
+              <button onclick={() => device.loadUser(k, s.slot).catch((e) => toast("err", e.message))} title={t("lib.load") + ` T${k + 1}`} aria-label={t("lib.load") + ` T${k + 1}`} style="color:{TRACK_COLORS[k]}">▶</button>
+              <button onclick={() => slotToLib(s.slot)} title={t("lib.toComputer")} aria-label={t("lib.toComputer")}>↓</button>
+              <button onclick={() => erase(s.slot)} title={t("lib.erase")} aria-label={t("lib.erase")}>×</button>
             {/if}
-            <button onclick={() => storeHere(s.slot)} title={t("lib.store")}>＋</button>
+            <button onclick={() => storeHere(s.slot)} title={t("lib.store")} aria-label={t("lib.store")}>＋</button>
           </span>
         </div>
       {/each}
@@ -141,9 +141,9 @@
             <span class="nm dot">{x.name}</span><span class="en">{x.engineName ?? engName(x.engine)}</span>
             <span class="acts">
               <button disabled={busy} onclick={() => audition(i)} title={t("lib.load") + ` T${k + 1}`} style="color:{TRACK_COLORS[k]}">▶ T{k + 1}</button>
-              <button onclick={() => rename(i)} title={t("proj.rename")}>✎</button>
-              <button onclick={() => exportLib(i)} title={t("lib.export")}>↧</button>
-              <button onclick={() => remove(i)} title={t("lib.erase")}>×</button>
+              <button onclick={() => rename(i)} title={t("proj.rename")} aria-label={t("proj.rename")}>✎</button>
+              <button onclick={() => exportLib(i)} title={t("lib.export")} aria-label={t("lib.export")}>↧</button>
+              <button onclick={() => remove(i)} title={t("lib.erase")} aria-label={t("lib.erase")}>×</button>
             </span>
           </li>
         {/each}

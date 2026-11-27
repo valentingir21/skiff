@@ -25,6 +25,12 @@
   let mode = $state<"roll" | "drums" | null>(null);
   const shown = $derived(mode ?? (drum ? "drums" : "roll"));
   let zoom = $state(1);
+  // (rc3) the steps shown: LENGTH rounded up to a bar of 16 (16 .. 64), the cells as wide as the frame allows (at zoom
+  // 1 they fit it: nothing cut; past LENGTH greyed); a zoom over 1 makes them wider, the frames then scroll sideways
+  let gw = $state(800);
+  const LW = 72;
+  const n = $derived(Math.min(64, Math.max(16, Math.ceil(len / 16) * 16)));
+  const cw = $derived(Math.max(12, Math.min(64, Math.floor((gw - LW - 14) / n))) * zoom);
   let sel = $state(new Set<number>());
   let focus = $state<number | null>(null);
   let busyTool = $state<string | null>(null);
@@ -72,12 +78,12 @@
       <span>{where}</span>
     </div>
     <div class="pat">
-      {#each patPage.ids as id, slot}<Param track={k} {id} page={patPage} {slot} where={`SEQ ×3 › PATTERN › KNOB ${slot + 1}`} {color} size={38} />{/each}
+      {#each patPage.ids as id, slot}<Param track={k} {id} page={patPage} {slot} where={`SEQ ×3 › PATTERN › KNOB ${slot + 1}`} {color} size={34} />{/each}
     </div>
     <div class="right">
       <Seg size="s" label="mode" value={shown} {color} onchange={(v) => (mode = v)}
            options={[{ value: "roll", label: t("seq.roll") }, { value: "drums", label: t("seq.drums") }]} />
-      <label class="zoom"><span class="sr-only">Zoom</span><input type="range" min="0.6" max="2" step="0.1" bind:value={zoom} aria-label="Zoom" /></label>
+      <label class="zoom"><span class="sr-only">Zoom</span><input type="range" min="1" max="3" step="0.25" bind:value={zoom} aria-label="Zoom" /></label>
       <Button size="s" variant="ghost" onclick={() => device.loadSteps(k).then(() => device.readMotion(k))}>{t("seq.reload")}</Button>
     </div>
   </header>
@@ -99,17 +105,17 @@
   {:else}
     <p class="help">{shown === "roll" ? t("seq.help") : t("seq.drumHelp")}</p>
     <div class="main">
-      <div class="grids">
+      <div class="grids" bind:clientWidth={gw} style="--lw:{LW}px">
         {#if shown === "roll"}
-          <PianoRoll bind:this={roll} {k} {len} {color} {zoom} {sel} onselect={(s, f) => { sel = s; focus = f ?? null; }} />
+          <PianoRoll bind:this={roll} {k} {len} {color} {cw} {n} {sel} onselect={(s, f) => { sel = s; focus = f ?? null; }} />
         {:else}
-          <DrumGrid {k} {len} {color} {zoom} {sel} onselect={(s, f) => { sel = s; focus = f ?? null; }} />
+          <DrumGrid {k} {len} {color} {cw} {n} {sel} onselect={(s, f) => { sel = s; focus = f ?? null; }} />
         {/if}
-        <StepLanes {k} {len} {color} {zoom} {sel} />
+        <StepLanes {k} {len} {color} {cw} {n} {sel} flags={shown === "roll"} />
       </div>
       <Inspector {k} i={focus} {color} />
     </div>
-    <Automation {k} {len} {color} {zoom} />
+    <div style="--lw:{LW}px"><Automation {k} {len} {color} {cw} {n} /></div>
   {/if}
 </div>
 

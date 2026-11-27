@@ -19,7 +19,7 @@
 </script>
 <article class="card" style="--c:{color}">
   <header><h3 class="dot">SOUND</h3><span class="sub">{t("sound.kit")}</span>
-    <button class="re" onclick={read}>{t("seq.reload")}</button></header>
+    <button class="re" onclick={read} aria-label={t("seq.reload") + " (kit)"}>{t("seq.reload")}</button></header>
   {#if cur}
     <div class="lanes" role="tablist">{#each DX.lanes as n, l}<button role="tab" aria-selected={l === lane} class:on={l === lane} class="dot" onclick={() => (lane = l)}>{n}</button>{/each}</div>
     <div class="opts">
@@ -32,7 +32,7 @@
     {#each ["a", "b"] as side}
       <div class="ab"><span class="sd dot">{side.toUpperCase()}</span>
         {#each DX.values as nm, i}
-          <Knob value={(cur as any)[side][i]} min={0} max={127} def={64} label={nm} text={String((cur as any)[side][i])} {color} size={38}
+          <Knob value={(cur as any)[side][i]} min={0} max={127} def={64} label={nm} text={String((cur as any)[side][i])} {color} size={34}
                 onchange={(v) => { const x = { ...cur, a: [...cur.a], b: [...cur.b] }; (x as any)[side][i] = v; kit[lane] = x; put(x); }} />
         {/each}
       </div>
@@ -42,7 +42,7 @@
   {/if}
 </article>
 <style>
-  .card { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 12px; display: flex; flex-direction: column; gap: 10px; grid-column: span 2; }
+  .card { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 12px; display: flex; flex-direction: column; gap: 10px; }
   header { display: flex; align-items: baseline; gap: 10px; }
   h3 { margin: 0; font-size: 15px; font-weight: 400; }
   .sub { color: var(--dim); font-size: 12px; flex: 1; }
@@ -52,7 +52,7 @@
   .lanes button { background: var(--surf-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 3px 8px; font-size: 13px; color: var(--dim); }
   .lanes button.on { color: #0b0b0b; background: var(--c); border-color: var(--c); }
   .opts { display: flex; flex-wrap: wrap; gap: 6px; }
-  .ab { display: flex; align-items: center; gap: 2px; }
-  .sd { width: 22px; color: var(--c); font-size: 16px; }
+  .ab { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 8px 2px; }
+  .sd { width: 22px; height: 34px; display: flex; align-items: center; color: var(--c); font-size: 16px; }
   .muted { color: var(--dim); }
 </style>

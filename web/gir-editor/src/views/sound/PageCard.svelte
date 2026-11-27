@@ -1,7 +1,7 @@
 <script lang="ts">
   // One page of the FM-1 (its title, its four knobs in the device's order), with its graph where one helps
   import { device } from "../../lib/model/device.svelte";
-  import { ID, pathOf, type Page } from "../../lib/model/tables";
+  import { ID, HELP, helpText, isHelp, pathOf, type Page } from "../../lib/model/tables";
   import Param from "../../ui/Param.svelte";
   import AdsrGraph from "../../ui/graphs/AdsrGraph.svelte";
   import WaveGraph from "../../ui/graphs/WaveGraph.svelte";
@@ -17,10 +17,18 @@
   const env = $derived(page.title === "ENV" || page.title === "ENV 2");
   const lfo = $derived(page.title === "LFO");
   const rumble = $derived(page.title === "RUMBLE" && page.fam === "EDIT");
+  // (rc3) a card stretched alone on its row: its knobs stay in the columns of the cards above, its help beside them
+  const help = $derived.by(() => {
+    const fam = page.fam === "TRK" ? "GLO" : page.fam;
+    const h = HELP.pages[`${fam}/${page.title}`];
+    if (!h) return [];
+    return page.ids.map((id, i) => (id >= 0 && h.knobs[i] && isHelp(h.knobs[i]) ? helpText(h.knobs[i]) : "")).filter(Boolean);
+  });
   const waveName = $derived.by(() => { const d = device.desc(ID.P_LWAVE, e); return d?.names?.[p(ID.P_LWAVE) - d.min] ?? "SIN"; });
 </script>
 
 <article class="card" class:wide style="--c:{color}">
+  <div class="inner">
   <header>
     <h3 class="dot">{page.title}</h3>
     {#if sub}<span class="sub dot">{sub}</span>{/if}
@@ -44,15 +52,26 @@
       {/if}
     {/each}
   </div>
+  </div>
+  {#if help.length}
+    <ul class="help">{#each help as h}<li>{h}</li>{/each}</ul>
+  {/if}
 </article>
 
 <style>
-  .card { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 12px 12px 10px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .card { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 12px 12px 12px; display: flex; gap: 24px; min-width: 0; container-type: inline-size; }
+  /* the knobs never spread wider than a page of 4 (no stretched knobs); a card wider than that shows its help beside */
+  .inner { flex: 1; max-width: 400px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  /* (rc3) stretched: the knobs' part as wide as a one-column card's (--colw from the Sound view), the help beside */
+  .wide .inner { flex: none; width: min(400px, calc(var(--colw, 340px) - 26px)); }
+  .help { display: none; }
+  @container (min-width: 620px) { .help { display: flex; } }
+  ul.help { flex: 1; min-width: 0; margin: 30px 0 0; padding: 0 0 0 18px; border-left: 1px solid var(--line); list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 12px; line-height: 1.45; color: var(--dim); }
   .card:hover { border-color: var(--line-2); }
   header { display: flex; align-items: baseline; gap: 10px; }
   h3 { margin: 0; font-size: 15px; font-weight: 400; color: var(--fg); }
   .sub { font-size: 13px; color: var(--c); }
   .gir { margin-left: auto; font-size: 10px; font-weight: 700; color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); border-radius: 4px; padding: 0 5px; }
-  .knobs { display: grid; grid-template-columns: repeat(4, 1fr); justify-items: center; gap: 4px; }
+  .knobs { margin-top: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); justify-items: center; gap: 10px 4px; }
   .gap { width: 1px; }
 </style>

@@ -76,7 +76,7 @@
   </header>
 
   {#if L}
-    <div class="tl" role="grid" aria-label={t("song.title")}>
+    <div class="tl" data-scroll-x role="grid" aria-label={t("song.title")}>
       <div class="hrow" role="row"><span></span>{#each ENT as c}<span class="eh dot">{c}</span>{/each}</div>
       {#each L.tracks as x, k}
         {@const c = TRACK_COLORS[k]}
@@ -177,7 +177,7 @@
   .lb { font-size: 12px; font-weight: 700; color: var(--dim); }
   .help { margin: 0 0 0 auto; font-size: 12px; color: var(--dim); max-width: 46ch; }
   .tl { display: flex; flex-direction: column; gap: 6px; background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 10px; overflow-x: auto; }
-  .hrow, .row { display: grid; grid-template-columns: 48px repeat(16, minmax(48px, 1fr)); gap: 4px; }
+  .hrow, .row { display: grid; grid-template-columns: 48px repeat(16, minmax(34px, 1fr)); gap: 4px; }
   .eh { text-align: center; color: var(--dim); font-size: 13px; }
   .th { display: flex; align-items: center; gap: 4px; background: none; border: 0; padding: 0; }
   .th .n { width: 30px; height: 40px; display: grid; place-items: center; border-radius: 8px; background: var(--c); color: #0a0a0a; font-size: 16px; }

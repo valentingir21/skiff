@@ -3,12 +3,17 @@
   import { t } from "../lib/i18n/index.svelte";
   import { ic, VIEW_ICON } from "../ui/icons";
   import { device } from "../lib/model/device.svelte";
+  import { isNarrow, isTiny } from "../lib/layout.svelte";
   const sel = $derived(device.sel);
+  // (rc3) the labels kept as long as possible: full, then short (< 1180 px), then short without the icons (< 900 px);
+  // each tab named for screen readers and tests whatever is shown
+  const short = $derived(isNarrow());
+  const tiny = $derived(isTiny());
 </script>
 <div class="tabs" role="tablist" aria-label="Views">
   {#each VIEWS as v, i}
-    <button role="tab" aria-selected={ui.view === v} class:on={ui.view === v} onclick={() => go(v)} title={`${t("view." + v)} (Alt+${i + 1})`}>
-      <i class="ic" aria-hidden="true">{ic(VIEW_ICON[v])}</i><span>{t("view." + v)}</span>
+    <button role="tab" aria-selected={ui.view === v} class:on={ui.view === v} onclick={() => go(v)} title={`${t("view." + v)} (Alt+${i + 1})`} aria-label={t("view." + v)}>
+      {#if !tiny}<i class="ic" aria-hidden="true">{ic(VIEW_ICON[v])}</i>{/if}<span aria-hidden="true">{short ? t("view.short." + v) : t("view." + v)}</span>
     </button>
   {/each}
   <span class="trk dot" style="color:var(--t{sel + 1})">T{sel + 1}</span>
@@ -21,5 +26,5 @@
   button.on::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: -1px; height: 2px; border-radius: 2px; background: var(--accent); }
   .ic { font-size: 15px; opacity: 0.85; }
   .trk { margin-left: auto; font-size: 15px; padding-right: 6px; }
-  @media (max-width: 1240px) { button span { display: none; } button { padding: 0 11px; } .ic { font-size: 17px; } }
+  @media (max-width: 1179px) { button { padding: 0 9px; gap: 5px; } .tabs { padding: 8px 8px 0; } }
 </style>

@@ -82,7 +82,7 @@
   let kbd = $state(true);
 
   onMount(() => {
-    geo = PANEL.draw(svg, "side", { knobFont: "DotGothic16" });
+    geo = PANEL.draw(svg, "wide", { knobFont: "DotGothic16" });   // (rc3) the unit's own layout, as Try Gir
     for (const b of geo.buttons) {
       b.g.style.cursor = "pointer";
       b.g.addEventListener("pointerdown", (e: PointerEvent) => {
@@ -139,7 +139,11 @@
   $effect(() => {                            // the lit buttons and keys (the copy's while casting)
     const l = casting ? cast.leds : leds;
     if (!geo) return;
-    for (const b of geo.buttons) b.g.classList.toggle("lit", !!((l[0] >> b.bit) & 1));
+    for (const b of geo.buttons) {
+      const green = b.bit === PANEL.B.PLAY && !!((l[0] >> PANEL.PLAY_GREEN) & 1);     // PLAY lit green while it plays
+      b.g.classList.toggle("green", green);
+      b.g.classList.toggle("lit", !green && !!((l[0] >> b.bit) & 1));
+    }
     geo.keys.forEach((kk: any, k: number) => kk?.g.classList.toggle("lit", !!((l[1] >> k) & 1)));
   });
   const scr = $derived(geo ? geo.screen : [0, 0, 0]);
@@ -178,10 +182,10 @@
     <div class="unit">
       <svg bind:this={svg} class="panel" role="application" aria-label="FM-1"></svg>
       {#if geo && live}
-        <canvas bind:this={canvas} width="240" height="240" aria-label="FM-1 screen" data-testid="screen-canvas"
+        <canvas bind:this={canvas} data-lint-over width="240" height="240" aria-label="FM-1 screen" data-testid="screen-canvas"
                 style="left:{(scr[0] / geo.L.w) * 100}%; top:{(scr[1] / geo.L.h) * 100}%; width:{(scr[2] / geo.L.w) * 100}%"></canvas>
       {:else if geo}
-        <div class="noscr" style="left:{(scr[0] / geo.L.w) * 100}%; top:{(scr[1] / geo.L.h) * 100}%; width:{(scr[2] / geo.L.w) * 100}%; height:{(scr[2] / geo.L.h) * 100}%">
+        <div class="noscr" data-lint-over style="left:{(scr[0] / geo.L.w) * 100}%; top:{(scr[1] / geo.L.h) * 100}%; width:{(scr[2] / geo.L.w) * 100}%; height:{(scr[2] / geo.L.h) * 100}%">
           {#if cast.state === "idle"}<span class="dot">GIR 1.0</span>{:else}<span class="spin"></span>{/if}
         </div>
       {/if}
@@ -201,17 +205,22 @@
   .on { display: flex; align-items: center; gap: 8px; color: var(--fg) !important; }
   .dotlive { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent); }
   .kb { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--fg-2); }
-  .wrap { position: relative; width: 100%; max-width: 1400px; --body: #1b1b1e; --tray: #131315; --part: #2a2a2f; --edge: #3a3a41; --label: #c9c6cd; background: var(--bg-2); }
+  /* (rc3) Try Gir's panel: its layout (the unit's), its colours */
+  .wrap { position: relative; width: 100%; max-width: 1180px; --body: #1d1d1f; --tray: #141415; --part: #2a2a2d; --edge: #3a3a3e; --label: #d6d6d8; --lit: #fff4d6; background: var(--bg-2); }
   .unit { position: relative; width: 100%; }
   .wrap.full { display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; max-width: none; }
-  .wrap.full .unit { width: min(100vw, calc(100vh * 1.9)); }
+  .wrap.full .unit { width: min(100vw, calc(100vh * 1000 / 624)); }
   .fst { color: #8a8a90; font-size: 12px; margin: 8px 0 0; }
   .panel { width: 100%; height: auto; display: block; user-select: none; touch-action: none; }
-  .panel :global(.face.key) { fill: #e8e5ea; }
-  .panel :global(.slit) { fill: #c4c1c6; }
-  .panel :global(.lit .face.btn) { fill: color-mix(in srgb, var(--accent) 55%, #2a2a2f); }
-  .panel :global(.lit .slit) { fill: var(--accent); }
-  .panel :global(.held .face) { filter: brightness(1.35); }
+  .panel :global(.face) { transition: fill 0.05s; }
+  .panel :global(.face.key) { fill: #0c0c0d; stroke: var(--edge); stroke-width: 1.5; }
+  .panel :global(.slit) { fill: #3a3a3c; }
+  .panel :global(.lit .face.btn) { fill: var(--lit); }
+  .panel :global(.lit text) { fill: #1d1d1f; }
+  .panel :global(.lit .slit) { fill: #ececee; filter: drop-shadow(0 0 3px rgb(255 255 255 / 60%)); }
+  .panel :global(.green .face.btn) { fill: #5fe08a; }
+  .panel :global(.green text) { fill: #0d2414; }
+  .panel :global(.held .face) { stroke: var(--lit); stroke-width: 3; }
   canvas { position: absolute; image-rendering: pixelated; aspect-ratio: 1; border-radius: 4px; }
   .noscr { position: absolute; display: grid; place-items: center; background: #080808; color: var(--mute); border-radius: 4px; font-size: 28px; }
   .spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid #333; border-top-color: var(--accent); animation: sp 0.9s linear infinite; }

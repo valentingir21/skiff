@@ -5,9 +5,9 @@
   import { device } from "../../lib/model/device.svelte";
   import { fmtValue } from "../../lib/legacy/proto.js";
   import { t } from "../../lib/i18n/index.svelte";
-  interface Props { k: number; len: number; color: string; zoom: number }
-  let { k, len, color, zoom }: Props = $props();
-  const CW = $derived(Math.round(26 * zoom));
+  interface Props { k: number; len: number; color: string; cw: number; n: number }
+  let { k, len, color, cw, n }: Props = $props();
+  const CW = $derived(cw);
   const m = $derived(device.motion[k]);
   const tr = $derived(device.tracks[k]);
   let extra = $state<number[]>([]);
@@ -38,7 +38,7 @@
   const frac = (id: number, v: number) => { const ds = d(id); return ds ? (v - ds.min) / Math.max(1, ds.max - ds.min) : 0; };
 </script>
 
-<section class="auto" style="--c:{color}; --cw:{CW}px">
+<section class="auto" data-scroll-x style="--c:{color}; --cw:{CW}px">
   <header>
     <h3>Automation</h3>
     {#if m}<span class="cnt">{m.events.length} · {m.events.filter((e) => e.lock).length} locks</span>
@@ -53,7 +53,7 @@
     {@const evs = m?.events.filter((e) => e.param === id) ?? []}
     <div class="lane">
       <span class="ln dot" title={String(id)}>{d(id)?.label ?? id}</span>
-      <div class="track" style="width:{CW * 64}px" role="presentation" onclick={(e) => click(id, e)} onpointermove={dotMove} onpointerup={dotUp}>
+      <div class="track" style="width:{CW * n}px" role="presentation" onclick={(e) => click(id, e)} onpointermove={dotMove} onpointerup={dotUp}>
         {#each evs as ev}
           {@const v = dragging && dragging.id === id && dragging.step === ev.step ? dragging.v : ev.value}
           <button class="dot-ev" class:lock={ev.lock} style="left:{ev.step * CW + CW / 2 - 6}px; bottom:{4 + frac(id, v) * 28}px"

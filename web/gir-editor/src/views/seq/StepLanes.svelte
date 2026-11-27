@@ -5,10 +5,10 @@
   import type { Step } from "../../lib/protocol/types";
   import Seg from "../../ui/components/Seg.svelte";
   import { t } from "../../lib/i18n/index.svelte";
-  interface Props { k: number; len: number; color: string; zoom: number; sel: Set<number> }
-  let { k, len, color, zoom, sel }: Props = $props();
+  interface Props { k: number; len: number; color: string; cw: number; n: number; sel: Set<number>; flags?: boolean }
+  let { k, len, color, cw, n, sel, flags = true }: Props = $props();
   const steps = $derived(device.steps[k] ?? []);
-  const CW = $derived(Math.round(26 * zoom));
+  const CW = $derived(cw);
   type Lane = "vel" | "chance" | "ratchet" | "nudge";
   let lane = $state<Lane>("vel");
   const R: Record<Lane, [number, number]> = { vel: [1, 127], chance: [0, 100], ratchet: [1, 4], nudge: [-32, 31] };
@@ -40,12 +40,13 @@
   const h = (s: Step) => { const [lo, hi] = R[lane]; return lane === "nudge" ? Math.abs(val(s)) / 32 : (val(s) - lo) / (hi - lo); };
 </script>
 
-<div class="lanes" style="--c:{color}; --cw:{CW}px">
-  {#each [[1, "ACC", t("seq.acc")], [2, "SLD", t("seq.sld")]] as [bit, nm, title]}
+<div class="lanes" data-scroll-x style="--c:{color}; --cw:{CW}px">
+  <!-- (rc3) ACC and SLD: not on a drum track (its accents are the grid's own, Shift-click; DECISIONS 37) -->
+  {#each flags ? [[1, "ACC", t("seq.acc")], [2, "SLD", t("seq.sld")]] : [] as [bit, nm, title]}
     <div class="row">
       <span class="ln dot" title={String(title)}>{nm}</span>
-      <div class="cells" style="width:{CW * 64}px">
-        {#each Array(64) as _, i}
+      <div class="cells" style="width:{CW * n}px">
+        {#each Array(n) as _, i}
           {@const s = steps[i]}
           <button class="flag" class:on={!!s && playable(s) && !!(s.flags & Number(bit))} class:dead={!playable(s)} class:out={i >= len} class:sel={sel.has(i)}
                   aria-label={`${nm} step ${i + 1}`} aria-pressed={!!s && !!(s.flags & Number(bit))} disabled={!playable(s) || i >= len}
@@ -60,9 +61,9 @@
   </div>
   <div class="row">
     <span class="ln"></span>
-    <div class="vals" bind:this={box} style="width:{CW * 64}px" role="presentation" onpointerdown={down} onpointermove={move} onpointerup={up}>
+    <div class="vals" bind:this={box} style="width:{CW * n}px" role="presentation" onpointerdown={down} onpointermove={move} onpointerup={up}>
       {#if lane === "nudge"}<div class="mid"></div>{/if}
-      {#each Array(64) as _, i}
+      {#each Array(n) as _, i}
         {@const s = steps[i]}
         {#if s && playable(s) && i < len}
           <div class="bar" class:neg={lane === "nudge" && s.nudge < 0} class:sel={sel.has(i)}
@@ -77,7 +78,7 @@
 <style>
   .lanes { border: 1px solid var(--line); border-radius: var(--r-l); background: var(--surf); padding: 6px 0 8px; overflow-x: auto; }
   .row { display: flex; align-items: center; }
-  .ln { width: 44px; flex: none; padding-left: 10px; font-size: 12px; color: var(--dim); position: sticky; left: 0; background: var(--surf); z-index: 1; }
+  .ln { width: var(--lw, 72px); flex: none; padding-left: 10px; font-size: 12px; color: var(--dim); position: sticky; left: 0; background: var(--surf); z-index: 1; }
   .cells { display: flex; flex: none; }
   .flag { width: var(--cw); height: 20px; background: none; border: 0; position: relative; padding: 0; }
   .flag::before { content: ""; position: absolute; inset: 5px calc(var(--cw) / 2 - 5px); border-radius: 3px; border: 1px solid var(--line-2); }
@@ -85,7 +86,7 @@
   .flag.dead::before { border-color: transparent; background: var(--surf-2); inset: 9px calc(var(--cw) / 2 - 1px); }
   .flag.out { opacity: 0.25; }
   .flag.sel::after { content: ""; position: absolute; inset: 1px 1px; border: 1px solid var(--line-2); border-radius: 4px; }
-  .vhead { padding: 8px 10px 6px 44px; position: sticky; left: 0; }
+  .vhead { padding: 8px 10px 6px var(--lw, 72px); position: sticky; left: 0; }
   .vals { position: relative; height: 84px; flex: none; cursor: ns-resize; background: repeating-linear-gradient(90deg, transparent 0 calc(var(--cw) * 4 - 1px), var(--line) calc(var(--cw) * 4 - 1px) calc(var(--cw) * 4)); touch-action: none; }
   .mid { position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed var(--line-2); }
   .bar { position: absolute; bottom: 0; border-radius: 3px 3px 0 0; background: color-mix(in srgb, var(--c) 75%, transparent); border-top: 2px solid var(--c); }

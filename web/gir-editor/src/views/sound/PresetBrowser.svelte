@@ -51,6 +51,10 @@
     if (n) { load(n); queueMicrotask(() => list?.querySelector(`[data-k="${n.key}"]`)?.scrollIntoView({ block: "nearest" })); }
   }
   const catLabel = (c: string) => (CATEGORIES[c] ? CATEGORIES[c][i18n.lang] : c);
+  // (rc3) the category chips on balanced lines of equal cells (never one alone on a line): one line if they fit (8 at
+  // most), else two even ones; Skiff's own sounds (no prefix) are "Skiff"
+  const nChips = $derived(cats.length + 1);
+  const chipCols = $derived(nChips <= 8 ? nChips : Math.ceil(nChips / 2));
 </script>
 
 <div class="pb" style="--c:{color}" role="region" aria-label={t("sound.presets")}>
@@ -63,11 +67,11 @@
       <button role="radio" aria-checked={scope === "engine"} class:on={scope === "engine"} onclick={() => (scope = "engine")}>{t("sound.thisEngine")}</button>
       <button role="radio" aria-checked={scope === "all"} class:on={scope === "all"} onclick={() => (scope = "all")}>{t("sound.allEngines")}</button>
     </div>
-    <button class="star" class:on={favOnly} aria-pressed={favOnly} title={t("sound.favorites")} onclick={() => (favOnly = !favOnly)}>★</button>
+    <button class="star" class:on={favOnly} aria-pressed={favOnly} title={t("sound.favorites")} aria-label={t("sound.favorites")} onclick={() => (favOnly = !favOnly)}>★</button>
   </div>
-  <div class="cats">
-    <button class:on={cat === "*"} onclick={() => (cat = "*")}>{t("sound.all")}</button>
-    {#each cats as c}<button class:on={cat === c} onclick={() => (cat = c)} title={catLabel(c)}>{c || catLabel(c)}</button>{/each}
+  <div class="cats" data-lint="chips" role="radiogroup" aria-label={t("sound.categories")} style="--n:{chipCols}">
+    <button role="radio" aria-checked={cat === "*"} class:on={cat === "*"} onclick={() => (cat = "*")}>{t("sound.all")}</button>
+    {#each cats as c}<button role="radio" aria-checked={cat === c} class:on={cat === c} onclick={() => (cat = c)} title={catLabel(c)} aria-label={catLabel(c)}>{c || "Skiff"}</button>{/each}
   </div>
   <ul class="list scroll" bind:this={list} tabindex="0" onkeydown={key} role="listbox" aria-label={t("sound.presets")}>
     {#each rows as r (r.key)}
@@ -98,8 +102,8 @@
   .seg button.on { background: var(--surf-4); color: var(--fg); }
   .star { width: 34px; border-radius: var(--r-m); border: 1px solid var(--line-2); background: var(--bg); color: var(--dim); }
   .star.on { color: var(--warn); border-color: var(--warn); }
-  .cats { display: flex; flex-wrap: wrap; gap: 4px; }
-  .cats button { border: 1px solid var(--line-2); background: none; color: var(--dim); border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 700; }
+  .cats { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 4px; }
+  .cats button { border: 1px solid var(--line-2); background: none; color: var(--dim); border-radius: 999px; padding: 2px 0; font-size: 11.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .cats button:hover { color: var(--fg); }
   .cats button.on { background: var(--c); border-color: var(--c); color: #0b0b0b; }
   .list { list-style: none; margin: 0; padding: 0; flex: 1; min-height: 120px; border-radius: var(--r-m); }

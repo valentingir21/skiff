@@ -8,8 +8,8 @@
   import { t } from "../lib/i18n/index.svelte";
   import Knob from "./components/Knob.svelte";
 
-  interface Props { track?: number; id: number; scope?: 0 | 1; page?: Page; slot?: number; where?: string; color?: string; size?: number; label?: string }
-  let { track = device.sel, id, scope = 0, page, slot = 0, where = "", color = "var(--accent)", size = 52, label }: Props = $props();
+  interface Props { track?: number; id: number; scope?: 0 | 1; page?: Page; slot?: number; where?: string; color?: string; size?: number; label?: string; hideLabel?: boolean; layout?: "col" | "row" }
+  let { track = device.sel, id, scope = 0, page, slot = 0, where = "", color = "var(--accent)", size = 48, label, hideLabel = false, layout = "col" }: Props = $props();
 
   const tr = $derived(device.tracks[track]);
   const d = $derived(scope === 1 ? device.gdesc[id] : tr ? device.desc(id, tr.engine) : undefined);
@@ -38,14 +38,14 @@
   }
 </script>
 
-{#if d}
+{#if d && /[A-Za-z0-9]/.test(label ?? d.label ?? "x") || (d && hideLabel)}
   <Knob value={value} min={d.min} max={d.max} def={d.def} label={label ?? d.label} text={shown[0]} unit={shown[1]}
-        names={d.fmt === 8 ? d.names : d.fmt === 11 ? ["OFF", "ON"] : null} {color} {size}
+        names={d.fmt === 8 ? d.names : d.fmt === 11 ? ["OFF", "ON"] : null} {color} {size} {hideLabel} {layout}
         describe={[help, where && `${t("param.where")} : ${where}`].filter(Boolean).join("\n")}
         onhover={hover}
         onchange={(v) => (scope === 1 ? device.setGlobal(id, v) : device.setParam(track, id, v, { label: d!.label }))} />
 {:else}
-  <div class="empty" style="width:{size + 34}px"></div>
+  <div class="empty" style="width:{size < 44 ? 64 : 76}px"></div>
 {/if}
 
 <style>.empty { height: 1px; }</style>

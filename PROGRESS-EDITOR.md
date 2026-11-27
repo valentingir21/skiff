@@ -3,7 +3,18 @@
 Lire ce fichier d'abord. Branche `gir-editor` (depuis le tag `gir-v1.0`). Docs : `../livraison/EDITOR/`
 (DECISIONS.md = journal des décisions). Règles : pas de flash, pas de changement dans `firmware/`, pas de merge.
 
-## Étape en cours
+## Étape en cours : rc3 (passe de correction de l'interface, 27/11/2026)
+- Test « layout lint » : `web/gir-editor/tests/e2e/layout.spec.ts` + `layout-lint.ts`, lancé par
+  `npx playwright test -c playwright.layout.config.ts` (`LAYOUT_LABEL=avant|apres`, `LAYOUT_ONLY=<regex>`,
+  `LAYOUT_URL=` pour une autre build ; rapport : `node scripts/layout-report.mjs <label>`). Captures et défauts dans
+  `../livraison/EDITOR/screens/layout/<label>/`. La rc2 est servie depuis le worktree `../work/rc2wt` (port 5177).
+- Fait : Knob à 2 tailles, grille de cartes (`lib/layout.svelte.ts` pack), MOD, mixer, points de rupture (tiroir de
+  presets, pistes compactes, onglets courts), descriptions (`lib/model/describe.ts`, `generated/presets.*.json`),
+  séquenceur ajusté, Écran façon Try Gir, FM6 vide, DECISIONS 36 à 45.
+- Reste : matrice complète à 0 défaut, 2 passes de revue visuelle, appli Mac, RAPPORT-LAYOUT.md, GUIDE, publication
+  gh-pages, pré-release rc3.
+
+## rc2
 **rc2 publiée** (27/11/2026) : voir `../livraison/EDITOR/RAPPORT-RC2.md` (checklist matériel de 30 min). La rc1 :
 `RAPPORT-NUIT.md`. Reste : la CI (droit `workflow` du jeton, puis `git mv web/gir-editor/ci/gir-editor-desktop.yml
 .github/workflows/`), les tests sur la vraie FM-1, la finale `gir-editor-v1.0` après eux (pas sans l'utilisateur).

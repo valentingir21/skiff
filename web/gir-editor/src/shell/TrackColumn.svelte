@@ -5,12 +5,15 @@
   import { t } from "../lib/i18n/index.svelte";
   import { TRACK_COLORS } from "../lib/ui.svelte";
   import { GIR_ENGINES } from "../lib/model/tables";
+  import { isNarrow } from "../lib/layout.svelte";
+  // (rc3) under 1180 px: compact, the number and colour, a short name, the three buttons small
+  const compact = $derived(isNarrow());
 
   let now = $state(Date.now());
   $effect(() => { const i = setInterval(() => (now = Date.now()), 150); return () => clearInterval(i); });
 </script>
 
-<aside class="col" aria-label={t("tracks.title")}>
+<aside class="col scroll" class:compact aria-label={t("tracks.title")}>
   {#each device.tracks as tr, k}
     {@const sel = k === device.sel}
     {@const eng = device.engineName(tr.engine)}
@@ -26,9 +29,9 @@
       </button>
       <div class="lvl" aria-hidden="true"><span style="width:{(tr.level / 127) * 100}%"></span></div>
       <div class="btns">
-        <button class="m" class:on={!!tr.mute} aria-pressed={!!tr.mute} title={t("tracks.mute")} onclick={() => device.setMute(k, !tr.mute)}>M</button>
-        <button class="s" class:on={device.soloTrack === k} aria-pressed={device.soloTrack === k} title={t("tracks.solo")} onclick={() => device.solo(k)}>S</button>
-        <button class="r" class:on={!!(device.recMask & (1 << k))} title={t("tracks.arm")} aria-label={t("tracks.arm")}
+        <button class="m" class:on={!!tr.mute} aria-pressed={!!tr.mute} title={t("tracks.mute")} aria-label={`${t("tracks.mute")} T${k + 1}`} onclick={() => device.setMute(k, !tr.mute)}>M</button>
+        <button class="s" class:on={device.soloTrack === k} aria-pressed={device.soloTrack === k} title={t("tracks.solo")} aria-label={`${t("tracks.solo")} T${k + 1}`} onclick={() => device.solo(k)}>S</button>
+        <button class="r" class:on={!!(device.recMask & (1 << k))} title={t("tracks.arm")} aria-label={`${t("tracks.arm")} T${k + 1}`}
                 onclick={async () => { await device.selectTrack(k); await device.rec(); }}>●</button>
       </div>
     </div>
@@ -57,4 +60,15 @@
   .m.on { background: var(--warn); border-color: var(--warn); color: #1a1200; }
   .s.on { background: var(--info); border-color: var(--info); color: #001a17; }
   .r.on { background: var(--err); border-color: var(--err); color: #fff; }
+  .col.compact { width: 88px; padding: 2px 6px 12px 8px; }
+  .compact .trk { padding: 6px 5px; }
+  .compact .main { grid-template-columns: 1fr; gap: 4px; justify-items: center; text-align: center; position: relative; }
+  .compact .num { width: 28px; height: 28px; font-size: 16px; }
+  .compact .txt { width: 100%; align-items: center; }
+  .compact .name { font-size: 11px; max-width: 100%; }
+  .compact .eng { display: none; }
+  .compact .act { position: absolute; top: 0; right: 2px; }
+  .compact .lvl { margin: 6px 2px 5px; }
+  .compact .btns { margin-left: 0; gap: 3px; }
+  .compact .btns button { height: 20px; font-size: 10px; padding: 0; min-width: 0; }
 </style>

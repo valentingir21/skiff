@@ -4,7 +4,8 @@
   // .syx import (single voices and 32-voice banks, Dexed's format) and export
   import { device } from "../lib/model/device.svelte";
   import { FM6, req } from "../lib/legacy/proto.js";
-  import { TRACK_COLORS, toast, download, pickFile, go } from "../lib/ui.svelte";
+  import { TRACK_COLORS, toast, download, pickFile, go, ask } from "../lib/ui.svelte";
+  import { T } from "../lib/model/tables";
   import { t } from "../lib/i18n/index.svelte";
   import Knob from "../ui/components/Knob.svelte";
   import Button from "../ui/components/Button.svelte";
@@ -67,12 +68,38 @@
   }
   function useVoice(x: Uint8Array) { v = [...x]; send(); }
   function exportSyx() { if (v) download(`${name.trim() || "FM6"}.syx`, Uint8Array.from(FM6.singleSysex(Uint8Array.from(v))), "application/octet-stream"); }
+  // (rc3) the empty state: the FM6 tracks to pick, or this track put on FM6 (asked first: its sound changes)
+  const fm6Tracks = $derived(device.tracks.map((x, i) => ({ x, i })).filter(({ x }) => device.engineName(x.engine) === "FM6"));
+  const FM6_E = T.ENG.findIndex((x) => x.name === "FM6");
+  const lightOff = $derived(!!device.info && !!(device.info.light.tracks & (1 << k)) && !!(device.info.light.engines & (1 << FM6_E)));
+  async function toFm6() {
+    if (!(await ask({ title: t("fm6.switchTitle", { n: k + 1 }), body: t("fm6.switchBody", { n: k + 1, name: tr?.name ?? "" }), ok: t("fm6.switchOk") }))) return;
+    await device.setEngine(k, FM6_E);
+  }
   const ENVN = ["R1", "R2", "R3", "R4", "L1", "L2", "L3", "L4"];
 </script>
 
 <div class="fm6" style="--c:{color}">
   {#if !isFm6}
-    <div class="empty"><p>{t("fm6.notFm6")}</p><Button onclick={() => go("sound")}>{t("view.sound")}</Button></div>
+    <div class="empty">
+      <h2>{t("fm6.emptyTitle", { n: k + 1, eng: tr ? device.engineName(tr.engine) : "" })}</h2>
+      <p>{t("fm6.emptyLead")}</p>
+      {#if fm6Tracks.length}
+        <div class="picks">
+          {#each fm6Tracks as { x, i }}
+            <button class="pick" style="--tc:{TRACK_COLORS[i]}" onclick={() => device.selectTrack(i)}>
+              <span class="n dot">{i + 1}</span><span class="nm dot">{x.name}</span><span class="go">{t("fm6.editThis")}</span>
+            </button>
+          {/each}
+        </div>
+      {:else}
+        <p class="none">{t("fm6.noneOnFm6")}</p>
+      {/if}
+      <div class="acts2">
+        <Button variant="primary" onclick={toFm6} disabled={lightOff}>{t("fm6.switch", { n: k + 1 })}</Button>
+        <Button variant="ghost" onclick={() => go("sound")}>{t("view.sound")}</Button>
+      </div>
+    </div>
   {:else if v}
     <header>
       <h2 class="dot">T{k + 1} · {name || "FM6"}</h2>
@@ -108,11 +135,11 @@
           {/each}
         </svg>
         <div class="row">
-          <Knob value={alg} min={0} max={31} label="ALGO" text={String(alg + 1)} {color} size={40} onchange={(x) => set(FM6.VI.ALG, x)} />
-          <Knob value={v[FM6.VI.FB]} min={0} max={7} label="FEEDBACK" text={String(v[FM6.VI.FB])} {color} size={40} onchange={(x) => set(FM6.VI.FB, x)} />
-          <Knob value={v[FM6.VI.TRNSP]} min={0} max={48} def={24} label="TRANSP" text={String(v[FM6.VI.TRNSP] - 24)} {color} size={40} onchange={(x) => set(FM6.VI.TRNSP, x)} />
-          <Knob value={v[FM6.VI.LFS]} min={0} max={99} label="LFO SPD" text={String(v[FM6.VI.LFS])} {color} size={40} onchange={(x) => set(FM6.VI.LFS, x)} />
-          <Knob value={v[FM6.VI.LPMD]} min={0} max={99} label="PM DEPTH" text={String(v[FM6.VI.LPMD])} {color} size={40} onchange={(x) => set(FM6.VI.LPMD, x)} />
+          <Knob value={alg} min={0} max={31} label="ALGO" text={String(alg + 1)} {color} onchange={(x) => set(FM6.VI.ALG, x)} />
+          <Knob value={v[FM6.VI.FB]} min={0} max={7} label="FEEDBACK" text={String(v[FM6.VI.FB])} {color} onchange={(x) => set(FM6.VI.FB, x)} />
+          <Knob value={v[FM6.VI.TRNSP]} min={0} max={48} def={24} label="TRANSP" text={String(v[FM6.VI.TRNSP] - 24)} {color} onchange={(x) => set(FM6.VI.TRNSP, x)} />
+          <Knob value={v[FM6.VI.LFS]} min={0} max={99} label="LFO SPD" text={String(v[FM6.VI.LFS])} {color} onchange={(x) => set(FM6.VI.LFS, x)} />
+          <Knob value={v[FM6.VI.LPMD]} min={0} max={99} label="PM DEPTH" text={String(v[FM6.VI.LPMD])} {color} onchange={(x) => set(FM6.VI.LPMD, x)} />
         </div>
       </section>
     </div>
@@ -122,12 +149,12 @@
         <section class="card op" class:car={graph.carriers.includes(n)}>
           <h3 class="dot">OP {n} <span>{FM6.freqText(Uint8Array.from(v), n)}</span></h3>
           <div class="g">
-            <Knob value={op(n, "OL")} min={0} max={99} label="LEVEL" text={String(op(n, "OL"))} {color} size={38} onchange={(x) => set(FM6.at(n, "OL"), x)} />
-            <Knob value={op(n, "FC")} min={0} max={31} label="COARSE" text={String(op(n, "FC"))} {color} size={38} onchange={(x) => set(FM6.at(n, "FC"), x)} />
-            <Knob value={op(n, "FF")} min={0} max={99} label="FINE" text={String(op(n, "FF"))} {color} size={38} onchange={(x) => set(FM6.at(n, "FF"), x)} />
-            <Knob value={op(n, "DET")} min={0} max={14} def={7} label="DETUNE" text={String(op(n, "DET") - 7)} {color} size={38} onchange={(x) => set(FM6.at(n, "DET"), x)} />
-            <Knob value={op(n, "KVS")} min={0} max={7} label="VEL" text={String(op(n, "KVS"))} {color} size={38} onchange={(x) => set(FM6.at(n, "KVS"), x)} />
-            <Knob value={op(n, "RS")} min={0} max={7} label="RATE SC" text={String(op(n, "RS"))} {color} size={38} onchange={(x) => set(FM6.at(n, "RS"), x)} />
+            <Knob value={op(n, "OL")} min={0} max={99} label="LEVEL" text={String(op(n, "OL"))} {color} size={34} onchange={(x) => set(FM6.at(n, "OL"), x)} />
+            <Knob value={op(n, "FC")} min={0} max={31} label="COARSE" text={String(op(n, "FC"))} {color} size={34} onchange={(x) => set(FM6.at(n, "FC"), x)} />
+            <Knob value={op(n, "FF")} min={0} max={99} label="FINE" text={String(op(n, "FF"))} {color} size={34} onchange={(x) => set(FM6.at(n, "FF"), x)} />
+            <Knob value={op(n, "DET")} min={0} max={14} def={7} label="DETUNE" text={String(op(n, "DET") - 7)} {color} size={34} onchange={(x) => set(FM6.at(n, "DET"), x)} />
+            <Knob value={op(n, "KVS")} min={0} max={7} label="VEL" text={String(op(n, "KVS"))} {color} size={34} onchange={(x) => set(FM6.at(n, "KVS"), x)} />
+            <Knob value={op(n, "RS")} min={0} max={7} label="RATE SC" text={String(op(n, "RS"))} {color} size={34} onchange={(x) => set(FM6.at(n, "RS"), x)} />
           </div>
           <div class="env">
             {#each ENVN as f}
@@ -144,7 +171,16 @@
 
 <style>
   .fm6 { display: flex; flex-direction: column; gap: 12px; }
-  .empty { padding: 40px; text-align: center; color: var(--dim); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .empty { max-width: 560px; margin: 40px auto; padding: 28px; background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-xl); color: var(--fg-2); display: flex; flex-direction: column; gap: 14px; }
+  .empty h2 { margin: 0; font-size: var(--fs-xl); color: var(--fg); }
+  .empty p { margin: 0; line-height: 1.5; }
+  .empty .none { color: var(--dim); }
+  .picks { display: flex; flex-direction: column; gap: 6px; }
+  .pick { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r-m); border: 1px solid var(--line-2); background: var(--surf-2); text-align: left; }
+  .pick:hover { border-color: var(--tc); }
+  .pick .n { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 7px; background: var(--tc); color: #0a0a0a; }
+  .pick .go { color: var(--dim); font-size: 12px; font-weight: 600; }
+  .acts2 { display: flex; gap: 8px; flex-wrap: wrap; }
   header { display: flex; align-items: center; gap: 12px; }
   h2 { margin: 0; font-size: 22px; font-weight: 400; color: var(--c); flex: 1; }
   .acts { display: flex; gap: 6px; }
@@ -164,13 +200,13 @@
   rect.car { fill: color-mix(in srgb, var(--c) 30%, var(--surf-3)); stroke: var(--c); }
   text { fill: var(--fg); font-family: var(--font-dot); font-size: 15px; }
   .fb { fill: none; stroke: var(--warn); stroke-width: 1.5; }
-  .row { display: flex; flex-wrap: wrap; }
-  .ops { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px 0; }
+  .ops { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
   .op.car { border-color: color-mix(in srgb, var(--c) 40%, var(--line)); }
-  .g { display: grid; grid-template-columns: repeat(3, 1fr); justify-items: center; }
-  .env { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; margin-top: 6px; }
+  .g { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); justify-items: center; row-gap: 10px; }
+  .env { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; margin-top: 12px; }
   .env label { display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); }
   .env input { accent-color: var(--c); width: 100%; }
   .muted { color: var(--dim); }
-  @media (max-width: 1200px) { .ops { grid-template-columns: repeat(2, 1fr); } .alg { grid-template-columns: 1fr; } }
+  @media (max-width: 1200px) { .alg { grid-template-columns: 1fr; } }
 </style>

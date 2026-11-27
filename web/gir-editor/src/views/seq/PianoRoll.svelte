@@ -7,11 +7,11 @@
   import type { Step } from "../../lib/protocol/types";
   import { NOTE_NAMES } from "../../lib/legacy/proto.js";
 
-  interface Props { k: number; len: number; color: string; zoom: number; sel: Set<number>; onselect: (s: Set<number>, focus?: number) => void }
-  let { k, len, color, zoom, sel, onselect }: Props = $props();
+  interface Props { k: number; len: number; color: string; cw: number; n: number; sel: Set<number>; onselect: (s: Set<number>, focus?: number) => void }
+  let { k, len, color, cw, n, sel, onselect }: Props = $props();
   const steps = $derived(device.steps[k] ?? []);
   const RH = 15, LO = 24, HI = 108;                // rows: C1 .. C8
-  const CW = $derived(Math.round(26 * zoom));
+  const CW = $derived(cw);
   const rows = HI - LO + 1;
   const y = (p: number) => (HI - p) * RH;
 
@@ -180,13 +180,13 @@
 <div class="roll" style="--c:{color}; --cw:{CW}px; --rh:{RH}px">
   <div class="ruler" role="presentation" onpointerdown={rulerDown} onpointermove={pmove} onpointerup={pup}>
     <div class="kspace"></div>
-    <div class="marks" style="width:{CW * 64}px">
-      {#each Array(64) as _, i}
+    <div class="marks" style="width:{CW * n}px">
+      {#each Array(n) as _, i}
         <span class="m" class:bar={i % 16 === 0} class:beat={i % 4 === 0} class:out={i >= len} class:sel={sel.has(i)} style="left:{i * CW}px">{i % 4 === 0 ? i / 4 + 1 : ""}</span>
       {/each}
     </div>
   </div>
-  <div class="scroll body" bind:this={scroller}>
+  <div class="scroll body" data-scroll-x bind:this={scroller}>
     <div class="keys" style="height:{rows * RH}px">
       {#each Array(rows) as _, r}
         {@const p = HI - r}
@@ -194,7 +194,7 @@
       {/each}
     </div>
     <div class="grid" bind:this={grid} role="grid" aria-label="Piano roll" tabindex="-1"
-         style="width:{CW * 64}px; height:{rows * RH}px; --len:{len * CW}px"
+         style="width:{CW * n}px; height:{rows * RH}px; --len:{len * CW}px"
          onpointerdown={gridDown} onpointermove={pmove} onpointerup={pup} oncontextmenu={(e) => e.preventDefault()}>
       {#each Array(rows) as _, r}{#if black(HI - r)}<div class="brow" style="top:{r * RH}px"></div>{/if}{/each}
       {#each [...sel] as i}<div class="scol" style="left:{i * CW}px"></div>{/each}
@@ -214,7 +214,7 @@
 </div>
 
 <style>
-  .roll { --kw: 44px; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--r-l); overflow: hidden; background: var(--surf); }
+  .roll { --kw: var(--lw, 72px); display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--r-l); overflow: hidden; background: var(--surf); }
   .ruler { display: flex; height: 24px; background: var(--surf-2); border-bottom: 1px solid var(--line); cursor: col-resize; overflow: hidden; }
   .kspace { width: var(--kw); flex: none; }
   .marks { position: relative; flex: none; }

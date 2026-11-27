@@ -2,6 +2,7 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "tests/e2e",
+  testIgnore: /layout\.spec/,
   timeout: 90_000,
   workers: 1,
   reporter: [["list"]],

@@ -718,21 +718,55 @@ export class Device {
   async panelTurn(role: number, steps: number) {
     await this.rq([84, [1, role, steps < 0 ? 128 + Math.max(-63, steps) : Math.min(63, steps)]]);
   }
-  /** SEQ TOOLS on track k: hold SEQ (the layer opens after the unit's HOLD time), tap the tool's white key, let go */
-  async seqTool(k: number, place: number) {
+  /** MENU › HOLD (CONTROL): how long a layer's button is held before it opens, 300..600 ms (panel.c HOLD_MS), read
+   *  from the unit each time (it may have changed on the unit) */
+  async holdMs(): Promise<number> {
+    const HOLD_MS = [300, 400, 500, 600];
+    try {
+      if (!this.menu.length) await this.readMenu();
+      const i = this.menu.findIndex((m) => m.name === "HOLD");
+      if (i < 0) return 600;
+      const d = await this.ask<MenuItem>(req.menuDesc(i), { retries: 2 });
+      if (d?.name === "HOLD") this.menu[i] = d;
+      return HOLD_MS[(this.menu[i].value - this.menu[i].min) % 4] ?? 600;
+    } catch { return 600; }
+  }
+  /** SEQ TOOLS on track k, by PANEL (Gir 1.0 has no command for them): checked first (not while REC is armed or
+   *  counting in: the keys would record), then SEQ held a little longer than the unit's HOLD, the tool's white key
+   *  tapped, SEQ let go; the track's steps read back to see that it took. Nothing changed: once more, then said.
+   *  (Gir 1.0 doesn't tell whether its MENU, a dialog or NAME is open: there the keys don't reach SEQ TOOLS, and the
+   *  read-back is what shows it.) */
+  async seqTool(k: number, place: number, opt: { mayNotChange?: boolean } = {}) {
     if (!this.hasPanel) throw new Error("nopanel");
     if (k !== this.sel) await this.selectTrack(k);
+    await this.readTransport();
+    if (this.recMask || this.counting) throw new Error("seqtool:rec");
+    const hold = (await this.holdMs()) + 150;
+    const sig = (x?: Step[]) => JSON.stringify(x ?? []);
+    if (!this.steps[k]) await this.loadSteps(k);
+    const before = sig(this.steps[k]);
+    const empty = (this.steps[k] ?? []).every((s) => !(s.time === 0 && (s.n > 0 || s.hit)));
     const seq = 1 << BTN.SEQ, key = 1 << WHITE_BIT[place];
-    try {
-      await this.panel(seq);
-      await sleep(720);                      // MENU › HOLD at most 0.6 s
-      await this.panel(seq, key);
-      await sleep(90);
-      await this.panel(seq);
-      await sleep(90);
-    } finally { await this.panel(0).catch(() => {}); }
-    await sleep(60);
-    if (this.steps[k]) await this.loadSteps(k);
+    const gesture = async () => {
+      try {
+        await this.panel(seq);
+        await sleep(hold);
+        await this.panel(seq, key);
+        await sleep(90);
+        await this.panel(seq);
+        await sleep(90);
+      } finally { await this.panel(0).catch(() => {}); }
+      await sleep(80);
+      await this.loadSteps(k);
+    };
+    await gesture();
+    // (CLEAR, REVERSE, SHIFT, DOUBLE, HALF on an empty track change nothing, rightly)
+    const quietOk = opt.mayNotChange || (empty && [TOOL.CLEAR, TOOL.REVERSE, TOOL.SHIFT_L, TOOL.SHIFT_R, TOOL.DOUBLE, TOOL.HALF].includes(place as never));
+    if (sig(this.steps[k]) === before && !quietOk) {
+      await sleep(250);
+      await gesture();
+      if (sig(this.steps[k]) === before) throw new Error("seqtool:noeffect");
+    }
     this.touch(k);
   }
 

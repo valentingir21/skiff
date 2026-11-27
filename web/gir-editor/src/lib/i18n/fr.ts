@@ -423,4 +423,6 @@ export default {
   "upd.go": "Sauvegarder maintenant",
   "upd.next": "La sauvegarde est sur votre ordinateur. Ensuite :\n1. Cliquez sur Déconnecter dans l'éditeur (ou quittez-le), pour que l'installeur puisse utiliser la FM-1.\n2. Ouvrez l'installeur, choisissez le firmware, suivez ses étapes.\n3. Quand la FM-1 a redémarré, reconnectez Gir Editor. S'il manque quelque chose : Projets › Restaurer, avec le fichier que vous venez de télécharger.",
   "upd.open": "Ouvrir l'installeur",
+  "seq.noEffect": "La FM-1 n'a pas appliqué {tool} sur T{n}, deux fois. Fermez tout MENU, dialogue ou saisie de nom sur la FM-1, puis réessayez.",
+  "seq.recArmed": "REC est armé ou en décompte sur la FM-1 : {tool} enregistrerait les touches. Désarmez REC d'abord.",
 };

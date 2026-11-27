@@ -468,3 +468,85 @@ test("another firmware (Skiff 2.7 as published, in the virtual FM-1): a clean co
   const k = page.getByRole("slider").first();
   await expect(k).toBeVisible();
 });
+
+test("SEQ TOOLS by PANEL with the unit's MENU › HOLD at 0.3 s and at 0.6 s: each takes, read back; REC armed refuses", async ({ page }) => {
+  test.setTimeout(150_000);
+  await start(page);
+  const r = await page.evaluate(async () => {
+    const g = (window as any).__gir, d = g.device;
+    const acid = d.info.engines.indexOf("ACID");
+    await d.setEngine(1, acid);
+    await d.readMenu();
+    const hold = d.menu.find((m: any) => m.name === "HOLD");
+    const out: any = { names: hold.names };
+    const notes = () => d.steps[1].filter((s: any) => s.time === 0 && s.n > 0).map((s: any) => s.notes[0]).join();
+    for (const v of [hold.min, hold.min + 3]) {             // 300 ms, 600 ms
+      await d.setMenu(hold.id, v);
+      const ms = await d.holdMs();
+      await d.seqTool(1, 0);                                  // CLEAR
+      const cleared = d.steps[1].filter((s: any) => s.time === 0 && s.n > 0).length;
+      await d.seqTool(1, 8);                                  // NEW ACID LINE (G4)
+      out["h" + ms] = { cleared, line: notes().split(",").filter(Boolean).length };
+    }
+    await d.rec();                                            // REC armed: refused
+    try { await d.seqTool(1, 4); out.rec = "ran"; } catch (e) { out.rec = String((e as Error).message); }
+    await d.rec();
+    return out;
+  });
+  console.log("seqtools", JSON.stringify(r));
+  expect(r.h300.cleared).toBe(0);
+  expect(r.h300.line).toBeGreaterThan(3);
+  expect(r.h600.cleared).toBe(0);
+  expect(r.h600.line).toBeGreaterThan(3);
+  expect(r.rec).toBe("seqtool:rec");
+});
+
+const unplugWhen = (page: Page, cond: string) => page.evaluate((cond) => new Promise<void>((res) => {
+  const g = (window as any).__gir, f = new Function("g", "return " + cond);
+  const t = setInterval(() => { if (f(g)) { clearInterval(t); g.device.emu.unplug(); res(); } }, 5);
+}), cond);
+
+test("unplugged while sending a sample: said, the slot's state told; plugged back, Resume sends it", async ({ page }) => {
+  await start(page);
+  await view(page, "Samples");
+  const slot = page.getByTestId("slot-0");
+  await choose(page, () => slot.getByRole("button", { name: "Add WAV files…" }).click(), [{ name: "pad_C3.wav", buffer: wav([0.0, 0.5, 1.0, 1.5, 2.0, 2.5], 3.0, 22050, 130) }]);
+  await slot.getByRole("button", { name: "Send to USR1" }).click();
+  const cut = unplugWhen(page, `document.querySelector('[data-testid="slot-0"] .gauge.up div') && parseFloat(document.querySelector('[data-testid="slot-0"] .gauge.up div').style.width) > 20`);
+  await page.locator(".dlg").getByRole("button", { name: "Stop and send" }).click();
+  await cut;
+  await expect(page.getByTestId("interrupted")).toContainText("That USR slot is now empty");
+  await expect(page.getByTestId("interrupted").getByRole("button", { name: "Resume" })).toBeDisabled();
+  await shot(page, "27-debranchement");
+  await page.evaluate(() => (window as any).__gir.device.emu.replug());
+  await page.waitForFunction(() => (window as any).__gir.device.status === "ready", null, { timeout: 30_000 });
+  await page.getByTestId("interrupted").getByRole("button", { name: "Resume" }).click();
+  await page.locator(".dlg").getByRole("button", { name: "Stop and send" }).click();
+  await expect(page.locator(".toast", { hasText: "USR1 sent." })).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId("interrupted")).toHaveCount(0);
+  const si = await smpInfo(page);
+  expect(si.slots[0].zones).toBe(1);
+  expect(si.slots[0].name).toBe("PAD_C3");
+});
+
+test("unplugged in the middle of a restore: what is written is said; plugged back, Resume restore writes the rest", async ({ page }) => {
+  test.setTimeout(150_000);
+  await start(page);
+  await view(page, "Projects");
+  const dl = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Back up to a file" }).click();
+  const file = await (await dl).path();
+  await page.evaluate(() => (window as any).__gir.device.setGlobal(0, 133));
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Restore from a file…" }).click();
+  await (await chooser).setFiles(file!);
+  const cut = unplugWhen(page, `g.backup.backupState.busy?.what === "proj.restoring" && g.backup.backupState.busy.pct > 5`);
+  await page.locator(".dlg").getByRole("button", { name: "Restore", exact: true }).click();
+  await cut;
+  await expect(page.getByTestId("interrupted")).toContainText("The restore was interrupted");
+  await page.evaluate(() => (window as any).__gir.device.emu.replug());
+  await page.waitForFunction(() => (window as any).__gir.device.status === "ready", null, { timeout: 30_000 });
+  await page.getByTestId("interrupted").getByRole("button", { name: "Resume restore" }).click();
+  await expect(page.locator(".toast", { hasText: "Restore finished." })).toBeVisible({ timeout: 90_000 });
+  await expect.poll(() => page.evaluate(() => { const g = (window as any).__gir; return g.device.ask(g.req.get(1, 0)).then((r: any) => r.value); })).toBe(120);
+});

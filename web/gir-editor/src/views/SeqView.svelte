@@ -47,7 +47,10 @@
     if (busyTool) return;
     busyTool = name;
     try { await device.seqTool(k, TOOL[name]); toast("ok", t("seq.toolDone", { tool: label, n: k + 1 })); }
-    catch (e) { toast("err", String((e as Error).message)); }
+    catch (e) {
+      const m = String((e as Error).message);
+      toast("err", m.startsWith("seqtool:") ? t("seq." + m.slice(8).replace("noeffect", "noEffect").replace("rec", "recArmed"), { tool: label, n: k + 1 }) : m);
+    }
     finally { busyTool = null; }
   }
   const TOOLS: (keyof typeof TOOL)[] = ["CLEAR", "REVERSE", "SHIFT_L", "SHIFT_R", "RANDOM", "COOK", "BEAT", "EUCLID", "DOUBLE", "HALF"];

@@ -477,4 +477,6 @@ export default {
   "upd.go": "Back up now",
   "upd.next": "The backup is on your computer. Next:\n1. Click Disconnect in the editor (or quit it), so the installer can use the FM-1.\n2. Open the installer, choose the firmware, follow its steps.\n3. Once the FM-1 restarts, connect Gir Editor again. If something is missing, Projects › Restore, with the backup file you just downloaded.",
   "upd.open": "Open the installer",
+  "seq.noEffect": "The FM-1 didn't apply {tool} on T{n}, twice. Close any MENU, dialog or name entry on the FM-1, then try again.",
+  "seq.recArmed": "REC is armed or counting in on the FM-1: {tool} would record the keys. Disarm REC first.",
 };

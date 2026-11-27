@@ -99,20 +99,7 @@ export class Device {
       this.transport = tr;
       this.listeners.push(tr.onState((s, why) => this.onTransportState(s, why)));
       if (tr instanceof WebMidiTransport) {
-        const pairs = await tr.candidates();
-        if (!pairs.length) throw new TransportError("nodevice");
-        let found = false;
-        for (const pair of pairs) {          // the first pair that answers INFO (the installer's handshake)
-          await tr.use(pair);
-          this.makeClient();
-          try {
-            this.info = await this.client!.ask(req.info(), { timeout: 500, retries: 2, quiet: true });
-            found = true;
-            break;
-          } catch { this.client!.close(); this.client = null; }
-        }
-        if (!found) throw new TransportError("nodevice");
-        tr.markConnected();
+        await this.probe(tr);
       } else {
         await tr.connect();
         this.makeClient();
@@ -139,17 +126,74 @@ export class Device {
     this.client.info = this.info;
   }
 
+  /** the first port pair that answers INFO (the installer's handshake); "busy": a pair seen but none would open */
+  private async probe(tr: WebMidiTransport) {
+    const pairs = await tr.candidates();
+    if (!pairs.length) throw new TransportError("nodevice");
+    let busy: TransportError | null = null;
+    for (const pair of pairs) {
+      try { await tr.use(pair); } catch (e) { busy = e as TransportError; continue; }
+      this.makeClient();
+      try {
+        this.info = await this.client!.ask(req.info(), { timeout: 500, retries: 2, quiet: true });
+        tr.markConnected();
+        return;
+      } catch { this.client!.close(); this.client = null; }
+    }
+    throw busy ?? new TransportError("noanswer");
+  }
+
+  /** why the unit went: "unplug" (or a port gone), "reboot" (the Screen view's cast restart) */
+  lostWhy = $state("");
+  /** (rc2) a write the unit was in when it went (a project save, a restore, a sample): said, and offered again */
+  interrupted = $state<{ what: string; resume?: () => Promise<unknown> } | null>(null);
+  private writingNow: { what: string; resume?: () => Promise<unknown> } | null = null;
+  /** run a write to the unit's flash; if the unit goes meanwhile, it is remembered (interrupted) to say and resume */
+  async writing<X>(what: string, fn: () => Promise<X>, resume?: () => Promise<unknown>): Promise<X> {
+    this.writingNow = { what, resume };
+    try { return await fn(); }
+    catch (e) {
+      if (this.status === "lost" || this.status === "reconnecting" || /closed/.test(String((e as Error)?.message))) {
+        this.interrupted = { what, resume };
+        throw new Error("interrupted");
+      }
+      throw e;
+    } finally { this.writingNow = null; }
+  }
+  /** (the Screen view) called right after INFO when the unit comes back, before the editor's own reading */
+  afterInfo: ((d: Device) => Promise<void> | void) | null = null;
+
   private onTransportState(s: string, why?: string) {
     if (s === "lost" && this.status !== "off") {
       this.status = "lost";
+      this.lostWhy = why ?? "unplug";
       this.stopAlive();
+      if (this.writingNow) this.interrupted = this.writingNow;
       this.client?.close();
       this.client = null;
-      this.onEvent({ type: "toast", level: "warn", key: "toast.lost" });
+      this.live = false;
+      if (why !== "reboot") this.onEvent({ type: "toast", level: "warn", key: "toast.lost" });
     } else if (s === "idle" && why === "back" && this.status === "lost") {
       this.status = "reconnecting";
-      setTimeout(() => this.connect(this.kind!).catch(() => { this.status = "lost"; }), 800);
+      setTimeout(() => this.reconnect().catch(() => { this.status = "lost"; }), this.kind === "emulator" ? 50 : 800);
     }
+  }
+
+  /** the same unit back (plugged in again, or restarted for the cast): the same transport, read again */
+  async reconnect() {
+    const tr = this.transport;
+    if (!tr) return;
+    this.status = "reconnecting";
+    if (tr instanceof WebMidiTransport) await this.probe(tr);
+    else {
+      (tr as EmulatorTransport).reattach?.();
+      this.makeClient();
+      this.info = await this.client!.ask(req.info(), { timeout: 600, retries: 5 });
+    }
+    this.portName = tr.name;
+    try { await this.afterInfo?.(this); } catch (e) { console.warn("afterInfo", e); }
+    await this.load();
+    if (this.lostWhy !== "reboot") this.onEvent({ type: "toast", level: "ok", key: "toast.back" });
   }
 
   async disconnect(quiet = false) {
@@ -482,19 +526,22 @@ export class Device {
   // ------------------------------------------------------------------- projects ---
   async readProj() { this.proj = await this.ask<ProjNames>(req.projName()); }
   /** SAVE AS: the music into slot s with a name (flash: stops the transport) */
-  async saveProject(slot: number, name: string) {
-    const r = await this.ask<ProjNames>(req.projName(1, slot, name), { timeout: 4000, retries: 0 });
+  async saveProject(slot: number, name: string): Promise<ProjNames> {
+    // (rc2) a lost reply: the same SAVE AS again (it writes the same music: safe), then the unit's word
+    const r: ProjNames = await this.writing("project", () => this.ask<ProjNames>(req.projName(1, slot, name), { timeout: 4000, retries: 1 }),
+      (): Promise<unknown> => this.saveProject(slot, name));
     this.proj = r;
     if (r.rc) throw new Error(r.rc === 1 ? "refused" : "failed");
+    this.interrupted = null;
     return r;
   }
   async renameProject(slot: number, name: string) {
-    const r = await this.ask<ProjNames>(req.projName(2, slot, name), { timeout: 4000, retries: 0 });
+    const r = await this.ask<ProjNames>(req.projName(2, slot, name), { timeout: 4000, retries: 1 });
     this.proj = r;
     if (r.rc) throw new Error(r.rc === 1 ? "refused" : "failed");
   }
   async loadProject(slot: number) {
-    const r = await this.ask<{ used: number }>(req.project(0, slot), { timeout: 4000, retries: 0 });
+    const r = await this.ask<{ used: number }>(req.project(0, slot), { timeout: 4000, retries: 1 });
     if (!r.used) throw new Error("empty");
     this.steps = {};
     await this.readTracks(true);
@@ -602,12 +649,14 @@ export class Device {
     await this.readEngineDesc(d.engine);
   }
   async storeUser(slot: number, name: string) {
-    const r = await this.ask<{ rc: number }>(req.upStore(slot, name), { timeout: 3000, retries: 0 });
+    const r = await this.writing("user", () => this.ask<{ rc: number }>(req.upStore(slot, name), { timeout: 4000, retries: 1 }),
+      () => this.storeUser(slot, name));
     if (r.rc) throw new Error("failed");
+    this.interrupted = null;
     await this.readUserSlots();
   }
   async eraseUser(slot: number) {
-    const r = await this.ask<{ rc: number }>(req.upErase(slot), { timeout: 3000, retries: 0 });
+    const r = await this.ask<{ rc: number }>(req.upErase(slot), { timeout: 4000, retries: 1 });
     if (r.rc) throw new Error("failed");
     await this.readUserSlots();
   }

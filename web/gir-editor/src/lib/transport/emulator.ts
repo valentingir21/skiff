@@ -22,6 +22,10 @@ export class EmulatorTransport implements Transport {
   /** true when the virtual FM-1 started with an empty flash (its first time here): the demo music is written */
   fresh = false;
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
+  /** (rc2) unplugged by a test: nothing goes either way, the unit keeps running (an FM-1 on its battery) */
+  unplugged = false;
+  /** (rc2) the realistic link (?latency=1 or gir.latency): 10-20 ms a reply, 2 s a flash write, 1 % of frames lost */
+  realistic = false;
 
   constructor(private base = import.meta.env.BASE_URL || "./") {}
 
@@ -55,6 +59,8 @@ export class EmulatorTransport implements Transport {
       this.node.port.postMessage({ type: "load", wasm, sectors: sectors || {} }, [wasm]);
       await ready;
       this.node.port.onmessage = (e) => this.onWorklet(e.data);
+      this.realistic = EmulatorTransport.wantRealistic();
+      if (this.realistic) this.node.port.postMessage({ type: "config", realistic: true, seed: 7 });
       if (this.ctx.state === "suspended") await this.ctx.resume().catch(() => {});
       document.addEventListener("visibilitychange", this.onVis);
       this.set("connected");
@@ -66,8 +72,18 @@ export class EmulatorTransport implements Transport {
 
   private onVis = () => this.node?.port.postMessage({ type: "visible", on: !document.hidden });
 
-  private onWorklet(m: { type: string; data?: Uint8Array; fb?: Uint16Array; leds?: number[]; playing?: number; sectors?: Record<string, Uint8Array> }) {
+  static wantRealistic(): boolean {
+    try {
+      return new URLSearchParams(location.search).get("latency") === "1" || localStorage.getItem("gir.latency") === "1";
+    } catch { return false; }
+  }
+
+  private onWorklet(m: { type: string; data?: Uint8Array; fb?: Uint16Array; leds?: number[]; playing?: number; sectors?: Record<string, Uint8Array>; lostIn?: number; lostOut?: number }) {
+    if (m.type === "reboot") { this.set("lost", "reboot"); return; }        // CAST op 2: the unit restarts
+    if (m.type === "rebooted") { if (!this.unplugged) setTimeout(() => this.set("idle", "back"), 300); return; }
+    if (m.type === "stats") { this.statsCb?.(m as { lostIn: number; lostOut: number }); return; }
     if (m.type === "midi" && m.data) {
+      if (this.unplugged) return;
       // the device's bytes since the last drain: whole frames F0 .. F7, one after the other
       const d = m.data;
       let s = -1;
@@ -88,6 +104,7 @@ export class EmulatorTransport implements Transport {
 
   send(frame: number[] | Uint8Array) {
     if (!this.node) throw new Error("closed");
+    if (this.unplugged) return;
     this.node.port.postMessage({ type: "sysex", data: frame instanceof Uint8Array ? frame : Uint8Array.from(frame) });
   }
 
@@ -109,6 +126,16 @@ export class EmulatorTransport implements Transport {
     await this.ctx?.close().catch(() => {});
     this.ctx = null;
     this.set("idle");
+  }
+
+  /** (tests) the cable out: the editor loses the unit, which keeps running; and back in */
+  unplug() { this.unplugged = true; this.set("lost", "unplug"); }
+  replug() { this.unplugged = false; this.set("idle", "back"); }
+  /** reconnecting to the same virtual FM-1 (after a replug or a cast's restart): it kept running */
+  reattach() { if (this.node) this.set("connected"); }
+  private statsCb: ((s: { lostIn: number; lostOut: number }) => void) | null = null;
+  stats(): Promise<{ lostIn: number; lostOut: number }> {
+    return new Promise((res) => { this.statsCb = res; this.node?.port.postMessage({ type: "stats" }); });
   }
 
   /** the demo's flash back to empty (a factory-fresh virtual FM-1) */

@@ -12,12 +12,18 @@
 #ifndef FELUCCA_CAST
 #define FELUCCA_CAST 1                              /* (as a unit: the cast, cmd 83, and PANEL, cmd 84, the Screen view's */
 #endif                                              /* panel and the SEQ TOOLS buttons; core.h FELUCCA_PANEL) */
-#define GFX_HOOKS 0
-#define GFX_HOOK_TEXT(x0, y0, x1, y1, s, flags) ((void)0)
-#define GFX_HOOK_BLIT(x, y, r0) ((void)0)
-#define GFX_HOOK_BEGIN() ((void)0)
-#define GFX_HOOK_PIXELS(n) ((void)0)
-#define CAST_READ() ((void)0)
+/* (rc2) the cast as a unit sends it: felucca.c's own hooks (gfx.c cv_begin -> cast_piece, ui_graph.c's read), and
+ * main.c's frame records, which the web build's loop (felucca_web.c web_frame) has not: F after master_poll, then the
+ * draw's piece 0 and its e. Two calls of web_frame are wrapped by name (the definitions keep theirs: "f(void)" pastes
+ * into the _impl name, a call "f()" into the wrapper), so neither felucca_web.c nor firmware/ changes. */
+static void lk_frame_begin(void);
+static void lk_draw(void);
+#define master_poll(...) LK_MP_##__VA_ARGS__
+#define LK_MP_ lk_frame_begin()
+#define LK_MP_void master_poll_impl(void)
+#define ui_draw(...) LK_UD_##__VA_ARGS__
+#define LK_UD_ lk_draw()
+#define LK_UD_void ui_draw_impl(void)
 #include "../../emu/felucca_web.c"
 
 static uint8_t lk_f[700];                          /* the frame for ed_service: the bytes between F0 and F7 */
@@ -66,6 +72,18 @@ static void lk_wdt_feed(void)                       /* (a flash write while play
 #include "../../../firmware/src/cast.c"
 static void web_cast_block(void) {}                /* (cast_follow.c's replay hook: nothing to replay here) */
 #endif
+static void lk_frame_begin(void)                    /* main.c: the readings, then (Skiff Studio) the frame's F */
+{
+    master_poll_impl();
+    ui_cpu = (uint8_t)(song.cpu_q8 * 100u / 256u);
+    CAST(cast_frame(fm1_adc_read(FM1_ADC_BATT)));
+}
+static void lk_draw(void)                           /* main.c: piece 0, the draw, its e (the pixels' hash) */
+{
+    CAST(cast_piece());
+    ui_draw_impl();
+    CAST(cast_rec('e', cast.px, 0u));
+}
 
 #if FELUCCA_PANEL
 /* PANEL (cmd 84) sets the virtual contacts a unit's key scan merges (hal/fm1_input.h: vbtn, vkey); the web build has no
@@ -122,3 +140,11 @@ EXPORT uint8_t *link_out_buf(void) { return lk_out; }
 EXPORT uint32_t link_out_len(void) { return lk_out_n; }
 EXPORT void link_out_clear(void) { lk_out_n = 0; }
 EXPORT uint32_t link_out_lost(void) { return lk_out_lost; }
+#if FELUCCA_CAST
+/* (rc2) CAST op 2 asked for the unit's restart (cast.c cast_flush: fm1_reboot, a stub here): the page restarts the
+ * virtual FM-1 from its flash, as the chip's reset does; link_cast_on: the cast started (CAST op 1), the splash's hold
+ * (cast.c cast_boot_hold) over */
+EXPORT uint32_t link_reboot(void) { return cast.reboot != 0u; }
+EXPORT uint32_t link_cast_on(void) { return cast.on == 1u; }
+EXPORT uint32_t link_boot_ms(void) { return web_boot_ms; }
+#endif

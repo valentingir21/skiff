@@ -25,6 +25,7 @@ export type ConnectError =
   | "denied"          // MIDI or SysEx permission refused
   | "nodevice"        // no FM-1 port found, or none answered
   | "busy"            // a port found but another app holds it (Windows)
+  | "noanswer"        // a port opened but nothing answered INFO (held elsewhere, or not a Skiff or Gir firmware)
   | "noaudio"         // the demo needs an AudioContext
   | "wasm";           // the virtual FM-1 did not load
 

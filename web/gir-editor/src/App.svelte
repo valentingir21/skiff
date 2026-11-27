@@ -10,6 +10,7 @@
   import CommandPalette from "./shell/CommandPalette.svelte";
   import Shortcuts from "./shell/Shortcuts.svelte";
   import Toasts from "./ui/components/Toasts.svelte";
+  import Interrupted from "./shell/Interrupted.svelte";
   import ConfirmDialog from "./ui/components/ConfirmDialog.svelte";
   import SoundView from "./views/SoundView.svelte";
   import SeqView from "./views/SeqView.svelte";
@@ -102,6 +103,7 @@
 <CommandPalette />
 <Shortcuts />
 <ConfirmDialog />
+<Interrupted />
 <Toasts />
 
 <style>

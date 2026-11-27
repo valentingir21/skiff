@@ -37,27 +37,105 @@ class GirLink extends AudioWorkletProcessor {
     this.queue = [];
     this.nextOk = 0;
     this.muted = false;
+    this.module = null;
+    this.master = 820;
+    this.hold = 0;            // after a cast's restart: 1 the splash runs, 2 held until CAST 1 (cast.c cast_boot_hold)
+    this.holdT = 0;
+    // (rc2) "realistic latency": a USB round trip of 10..20 ms, a flash write's 2 s (the unit's main loop stalls: one
+    // frame waits in its buffer, the rest are lost), 1 % of frames lost each way. Seeded, so a test run repeats.
+    this.real = false;
+    this.seed = 1;
+    this.outq = [];           // [at ms, bytes] in order
+    this.busyUntil = 0;
+    this.pending = null;      // the one frame the unit holds while busy
+    this.lostIn = 0;
+    this.lostOut = 0;
     this.port.onmessage = (e) => this.onMessage(e.data);
   }
 
-  drain() {
+  rnd() { this.seed = (this.seed * 1103515245 + 12345) >>> 0; return (this.seed >>> 8) / 16777216; }
+  now() { return currentTime * 1000; }
+
+  drain(extra = 0) {
     const ex = this.ex, n = ex.link_out_len();
     if (!n) return;
     const data = new Uint8Array(ex.memory.buffer, ex.link_out_buf(), n).slice();
     ex.link_out_clear();
+    if (!this.real) { this.port.postMessage({ type: "midi", data }, [data.buffer]); return; }
+    let s = -1;                                        // frame by frame: each may be lost, each comes a little later
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] === 0xF0) s = i;
+      else if (data[i] === 0xF7 && s >= 0) {
+        if (this.rnd() < 0.01) this.lostOut++;
+        else {
+          const last = this.outq.length ? this.outq[this.outq.length - 1][0] : 0;
+          this.outq.push([Math.max(last, this.now() + extra + 10 + 10 * this.rnd()), data.slice(s, i + 1)]);
+        }
+        s = -1;
+      }
+    }
+  }
+  flushOut() {
+    const t = this.now();
+    let n = 0;
+    while (n < this.outq.length && this.outq[n][0] <= t) n++;
+    if (!n) return;
+    const parts = this.outq.splice(0, n).map((x) => x[1]);
+    const data = new Uint8Array(parts.reduce((a, p) => a + p.length, 0));
+    let o = 0;
+    for (const p of parts) { data.set(p, o); o += p.length; }
     this.port.postMessage({ type: "midi", data }, [data.buffer]);
+  }
+
+  /** one frame into the unit's editor handler; a flash write meanwhile: the reply 2 s later (realistic mode) */
+  take(d) {
+    const ex = this.ex, n = d.length;
+    if (n > 702) return;
+    const w0 = ex.web_flash_writes_count();
+    new Uint8Array(ex.memory.buffer, ex.link_in_buf(), n).set(d);
+    ex.link_in(n);
+    // a save (a project, a user sound, a backup object's commit, a sample's erase: several sectors) 2 s; a sample's
+    // 256-byte piece (a page programmed, a sector erased now and then) 25 ms
+    const w = this.real ? ex.web_flash_writes_count() - w0 : 0, busy = w >= 4 ? 2000 : w ? 25 : 0;
+    if (busy) this.busyUntil = this.now() + busy;
+    this.drain(busy);
+  }
+
+  async boot(nor, sectors) {
+    const instance = await WebAssembly.instantiate(this.module, {});
+    const ex = instance.exports;
+    ex._initialize();
+    ex.web_nor_erase();
+    const mem = new Uint8Array(ex.memory.buffer, ex.web_nor(), ex.web_nor_size());
+    if (nor) mem.set(nor); else restoreSectors(mem, sectors);
+    ex.web_master(this.master);
+    ex.web_boot();
+    return ex;
+  }
+
+  /** CAST op 2 (cast.c): the unit stores its music and restarts; the virtual FM-1 starts again from its flash, its
+   *  USB gone for a moment (the page sees the port go and come back), the splash held until the cast starts */
+  async reboot() {
+    const old = this.ex;
+    this.ex = null;
+    this.port.postMessage({ type: "reboot" });
+    const nor = new Uint8Array(old.memory.buffer, old.web_nor(), old.web_nor_size()).slice();
+    this.outq = []; this.pending = null; this.busyUntil = 0;
+    const ex = await this.boot(nor);
+    this.sentWrites = ex.web_flash_writes_count();
+    this.sentDraws = -1;
+    this.hold = 1;
+    this.holdT = this.now();
+    this.ex = ex;
+    this.port.postMessage({ type: "rebooted" });
   }
 
   async onMessage(m) {
     if (m.type === "load") {
       try {
-        const { instance } = await WebAssembly.instantiate(m.wasm, {});
-        const ex = instance.exports;
-        ex._initialize();
-        ex.web_nor_erase();
-        restoreSectors(new Uint8Array(ex.memory.buffer, ex.web_nor(), ex.web_nor_size()), m.sectors);
-        ex.web_master(m.master ?? 820);
-        ex.web_boot();
+        this.module = await WebAssembly.compile(m.wasm);
+        this.master = m.master ?? 820;
+        const ex = await this.boot(null, m.sectors);
         this.ex = ex;
         this.sentWrites = ex.web_flash_writes_count();
         this.port.postMessage({ type: "ready", rate: ex.web_sample_rate() });
@@ -68,12 +146,22 @@ class GirLink extends AudioWorkletProcessor {
     }
     const ex = this.ex;
     if (!ex) return;
+    if (m.type === "config") {
+      this.real = !!m.realistic;
+      this.seed = m.seed || 1;
+      return;
+    }
+    if (m.type === "stats") { this.port.postMessage({ type: "stats", lostIn: this.lostIn, lostOut: this.lostOut }); return; }
     if (m.type === "sysex") {
-      const d = m.data, n = d.length;
-      if (n > 702) return;
-      new Uint8Array(ex.memory.buffer, ex.link_in_buf(), n).set(d);
-      ex.link_in(n);
-      this.drain();
+      if (this.real) {
+        if (this.rnd() < 0.01) { this.lostIn++; return; }
+        if (this.now() < this.busyUntil) {             // the main loop is in a flash write: one frame waits, the
+          if (!this.pending) this.pending = m.data;     // rest are lost (the unit's single frame buffer)
+          else this.lostIn++;
+          return;
+        }
+      }
+      this.take(m.data);
     } else if (m.type === "buttons" || m.type === "keys") this.queue.push(m);
     else if (m.type === "enc") ex.web_enc(m.role, m.n | 0);
     else if (m.type === "master") ex.web_master(m.value | 0);
@@ -118,11 +206,27 @@ class GirLink extends AudioWorkletProcessor {
   process(inputs, outputs) {
     const ex = this.ex;
     if (!ex) return true;
-    if (this.queue.length) this.input();
+    if (this.real) {
+      this.flushOut();
+      if (this.pending && this.now() >= this.busyUntil) { const d = this.pending; this.pending = null; this.take(d); }
+    }
     const out = outputs[0], n = out[0].length;
+    if (this.hold) {                                   // (a cast's restart) the splash, then held for the cast
+      if (this.hold === 1) {
+        const at = ex.link_boot_ms();
+        while (at && ex.web_now_ms() + 1 < at) ex.web_render(1);
+        this.hold = 2;
+      }
+      ex.link_service();
+      this.drain();
+      if (!ex.link_cast_on() && this.now() - this.holdT < 10000) return true;
+      this.hold = 0;
+    }
+    if (this.queue.length) this.input();
     ex.web_render(n);
     ex.link_service();
     this.drain();
+    if (ex.link_reboot && ex.link_reboot()) { this.reboot(); return true; }
     if (!this.muted) {
       out[0].set(new Float32Array(ex.memory.buffer, ex.web_out_l(), n));
       if (out[1]) out[1].set(new Float32Array(ex.memory.buffer, ex.web_out_r(), n));

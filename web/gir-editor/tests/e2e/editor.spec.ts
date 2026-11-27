@@ -9,12 +9,14 @@ import tables from "../../src/generated/tables.json" with { type: "json" };
 const T = tables as any;
 const ID = T.ID;
 const SHOTS = process.env.SHOTS === "1";
+/** LATENCY=1: the whole suite on the realistic link (10-20 ms a reply, 2 s a flash write, 1 % of frames lost) */
+const LATENCY = process.env.LATENCY === "1";
 const SHOT_DIR = new URL("../../../../../livraison/EDITOR/screens/", import.meta.url).pathname;
 if (SHOTS) mkdirSync(SHOT_DIR, { recursive: true });
 const shot = async (page: Page, name: string) => { if (SHOTS) await page.screenshot({ path: SHOT_DIR + name + ".png" }); };
 
 async function start(page: Page, lang = "en", seed = false) {
-  await page.addInitScript(([l, seed]) => { try { localStorage.setItem("gir.lang", JSON.stringify(l)); localStorage.setItem("gir.view", JSON.stringify("sound")); localStorage.setItem("gir.noseed", JSON.stringify(seed === false)); } catch {} }, [lang, seed] as const);
+  await page.addInitScript(([l, seed, lat]) => { try { localStorage.setItem("gir.lang", JSON.stringify(l)); localStorage.setItem("gir.view", JSON.stringify("sound")); localStorage.setItem("gir.noseed", JSON.stringify(seed === false)); if (lat) localStorage.setItem("gir.latency", "1"); } catch {} }, [lang, seed, LATENCY] as const);
   await page.goto("/");
   await page.getByRole("button", { name: /Try without an FM-1|Essayer sans FM-1/ }).click();
   await page.waitForSelector(".top", { timeout: 30_000 });

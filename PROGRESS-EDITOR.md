@@ -4,7 +4,16 @@ Lire ce fichier d'abord. Branche `gir-editor` (depuis le tag `gir-v1.0`). Docs :
 (DECISIONS.md = journal des décisions). Règles : pas de flash, pas de changement dans `firmware/`, pas de merge.
 
 ## Étape en cours
-**Terminé** (nuit du 26 au 27/11/2026). Voir `../livraison/EDITOR/RAPPORT-NUIT.md` (checklist matériel incluse).
+**rc2 publiée** (27/11/2026) : voir `../livraison/EDITOR/RAPPORT-RC2.md` (checklist matériel de 30 min). La rc1 :
+`RAPPORT-NUIT.md`. Reste : la CI (droit `workflow` du jeton, puis `git mv web/gir-editor/ci/gir-editor-desktop.yml
+.github/workflows/`), les tests sur la vraie FM-1, la finale `gir-editor-v1.0` après eux (pas sans l'utilisateur).
+
+## rc2 (fait)
+- Parité complète (`PARITE.md`) : miroir d'écran CAST, Samples (kits, enregistrement), thème et CUSTOM, APC mini mk2,
+  conversion des vieilles sauvegardes. Robustesse : NAMES, autre firmware (Skiff 2.7 en fixture), outils SEQ avec
+  HOLD, latence réaliste (`LATENCY=1`), débranchements (reprise), « Préparer une mise à jour ». Aide anglaise.
+- Tests : 16 unitaires, 23 e2e (aussi en latence), vues aux 3 tailles (`zz-views`), appli lancée
+  (`npx playwright test -c playwright.desktop.config.ts` après electron-builder).
 
 ## Fait
 - Phase 0 : étude, `FIRMWARE-A-PREVOIR.md` (NAMES coupé à 600 octets : l'éditeur d'origine ne se connecte pas à Gir).
@@ -21,5 +30,5 @@ Lire ce fichier d'abord. Branche `gir-editor` (depuis le tag `gir-v1.0`). Docs :
 
 ## Commandes
 - Dev : `cd web/gir-editor && npm install && npm run dev` (http://localhost:5174, `?demo=1` démarre la démo, `?view=demo` la galerie)
-- Tests : `npm test` (unitaires), `npm run e2e` (Playwright), `npm run check` (types)
+- Tests : `npm test` (unitaires), `npm run e2e` (Playwright ; `LATENCY=1` latence réaliste, `SHOTS=1` captures), `npm run check` (types)
 - Fausse FM-1 : `web/gir-editor/emu/build.sh` (après `./build.sh`, emcc requis)

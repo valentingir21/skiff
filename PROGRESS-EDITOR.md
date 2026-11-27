@@ -12,7 +12,8 @@ Lire ce fichier d'abord. Branche `gir-editor` (depuis le tag `gir-v1.0`). Docs :
 - Côté web : `src/lib/plugin/` (pont, état du projet, paramètres, autotest), `transport/plugin.ts`, `kill.svelte.ts`,
   verrou dans `electron/main.cjs` + `webmidi.ts`. Décisions 47 à 59. Guide + checklist : `GUIDE-PLUGIN.md`.
 - Une vraie FM-1 (« Felucca ») était branchée : les tests n'ouvrent que le port virtuel (GIR_PLUGIN_TEST_PORT).
-- Reste : pré-release `gir-editor-plugin-v1.0-rc1`, tests dans Live et Luna avec l'utilisateur, build Windows,
+- Pré-release `gir-editor-plugin-v1.0-rc1` publiée (AU, VST3, SHA-256). Tout vert : plugin (run-mac.sh), 19 unitaires,
+  26 e2e (+ latence), test_web, layout lint 48/48 à 0, appli de bureau. Reste : tests dans Live et Luna avec l'utilisateur, build Windows,
   CLAP (clap-juce-extensions incompatible avec JUCE 8.0.15), CI (`web/gir-editor/ci/gir-editor-plugin.yml`).
 
 ## rc3 (fait) (passe de correction de l'interface, 27/11/2026)

@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: GPL-3.0-only
-# TO ENABLE: move this file to .github/workflows/ (the token used tonight could not push workflows: it lacks the
-# "workflow" scope; run `gh auth refresh -s workflow` once, then `git mv web/gir-editor/ci/gir-editor-desktop.yml .github/workflows/`).
-# Gir Editor's desktop apps: a universal .dmg on macOS, an NSIS installer and a portable .exe on Windows, from the web
-# build (web/gir-editor). The virtual FM-1's wasm is committed (web/gir-editor/public/emu), so neither Emscripten nor
-# the firmware build is needed here. Unsigned (see livraison/EDITOR/GUIDE-EDITEUR.md: how to open them anyway).
+# Gir Editor: the tests, then the desktop apps built AND launched on real runners: a universal .dmg on macOS, an NSIS
+# installer and a portable .exe on Windows, from the web build (web/gir-editor). Each packaged app is started by
+# Playwright (tests/desktop/app.spec.ts): its window, the demo on the virtual FM-1, the Screen view, the compact window;
+# the screenshots are kept with the builds (the only look at the Windows app without a PC), and on Windows the icons of
+# the app and of its installer are pulled out of the .exe files and kept too. The virtual FM-1's wasm is committed
+# (web/gir-editor/public/emu), so neither Emscripten nor the firmware build is needed here. Unsigned (see
+# livraison/EDITOR/GUIDE-EDITEUR.md: how to open them anyway).
 name: Gir Editor desktop
 on:
   push:
     branches: [gir-editor]
-    paths: ["web/gir-editor/**", "web/editor.html", "web/fm1backup.js", "web/panel.js", ".github/workflows/gir-editor-desktop.yml"]
+    paths: ["web/gir-editor/**", "web/editor.html", "web/fm1backup.js", "web/panel.js", "web/conv/**", ".github/workflows/gir-editor-desktop.yml"]
     tags: ["gir-editor-v*"]
   workflow_dispatch:
 permissions:
@@ -24,6 +26,13 @@ jobs:
       - run: npm ci
       - run: npm run proto && npx svelte-check --tsconfig ./tsconfig.json
       - run: npx vitest run
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+      - run: npx playwright test
+        env: { LATENCY: "1" }
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: e2e-results, path: web/gir-editor/test-results, if-no-files-found: ignore }
   build:
     needs: test
     strategy:
@@ -33,7 +42,7 @@ jobs:
           - { os: macos-latest, target: "--mac --universal", name: mac }
           - { os: windows-latest, target: "--win", name: windows }
     runs-on: ${{ matrix.os }}
-    defaults: { run: { working-directory: web/gir-editor } }
+    defaults: { run: { working-directory: web/gir-editor, shell: bash } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,6 +51,27 @@ jobs:
       - run: npm run build
       - run: npx electron-builder ${{ matrix.target }} --publish never
         env: { CSC_IDENTITY_AUTO_DISCOVERY: "false" }
+      - name: Launch the packaged app (Playwright + Electron), screenshots
+        run: npx playwright test -c playwright.desktop.config.ts
+      - name: The Windows icons (the app's .exe, the installer's)
+        if: matrix.name == 'windows'
+        shell: pwsh
+        run: |
+          Add-Type -AssemblyName System.Drawing
+          New-Item -ItemType Directory -Force ci-shots | Out-Null
+          $pairs = @(@("release/win-unpacked/Gir Editor.exe", "ci-shots/windows-icon-app.png"))
+          Get-ChildItem release -Filter "*-windows-setup.exe" | ForEach-Object { $pairs += ,@($_.FullName, "ci-shots/windows-icon-installer.png") }
+          foreach ($p in $pairs) {
+            $ico = [System.Drawing.Icon]::ExtractAssociatedIcon((Resolve-Path $p[0]))
+            $ico.ToBitmap().Save($p[1], [System.Drawing.Imaging.ImageFormat]::Png)
+            Write-Host "$($p[0]): icon $($ico.Width)x$($ico.Height)"
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gir-editor-${{ matrix.name }}-screenshots
+          path: web/gir-editor/ci-shots/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
           name: gir-editor-${{ matrix.name }}

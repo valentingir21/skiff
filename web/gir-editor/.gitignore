@@ -6,3 +6,4 @@ playwright-report/
 src/lib/legacy/proto.d.ts
 shot.tmp.mjs
 release/
+ci-shots/

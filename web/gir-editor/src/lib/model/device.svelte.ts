@@ -122,6 +122,8 @@ export class Device {
       onPush: (f) => this.onPush(f),
       onTimeout: () => { this.stats.timeouts++; },
       onGap: () => { if (this.live) this.rewatch(); },
+      onCast: (a) => this.onCast?.(a),
+      onSent: (d) => this.onSent?.(d),
     });
     this.client.info = this.info;
   }
@@ -160,6 +162,10 @@ export class Device {
       throw e;
     } finally { this.writingNow = null; }
   }
+  /** (the Screen view's live screen, cast.svelte.ts) the unit's cast records, the frames sent, the unit gone */
+  onCast: ((a: number[]) => void) | null = null;
+  onSent: ((d: number[]) => void) | null = null;
+  onLost: ((why: string) => void) | null = null;
   /** (the Screen view) called right after INFO when the unit comes back, before the editor's own reading */
   afterInfo: ((d: Device) => Promise<void> | void) | null = null;
 
@@ -173,6 +179,7 @@ export class Device {
       this.client = null;
       this.live = false;
       if (why !== "reboot") this.onEvent({ type: "toast", level: "warn", key: "toast.lost" });
+      this.onLost?.(why ?? "unplug");
     } else if (s === "idle" && why === "back" && this.status === "lost") {
       this.status = "reconnecting";
       setTimeout(() => this.reconnect().catch(() => { this.status = "lost"; }), this.kind === "emulator" ? 50 : 800);

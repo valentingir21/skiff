@@ -264,3 +264,36 @@ test("other views render: library, samples, FM6, screen (live), settings (MENU),
   await page.getByRole("tab", { name: "Son", exact: true }).click();
   await shot(page, "19-son-francais");
 });
+
+test("live screen by CAST, end to end: backup, the unit's restart, the copy follows and draws what the unit draws", async ({ page }) => {
+  test.setTimeout(150_000);
+  await start(page);
+  await page.evaluate(() => (window as any).__gir.ui.view = "screen");
+  const dl = page.waitForEvent("download");
+  await page.evaluate(() => { (window as any).__gir.cast.startCast(); });
+  expect((await dl).suggestedFilename()).toMatch(/^Skiff-backup-before-screen-/);
+  await expect.poll(() => page.evaluate(() => { const c = (window as any).__gir.cast.cast; return c.state === "idle" ? "idle:" + c.say + JSON.stringify(c.vars) : c.state; }), { timeout: 60_000 }).toBe("on");
+  await expect.poll(() => page.evaluate(() => (window as any).__gir.cast.castStat(1)), { timeout: 30_000 }).toBeGreaterThan(120);
+  await page.waitForFunction(() => (window as any).__gir.device.status === "ready", null, { timeout: 30_000 });
+  // a change on the unit's own panel (its SELECT knob, a page) shows in the copy too
+  await page.evaluate(() => { const e = (window as any).__gir.device.emu; e.panel({ type: "buttons", mask: 1 << 4 }); setTimeout(() => e.panel({ type: "buttons", mask: 0 }), 150); });
+  await page.waitForTimeout(1500);
+  const r = await page.evaluate(async () => {
+    const g = (window as any).__gir, emu = g.device.emu;
+    let best = 0;
+    for (let k = 0; k < 6; k++) {              // the unit's frame and the copy's, a few times (they redraw at their own pace)
+      await new Promise((res) => setTimeout(res, 250));
+      const a: Uint16Array = emu.lastFb, b: Uint16Array = g.cast.castScreen();
+      let same = 0;
+      for (let i = 0; i < a.length; i++) same += a[i] === b[i] ? 1 : 0;
+      best = Math.max(best, same / a.length);
+    }
+    return { best, frames: g.cast.castStat(1), off: g.cast.castStat(2), chk: g.cast.castStat(3), chkOff: g.cast.castStat(4), follow: g.cast.cast.follow };
+  });
+  console.log("cast", JSON.stringify(r));
+  expect(r.best).toBeGreaterThan(0.97);
+  expect(r.follow).toBeGreaterThan(80);
+  await shot(page, "22-ecran-cast");
+  await page.evaluate(() => (window as any).__gir.cast.stopCast());
+  await expect.poll(() => page.evaluate(() => (window as any).__gir.cast.cast.state)).toBe("idle");
+});

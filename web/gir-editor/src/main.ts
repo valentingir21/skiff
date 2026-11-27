@@ -11,8 +11,9 @@ import App from "./App.svelte";
 import { device } from "./lib/model/device.svelte";
 import { ui } from "./lib/ui.svelte";
 import { req } from "./lib/legacy/proto.js";
+import * as castApi from "./lib/cast.svelte";
 
 const app = mount(App, { target: document.getElementById("app")! });
 // for the end-to-end tests and the curious: the model, and the protocol's request builders (window.__gir.device.ask)
-(window as unknown as { __gir: unknown }).__gir = { device, ui, req };
+(window as unknown as { __gir: unknown }).__gir = { device, ui, req, cast: castApi };
 export default app;

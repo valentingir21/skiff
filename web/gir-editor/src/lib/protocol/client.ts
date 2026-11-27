@@ -21,8 +21,8 @@ export class Client {
   timeouts = 0;
   private off: () => void;
 
-  constructor(public transport: Transport, handlers: { onPush: (f: Push) => void; onTimeout?: (cmd: number) => void; onGap?: () => void; onCast?: (a: number[]) => void }) {
-    this.link = new Link((d: number[]) => { this.sent++; transport.send(d); }, {
+  constructor(public transport: Transport, handlers: { onPush: (f: Push) => void; onTimeout?: (cmd: number) => void; onGap?: () => void; onCast?: (a: number[]) => void; onSent?: (d: number[]) => void }) {
+    this.link = new Link((d: number[]) => { this.sent++; handlers.onSent?.(d); transport.send(d); }, {
       timeout: transport.kind === "emulator" ? 400 : 300,
       onUnknown: () => {},
       onTimeout: (cmd: number) => { this.timeouts++; handlers.onTimeout?.(cmd); },

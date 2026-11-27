@@ -118,6 +118,10 @@ class GirLink extends AudioWorkletProcessor {
   async reboot() {
     const old = this.ex;
     this.ex = null;
+    if (this.outq.length) {                            // (what the unit sent before its reset has gone: cast.c waits)
+      for (const x of this.outq) x[0] = 0;
+      this.flushOut();
+    }
     this.port.postMessage({ type: "reboot" });
     const nor = new Uint8Array(old.memory.buffer, old.web_nor(), old.web_nor_size()).slice();
     this.outq = []; this.pending = null; this.busyUntil = 0;

@@ -16,7 +16,7 @@
 </script>
 <article class="card" style="--c:{color}">
   <header><h3 class="dot">MOD</h3></header>
-  <div class="top">
+  <div class="mtop">
     <div class="routes" role="table" aria-label="MOD routes">
       <span></span>
       {#each TARGETS as tg}<span class="th">{tg}</span>{/each}
@@ -44,7 +44,7 @@
 <style>
   .card { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 12px; display: flex; flex-direction: column; gap: 12px; container-type: inline-size; }
   h3 { margin: 0; font-size: 15px; font-weight: 400; }
-  .top { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  .mtop { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
   .routes { display: grid; grid-template-columns: 56px repeat(4, 80px); justify-items: center; align-items: start; row-gap: 10px; }
   .th { font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; color: var(--dim); }
   .rl { justify-self: start; height: 48px; display: flex; align-items: center; font-size: 12px; font-weight: 700; color: var(--fg-2); white-space: nowrap; }

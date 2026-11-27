@@ -72,7 +72,7 @@
   header { display: flex; align-items: center; gap: 10px; padding: 0 12px 8px; position: sticky; left: 0; }
   h3 { margin: 0; font-size: 13px; }
   .cnt { color: var(--dim); font-size: 12px; }
-  .pl { border: 1px solid var(--line-2); background: var(--surf-3); color: var(--dim); border-radius: 6px; font-size: 11px; font-weight: 700; padding: 3px 8px; }
+  .pl { white-space: nowrap; border: 1px solid var(--line-2); background: var(--surf-3); color: var(--dim); border-radius: 6px; font-size: 11px; font-weight: 700; padding: 3px 8px; }
   .pl.on { color: #0b0b0b; background: var(--c); border-color: var(--c); }
   select { background: var(--surf-3); border: 1px solid var(--line-2); border-radius: 6px; height: 26px; font-size: 12px; }
   .hint { color: var(--mute); font-size: 11.5px; margin-left: auto; }

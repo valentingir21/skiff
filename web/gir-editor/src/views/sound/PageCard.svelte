@@ -2,6 +2,7 @@
   // One page of the FM-1 (its title, its four knobs in the device's order), with its graph where one helps
   import { device } from "../../lib/model/device.svelte";
   import { ID, HELP, helpText, isHelp, pathOf, type Page } from "../../lib/model/tables";
+  import { t } from "../../lib/i18n/index.svelte";
   import Param from "../../ui/Param.svelte";
   import AdsrGraph from "../../ui/graphs/AdsrGraph.svelte";
   import WaveGraph from "../../ui/graphs/WaveGraph.svelte";
@@ -22,7 +23,19 @@
     const fam = page.fam === "TRK" ? "GLO" : page.fam;
     const h = HELP.pages[`${fam}/${page.title}`];
     if (!h) return [];
-    return page.ids.map((id, i) => (id >= 0 && h.knobs[i] && isHelp(h.knobs[i]) ? helpText(h.knobs[i]) : "")).filter(Boolean);
+    const eng = HELP.engines[device.engineName(e)];
+    return page.ids.map((id, i) => {
+      if (id < 0) return "";
+      const line = (h.knobs[i] ?? "").trim();
+      // a bare name (K.CLICK) says nothing: the engine's help for that knob instead, else nothing
+      if (!/\s/.test(line)) {
+        const p = eng?.params?.[line];
+        if (p && isHelp(p)) return `${line} : ${helpText(p)}`;
+        const k = "help.knob." + line;                   // the manual's tables the help generator does not read (KICK)
+        return t(k) !== k ? `${line} : ${t(k)}` : "";
+      }
+      return isHelp(line) ? helpText(line) : "";
+    }).filter(Boolean);
   });
   const waveName = $derived.by(() => { const d = device.desc(ID.P_LWAVE, e); return d?.names?.[p(ID.P_LWAVE) - d.min] ?? "SIN"; });
 </script>

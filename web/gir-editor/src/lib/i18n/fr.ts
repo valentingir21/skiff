@@ -415,4 +415,12 @@ export default {
   "apc.lScene": "scène enregistrée",
   "apc.map": "Colonnes 1 à 6 : entrées A à H de T1 à T6 (I à P sur la deuxième page). Colonnes 7 et 8 : scènes 1 à 16. Rangée du bas : mutes de T1 à T6, puis les deux pages. Faders 1 à 6 : niveaux des pistes.",
   "apc.last": "Dernier :",
+  "toast.namesCut": "Cette FM-1 n'a envoyé qu'une partie de certaines listes de presets : {list} nom(s) manquant(s), affichés par numéro. Tout le reste fonctionne.",
+  "upd.title": "Préparer une mise à jour du firmware",
+  "upd.what": "Avant d'installer un autre firmware avec l'installeur web : d'abord une sauvegarde complète de la FM-1, car l'installeur n'en fait pas sur Gir 1.0.",
+  "upd.btn": "Préparer une mise à jour…",
+  "upd.before": "L'installeur web de Skiff et Gir ne fait aucune sauvegarde quand la FM-1 a déjà Skiff 2 ou Gir. L'éditeur fait maintenant une sauvegarde complète de la FM-1 (projets, sons USER, samples, réglages) et la télécharge : Skiff-backup-before-update-….json. Gardez-la jusqu'à la fin de la mise à jour.",
+  "upd.go": "Sauvegarder maintenant",
+  "upd.next": "La sauvegarde est sur votre ordinateur. Ensuite :\n1. Cliquez sur Déconnecter dans l'éditeur (ou quittez-le), pour que l'installeur puisse utiliser la FM-1.\n2. Ouvrez l'installeur, choisissez le firmware, suivez ses étapes.\n3. Quand la FM-1 a redémarré, reconnectez Gir Editor. S'il manque quelque chose : Projets › Restaurer, avec le fichier que vous venez de télécharger.",
+  "upd.open": "Ouvrir l'installeur",
 };

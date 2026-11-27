@@ -26,7 +26,7 @@
       </label>
     {/if}
     <div class="row">
-      <Button variant="ghost" onclick={() => done(false)}>{t("dlg.cancel")}</Button>
+      <Button variant="ghost" onclick={() => done(false)}>{c.cancel ?? t("dlg.cancel")}</Button>
       <Button variant={c.danger ? "danger" : "primary"} onclick={() => done(true)}>{c.ok}</Button>
     </div>
   </div>
@@ -34,11 +34,11 @@
 <style>
   .scrim { position: fixed; inset: 0; background: rgb(0 0 0 / 55%); z-index: 90; animation: f var(--t-med); }
   @keyframes f { from { opacity: 0; } }
-  .dlg { position: fixed; top: 22%; left: 50%; transform: translateX(-50%); z-index: 91; width: min(460px, 92vw); background: var(--surf-2);
+  .dlg { position: fixed; top: max(6vh, calc(40vh - 200px)); left: 50%; transform: translateX(-50%); z-index: 91; width: min(520px, 92vw); max-height: 86vh; overflow: auto; background: var(--surf-2);
          border-radius: var(--r-xl); box-shadow: var(--shadow-pop); padding: 22px 22px 18px; animation: p var(--t-med) var(--ease); }
   @keyframes p { from { opacity: 0; transform: translate(-50%, 6px); } }
   h2 { margin: 0 0 8px; font-size: var(--fs-xl); font-weight: 700; }
-  p { margin: 0 0 16px; color: var(--fg-2); line-height: 1.5; }
+  p { margin: 0 0 16px; color: var(--fg-2); line-height: 1.5; white-space: pre-line; }
   .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; font-size: 12px; color: var(--dim); }
   input { height: 38px; border-radius: var(--r-m); border: 1px solid var(--line-2); background: var(--bg); padding: 0 12px; font-family: var(--font-dot); font-size: 16px; text-transform: uppercase; }
   input:focus { border-color: var(--accent); }

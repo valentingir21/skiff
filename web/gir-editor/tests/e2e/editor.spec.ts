@@ -432,3 +432,39 @@ test("APC mini mk2: a clear word when none is plugged in; a controller's pads la
   await shot(page, "26-song-apc");
   await page.evaluate(() => (window as any).__gir.apc.press([0x90, 119, 127]));
 });
+
+test("NAMES cut at 600 bytes by Gir 1.0: every ANALOG preset whole (89, 13-character names too), the EDIT pages' titles", async ({ page }) => {
+  await start(page);
+  const r = await page.evaluate(async () => {
+    const g = (window as any).__gir, d = g.device, e = d.info.engines.indexOf("ANALOG");
+    const raw = await d.rq(g.req.names(e));                // the unit's own reply: cut
+    return { n: d.names[e].length, larsen: d.names.flat().includes("FX LARSEN RES"), titles: d.titles.map((x: string[]) => x.length),
+      rawLen: raw.length, empty: d.names.flat().filter((x: string) => !x || x.startsWith("#")).length };
+  });
+  expect(r.rawLen).toBeLessThan(600);                      // (the cut is real)
+  expect(r.n).toBe(T.ENG[T.ENG.findIndex((e: any) => e.name === "ANALOG")].presets.length);
+  expect(r.n).toBe(89);
+  expect(r.larsen).toBe(true);
+  expect(r.titles.every((n: number) => n === 2)).toBe(true);
+  expect(r.empty).toBe(0);
+});
+
+test("another firmware (Skiff 2.7 as published, in the virtual FM-1): a clean connection, read from the unit", async ({ page }) => {
+  const wasm = readFileSync(new URL("../fixtures/felucca_link_skiff27.wasm", import.meta.url));
+  await page.route("**/emu/felucca_link.wasm", (r) => r.fulfill({ body: wasm, contentType: "application/wasm" }));
+  await start(page);
+  const st = await page.evaluate(() => {
+    const d = (window as any).__gir.device;
+    return { match: d.tablesMatch, ver: d.info.version, engines: d.info.engines.filter((x: string) => x !== "-").length, cut: d.namesCut,
+      names: d.names.map((x: string[], e: number) => (d.info.engines[e] === "-" ? 1 : x.length)), sel: d.engineName(d.tracks[0].engine) };
+  });
+  console.log("skiff 2.7", JSON.stringify(st));
+  expect(st.match).toBe(false);
+  expect(st.ver).toMatch(/2\.7/);
+  expect(st.names.every((n: number) => n > 0)).toBe(true);
+  await expect(page.locator(".top")).toBeVisible();
+  // its sound view works: a knob reaches the unit
+  await view(page, "Sound");
+  const k = page.getByRole("slider").first();
+  await expect(k).toBeVisible();
+});

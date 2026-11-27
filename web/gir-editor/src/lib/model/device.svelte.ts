@@ -41,6 +41,8 @@ export class Device {
   edesc = $state<Record<number, Desc[]>>({}); // per engine, P_E0 .. P_E0 + 7
   names = $state<string[][]>([]);             // preset names per engine
   titles = $state<string[][]>([]);
+  /** (rc2) engines whose preset names this firmware's NAMES didn't send whole (shown by number) */
+  namesCut = $state<string[]>([]);
   tracks = $state<TrackState[]>([]);
   g = $state<number[]>([]);
   sel = $state(0);
@@ -239,7 +241,9 @@ export class Device {
       const ed: Record<number, Desc[]> = {};
       T.ENG.forEach((e, k) => { ed[k] = e.edit.map((d, j) => tdesc(d, 0, T.P_E0 + j)); });
       this.edesc = ed;
-      this.names = T.ENG.map((e) => e.presets.map((p) => p.name.slice(0, 12)));
+      // (rc2) the whole names, from the firmware's own tables: NAMES cuts them at 12 characters ("FX LARSEN RES")
+      this.names = T.ENG.map((e) => e.presets.map((p) => p.name));
+      this.namesCut = [];
       this.titles = T.ENG.map((e) => [...e.titles]);
     } else {                                    // another firmware: ask the device (slower, as the original editor)
       const total = info.pcount + info.gcount + info.nengines;
@@ -250,13 +254,18 @@ export class Device {
       const gd: Desc[] = [];
       for (let i = 0; i < info.gcount; i++) { step("desc"); gd[i] = await this.ask(req.desc(1, i)).catch(() => null as any); }
       this.tdesc = td; this.gdesc = gd;
-      const nm: string[][] = [], tt: string[][] = [];
+      const nm: string[][] = [], tt: string[][] = [], cut: string[] = [];
       for (let e = 0; e < info.nengines; e++) {
         step("names");
-        const r = parseNamesTolerant(await this.rq(req.names(e)));
-        nm[e] = r.names; tt[e] = r.titles;
+        // (the tolerant reader: a firmware that cuts its reply, as Gir 1.0 does at 600 bytes, still connects; the
+        // names that didn't come are shown by number, and said once)
+        const r = parseNamesTolerant(await this.rq(req.names(e), { retries: 2 }));
+        nm[e] = r.names.concat(Array.from({ length: Math.max(0, r.count - r.names.length) }, (_, i) => `#${r.names.length + i + 1}`));
+        tt[e] = r.titles.length === 2 ? r.titles : ["EDIT 1", "EDIT 2"];
+        if (!r.complete && info.engines[e] !== "-") cut.push(`${info.engines[e]} (${r.count - r.names.length})`);
       }
-      this.names = nm; this.titles = tt;
+      this.names = nm; this.titles = tt; this.namesCut = cut;
+      if (cut.length) this.onEvent({ type: "toast", level: "warn", key: "toast.namesCut", vars: { list: cut.join(", ") } });
       this.edesc = {};
     }
     this.progress = { what: "tracks", pct: 60 };

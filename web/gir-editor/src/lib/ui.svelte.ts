@@ -7,7 +7,7 @@ export type View = "sound" | "seq" | "song" | "mixer" | "library" | "screen" | "
 export const VIEWS: View[] = ["sound", "seq", "song", "mixer", "library", "projects", "samples", "fm6", "screen", "settings"];
 
 export interface Toast { id: number; level: "info" | "ok" | "warn" | "err"; text: string; action?: { label: string; run: () => void } }
-export interface Confirm { title: string; body: string; ok: string; danger?: boolean; input?: { label: string; value: string; max?: number }; resolve: (v: string | boolean | null) => void }
+export interface Confirm { title: string; body: string; ok: string; cancel?: string; danger?: boolean; input?: { label: string; value: string; max?: number }; resolve: (v: string | boolean | null) => void }
 
 let tid = 0;
 export const ui = $state({

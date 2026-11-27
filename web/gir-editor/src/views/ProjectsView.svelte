@@ -6,7 +6,7 @@
   import { device } from "../lib/model/device.svelte";
   import { ask, toast, toastKey } from "../lib/ui.svelte";
   import { t } from "../lib/i18n/index.svelte";
-  import { backup, restore, backupState } from "../lib/backup.svelte";
+  import { backup, restore, backupState, prepareUpdate, canResume, resumeRestore } from "../lib/backup.svelte";
   import Button from "../ui/components/Button.svelte";
   import { ic } from "../ui/icons";
 
@@ -62,8 +62,17 @@
       <h3><i class="ic">{ic("symbol_upload")}</i>{t("proj.restore")}</h3>
       <p>{t("proj.restoreWhat")}</p>
       <Button variant="danger" disabled={!!busy || !(device.info && device.info.backupCaps & 2)} onclick={restore}>{t("proj.restoreBtn")}</Button>
+      {#if canResume() && !busy}<Button onclick={resumeRestore}>{t("write.resumeRestore")}</Button>{/if}
+    </article>
+    <article>
+      <h3><i class="ic">{ic("symbol_upload")}</i>{t("upd.title")}</h3>
+      <p>{t("upd.what")}</p>
+      <Button disabled={!!busy || !device.info?.backupCaps} onclick={prepareUpdate}>{t("upd.btn")}</Button>
     </article>
   </section>
+  {#if backupState.report}
+    <section class="rep"><h3>{t("conv.report", { file: backupState.report.file })}</h3><ul>{#each backupState.report.lines as l}<li>{l}</li>{/each}</ul></section>
+  {/if}
   {#if busy}
     <div class="prog" role="progressbar" aria-valuenow={busy.pct} aria-valuemin={0} aria-valuemax={100}>
       <span>{t(busy.what, { pct: busy.pct })}</span><div class="b"><div style="width:{busy.pct}%"></div></div>
@@ -85,10 +94,13 @@
   .nm { font-size: 20px; min-height: 26px; }
   .empty .nm { color: var(--mute); }
   .act { display: flex; gap: 6px; flex-wrap: wrap; }
-  .bk { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .bk { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .bk article { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 18px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
   h3 { margin: 0; font-size: 16px; display: flex; gap: 8px; align-items: center; }
   .bk p { margin: 0; color: var(--fg-2); line-height: 1.5; flex: 1; }
+  .rep { background: var(--surf); border: 1px solid var(--line); border-radius: var(--r-l); padding: 14px 18px; }
+  .rep h3 { font-size: 13px; color: var(--fg-2); }
+  .rep ul { margin: 8px 0 0; padding-left: 18px; color: var(--fg-2); line-height: 1.6; font-size: 13px; }
   .prog { display: flex; flex-direction: column; gap: 6px; }
   .b { height: 6px; background: var(--surf-3); border-radius: 4px; overflow: hidden; }
   .b div { height: 100%; background: var(--accent); transition: width var(--t-med); }

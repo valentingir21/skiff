@@ -35,6 +35,7 @@ function create() {
     webPreferences: { preload: path.join(__dirname, "preload.cjs"), contextIsolation: true, sandbox: true, nodeIntegration: false },
   });
   if (state.maximized && !compact) win.maximize();
+  if (state.onTop) win.setAlwaysOnTop(true, "floating");   // (remembered, at the level the menu sets)
   win.once("ready-to-show", () => win.show());
   win.loadURL(`${ORIGIN}/index.html${compact ? "?compact=1" : ""}`);
   const save = () => {
@@ -71,6 +72,7 @@ function menu() {
     { label: "File", submenu: [
       { label: "Back Up the FM-1…", accelerator: "CmdOrCtrl+Shift+B", click: () => send("backup") },
       { label: "Restore a Backup…", click: () => send("restore") },
+      { label: "Prepare a Firmware Update…", click: () => send("update") },
       { type: "separator" },
       { label: "Save the Music to the FM-1", accelerator: "CmdOrCtrl+S", click: () => send("save") },
       { type: "separator" },

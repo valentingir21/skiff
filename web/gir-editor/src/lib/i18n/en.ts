@@ -469,4 +469,12 @@ export default {
   "apc.lScene": "stored scene",
   "apc.map": "Columns 1–6: T1 to T6's entries A–H (I–P on the second page). Columns 7–8: scenes 1–16. Bottom row: mutes of T1 to T6, then the two pages. Faders 1–6: track levels.",
   "apc.last": "Last:",
+  "toast.namesCut": "This FM-1 sent only part of some preset lists: {list} name(s) missing, shown by number. Everything else works.",
+  "upd.title": "Prepare a firmware update",
+  "upd.what": "Before installing another firmware with the web installer: a full backup of the FM-1 first, since the installer makes none over Gir 1.0.",
+  "upd.btn": "Prepare an update…",
+  "upd.before": "The web installer of Skiff and Gir makes no backup itself when the FM-1 already runs Skiff 2 or Gir. The editor now makes a full backup of the FM-1 (projects, user sounds, samples, settings) and downloads it: Skiff-backup-before-update-….json. Keep it until the update is done.",
+  "upd.go": "Back up now",
+  "upd.next": "The backup is on your computer. Next:\n1. Click Disconnect in the editor (or quit it), so the installer can use the FM-1.\n2. Open the installer, choose the firmware, follow its steps.\n3. Once the FM-1 restarts, connect Gir Editor again. If something is missing, Projects › Restore, with the backup file you just downloaded.",
+  "upd.open": "Open the installer",
 };

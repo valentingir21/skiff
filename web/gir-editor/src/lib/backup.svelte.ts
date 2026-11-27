@@ -163,3 +163,14 @@ async function runRestore() {
   }
   finally { backupState.busy = null; }
 }
+
+/** (rc2) before installing another firmware with the web installer: it makes no backup itself over a unit of Skiff
+ *  2.0 or later (Gir 1.0 is one: index_pkg.html backupBefore), so the editor makes it, then says what comes next */
+export const INSTALLER_URL = "https://valentingir21.github.io/skiff/webapp/installer/";
+export async function prepareUpdate() {
+  if (!device.ready) return;
+  if (!(await ask({ title: t("upd.title"), body: t("upd.before"), ok: t("upd.go") }))) return;
+  if (!(await backup("Skiff-backup-before-update"))) return;
+  const open = await ask({ title: t("upd.title"), body: t("upd.next"), ok: t("upd.open"), cancel: t("dlg.close") });
+  if (open) window.open(INSTALLER_URL, "_blank", "noopener");
+}

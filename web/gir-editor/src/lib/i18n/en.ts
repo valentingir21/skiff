@@ -479,4 +479,6 @@ export default {
   "upd.open": "Open the installer",
   "seq.noEffect": "The FM-1 didn't apply {tool} on T{n}, twice. Close any MENU, dialog or name entry on the FM-1, then try again.",
   "seq.recArmed": "REC is armed or counting in on the FM-1: {tool} would record the keys. Disarm REC first.",
+  "smp.dropHere": "Drop WAV files here",
+  "smp.namePh": "NAME",
 };

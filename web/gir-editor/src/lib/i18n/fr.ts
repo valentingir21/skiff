@@ -460,4 +460,6 @@ export default {
   "fm6.feedback": "Feedback",
   "smp.slot": "USR{n}",
   "dlg.ok": "OK",
+  "smp.dropHere": "Déposez des WAV ici",
+  "smp.namePh": "NOM",
 };

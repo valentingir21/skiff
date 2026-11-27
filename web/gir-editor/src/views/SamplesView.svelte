@@ -189,7 +189,7 @@
 </script>
 
 <div class="smp">
-  <p class="what">{t("smp.what")}</p>
+  <p class="what">{t("smp.what")} {t("smp.dropHint")}</p>
   {#if info}
     <div class="slots">
       {#each info.slots as u, k}
@@ -228,7 +228,7 @@
                 <button role="radio" aria-checked={d.kit} class:sel={d.kit} disabled={off} onclick={() => (d.kit = true)}>{t("smp.kit")}</button>
               </div>
               <label class="name">{t("smp.name")}
-                <input class="dot" maxlength="8" spellcheck="false" placeholder="NAME" value={d.name} disabled={off}
+                <input class="dot" maxlength="8" spellcheck="false" placeholder={t("smp.namePh")} value={d.name} disabled={off}
                        oninput={(e) => { const el = e.currentTarget as HTMLInputElement; d.name = el.value.toUpperCase().replace(/[^\x20-\x7E]/g, "").slice(0, 8); el.value = d.name; }} />
               </label>
             </div>
@@ -254,7 +254,7 @@
                   {/if}
                 </div>
               {/each}
-              {#if !d.files.length}<p class="hint">{t("smp.dropHint")}</p>{/if}
+              {#if !d.files.length}<div class="dz">{t("smp.dropHere")}</div>{/if}
               <div class="acts">
                 <Button size="s" onclick={() => pick(k)} disabled={off || d.files.length >= MAX_ZONES}>{t("smp.addFiles")}</Button>
                 {#if recK === k}
@@ -362,6 +362,8 @@
   .ic { border: 0; background: var(--surf-4); color: var(--fg-2); border-radius: 5px; padding: 3px 7px; font-size: 11.5px; min-width: 26px; }
   .ic:hover:not(:disabled) { color: var(--fg); }
   .fmix { display: flex; gap: 12px; font-size: 11.5px; color: var(--dim); }
+  .dz { border: 1px dashed var(--line-2); border-radius: 8px; padding: 14px; text-align: center; color: var(--dim); font-size: 12.5px; }
+  .slot.over .dz { border-color: var(--accent); color: var(--fg); }
   .hint { margin: 0; font-size: 12.5px; color: var(--dim); line-height: 1.45; }
   .acts { display: flex; gap: 6px; flex-wrap: wrap; }
   .rec { display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: var(--surf-2); border-radius: 8px; }

@@ -12,8 +12,9 @@ import { device } from "./lib/model/device.svelte";
 import { ui } from "./lib/ui.svelte";
 import { req } from "./lib/legacy/proto.js";
 import * as castApi from "./lib/cast.svelte";
+import * as themeApi from "./lib/theme.svelte";
 
 const app = mount(App, { target: document.getElementById("app")! });
 // for the end-to-end tests and the curious: the model, and the protocol's request builders (window.__gir.device.ask)
-(window as unknown as { __gir: unknown }).__gir = { device, ui, req, cast: castApi };
+(window as unknown as { __gir: unknown }).__gir = { device, ui, req, cast: castApi, theme: themeApi };
 export default app;

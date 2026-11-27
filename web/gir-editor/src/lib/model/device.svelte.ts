@@ -166,6 +166,8 @@ export class Device {
   onCast: ((a: number[]) => void) | null = null;
   onSent: ((d: number[]) => void) | null = null;
   onLost: ((why: string) => void) | null = null;
+  /** (the theme) the unit read: its display settings next */
+  onReady: (() => void) | null = null;
   /** (the Screen view) called right after INFO when the unit comes back, before the editor's own reading */
   afterInfo: ((d: Device) => Promise<void> | void) | null = null;
 
@@ -274,6 +276,7 @@ export class Device {
     this.progress = null;
     this.status = "ready";
     this.startAlive();
+    try { this.onReady?.(); } catch (e) { console.warn(e); }
   }
 
   /** TRACK (every track's engine, preset, level, mute, armed) then TRACK_DUMP of each: all their parameters */

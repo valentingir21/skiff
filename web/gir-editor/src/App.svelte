@@ -25,6 +25,7 @@
   import DemoView from "./views/DemoView.svelte";
   import CompactView from "./views/CompactView.svelte";
   import { initDesktop } from "./lib/desktop";
+  import { theme, apply as applyTheme } from "./lib/theme.svelte";
   initDesktop();
 
   device.onEvent = (e) => toastKey(e.level, e.key, e.vars);
@@ -38,6 +39,8 @@
   const compact = qs.get("compact") === "1";
 
   $effect(() => { document.documentElement.lang = i18n.lang; });
+  // (rc2) the FM-1's THEME colours go with it
+  $effect(() => { if (device.status === "off") { theme.prefs = null; theme.edit = null; applyTheme(); } });
 
   function isTyping(e: KeyboardEvent) {
     const el = e.target as HTMLElement;

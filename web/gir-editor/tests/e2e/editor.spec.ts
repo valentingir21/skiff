@@ -371,3 +371,40 @@ test("samples: a recording from the computer's input (level, time), heard back, 
   expect(si.slots[1].zones).toBe(1);
   expect(si.slots[1].name).toBe("REC");
 });
+
+test("theme: the editor follows the FM-1's THEME; THEME CUSTOM edited (shown live), saved on the unit, worn by the editor", async ({ page }) => {
+  await start(page);
+  await view(page, "Settings");
+  const card = page.getByTestId("theme");
+  await expect(card.getByLabel("THEME", { exact: true })).toBeVisible();
+  const css = (k: string) => page.evaluate((k) => getComputedStyle(document.documentElement).getPropertyValue(k).trim(), k);
+  // NEON on the unit: the editor's track colours become NEON's
+  await card.getByLabel("THEME", { exact: true }).selectOption({ label: "NEON" });
+  const neon = await page.evaluate(() => { const th = (window as any).__gir.theme; return th.BUILTIN.find((b: any) => b.name === "NEON").c.map(th.hex565); });
+  await expect.poll(() => css("--t1")).toBe(neon[5]);
+  expect(await css("--bg")).toBe(neon[0]);
+  // CUSTOM: BG and T1 changed, saved
+  const setWell = (role: string, hex: string) => card.getByLabel(role + " colour", { exact: true }).evaluate((el, hex) => {
+    const i = el as HTMLInputElement; i.value = hex; i.dispatchEvent(new Event("input", { bubbles: true }));
+  }, hex);
+  await setWell("BG", "#102030");
+  await setWell("T1", "#ff00ff");
+  await expect.poll(() => css("--t1")).toBe("#ff00ff");          // the editor shows the edit at once
+  await shot(page, "25-theme-custom");
+  await card.getByRole("button", { name: "Save on the FM-1" }).click();
+  await expect(page.locator(".toast", { hasText: "THEME CUSTOM saved" })).toBeVisible({ timeout: 15_000 });
+  const st = await page.evaluate(async () => {
+    const g = (window as any).__gir, d = g.device, P = await d.rq(g.req.uiState()), C = await d.rq(g.req.colors());
+    const pal = await d.rq(g.req.uiPalettes());
+    return { P, C, pal };
+  });
+  const parsed = await page.evaluate(() => (window as any).__gir.theme.theme.prefs);
+  expect(parsed.palettes[parsed.state.palette]).toBe("CUSTOM");
+  expect(parsed.colors.stored).toBe(true);
+  const hx = await page.evaluate((c) => c.map((v: number) => (window as any).__gir.theme.hex565(v)), parsed.colors.c);
+  const bg = "#102031";                          // #102030 in RGB565 (the unit's colours), back to 8 bits
+  expect(hx[0]).toBe(bg);
+  expect(hx[5]).toBe("#ff00ff");
+  expect(await css("--bg")).toBe(bg);
+  expect(st.pal).toBeTruthy();
+});

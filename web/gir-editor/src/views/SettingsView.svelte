@@ -10,6 +10,7 @@
   import Param from "../ui/Param.svelte";
   import Seg from "../ui/components/Seg.svelte";
   import Button from "../ui/components/Button.svelte";
+  import ThemeCard from "./settings/ThemeCard.svelte";
 
   onMount(() => { device.readMenu().catch(() => {}); });
   const tabs = $derived([...new Set(device.menu.map((m) => m.tabName || "MENU"))]);
@@ -60,6 +61,8 @@
     </div>
   </section>
 
+  <ThemeCard />
+
   <section class="card">
     <h2>{t("set.editor")}</h2>
     <div class="item"><span class="nm">{t("set.lang")}</span>
@@ -73,7 +76,7 @@
   <section class="card">
     <h2>{t("set.about")}</h2>
     <dl>
-      <dt>Gir Editor</dt><dd>1.0.0-rc1 · GPL-3.0</dd>
+      <dt>Gir Editor</dt><dd>{__APP_VERSION__} · GPL-3.0</dd>
       <dt>{t("set.firmware")}</dt><dd>{device.info?.version} · {device.tablesMatch ? "Gir 1.0" : ""}</dd>
       <dt>{t("set.tables")}</dt><dd>{device.tablesMatch ? t("set.tablesMatch") : t("set.tablesOther")}</dd>
       <dt>Link</dt><dd>{device.stats.sent} ↑ · {device.stats.received} ↓ · {device.stats.timeouts} timeouts</dd>

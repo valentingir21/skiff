@@ -20,6 +20,45 @@ function writeState(s) { try { fs.writeFileSync(STATE(), JSON.stringify(s)); } c
 let win = null;
 let state = {};
 
+// One Gir Editor talks to the FM-1 at a time: this app and the plugin's instances (plugin/src/PortLock.cpp) share
+// ~/Library/Application Support/Gir Editor/port-lock.json {id, pid, app, label, t}. Its owner rewrites t every second;
+// older than 4 s, or its process gone, it is free. Taking over rewrites it; the old owner hears it at its next beat.
+const LOCK = () => path.join(process.env.GIR_LOCK_DIR || path.join(app.getPath("appData"), "Gir Editor"), "port-lock.json");
+const LOCK_ID = require("node:crypto").randomUUID();
+let lockBeat = null;
+function readLock() { try { return JSON.parse(fs.readFileSync(LOCK(), "utf8")); } catch { return null; } }
+function alive(pid) { try { process.kill(pid, 0); return true; } catch (e) { return e.code === "EPERM"; } }
+function writeLock() {
+  try {
+    fs.mkdirSync(path.dirname(LOCK()), { recursive: true });
+    const tmp = LOCK() + "." + process.pid;
+    fs.writeFileSync(tmp, JSON.stringify({ id: LOCK_ID, pid: process.pid, app: "app", label: "app", t: Date.now() }));
+    fs.renameSync(tmp, LOCK());
+  } catch { /* read-only: no lock */ }
+}
+function lockAcquire(force) {
+  const h = readLock();
+  if (h && h.id !== LOCK_ID && Date.now() - h.t <= 4000 && alive(h.pid) && !force) return { ok: false, by: h.label || h.app || "" };
+  writeLock();
+  clearInterval(lockBeat);
+  lockBeat = setInterval(() => {
+    const now = readLock();
+    if (now && now.id !== LOCK_ID) {
+      clearInterval(lockBeat); lockBeat = null;
+      if (win && !win.isDestroyed()) win.webContents.send("gir", "taken", now.label || now.app || "");
+      return;
+    }
+    writeLock();
+  }, 1000);
+  return { ok: true };
+}
+function lockRelease() {
+  if (!lockBeat) return;
+  clearInterval(lockBeat); lockBeat = null;
+  const h = readLock();
+  if (h && h.id === LOCK_ID) { try { fs.unlinkSync(LOCK()); } catch { /* gone */ } }
+}
+
 function create() {
   state = readState();
   const compact = !!state.compact;
@@ -117,6 +156,8 @@ app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(ok(wc, perm)));
   session.defaultSession.setPermissionCheckHandler((wc, perm) => ok(wc, perm));
   ipcMain.handle("gir:compact", (_e, on) => setCompact(!!on));
+  ipcMain.handle("gir:lock", (_e, force) => lockAcquire(!!force));
+  ipcMain.handle("gir:unlock", () => lockRelease());
   ipcMain.handle("gir:ontop", (_e, on) => { state.onTop = !!on; win.setAlwaysOnTop(!!on, "floating"); writeState(state); menu(); });
   ipcMain.handle("gir:state", () => ({ compact: !!state.compact, onTop: !!state.onTop, platform: process.platform, version: app.getVersion() }));
   create();
@@ -125,3 +166,5 @@ app.whenReady().then(() => {
 });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 void dialog;
+
+app.on("will-quit", () => lockRelease());

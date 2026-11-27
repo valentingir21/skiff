@@ -37,6 +37,9 @@ export function ask(c: Omit<Confirm, "resolve">): Promise<string | boolean | nul
 }
 
 export function download(name: string, data: string | Uint8Array, type = "application/json") {
+  // (plugin) WKWebView has no downloads: the plugin writes the file into ~/Documents/Gir Editor/
+  const pl = (globalThis as unknown as { __girSave?: (n: string, d: string | Uint8Array) => void }).__girSave;
+  if (pl) { pl(name, data); return; }
   const blob = new Blob([data as BlobPart], { type });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);

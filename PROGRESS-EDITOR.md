@@ -3,7 +3,19 @@
 Lire ce fichier d'abord. Branche `gir-editor` (depuis le tag `gir-v1.0`). Docs : `../livraison/EDITOR/`
 (DECISIONS.md = journal des décisions). Règles : pas de flash, pas de changement dans `firmware/`, pas de merge.
 
-## Étape en cours : rc3 (passe de correction de l'interface, 27/11/2026)
+## Étape en cours : plugin AU / VST3 rc1 (branche `gir-editor-plugin`, 27/11/2026)
+- rc3 installée dans `/Applications` (quarantaine retirée, lancée une fois en démo par `GIR_APP=… npx playwright test
+  -c playwright.desktop.config.ts`).
+- `plugin/` : JUCE 8.0.15 (AGPLv3, `plugin/fetch-deps.sh`, non commité), `plugin/build-mac.sh` (universel, macOS 12,
+  ad hoc, installe dans `~/Library/Audio/Plug-Ins/`), `plugin/tests/run-mac.sh` (auval x2, validateur VST3, hôte de
+  test `tests/host` avec FM-1 virtuelle native sur le port « Gir Test FM-1 », verrou appli + plugin).
+- Côté web : `src/lib/plugin/` (pont, état du projet, paramètres, autotest), `transport/plugin.ts`, `kill.svelte.ts`,
+  verrou dans `electron/main.cjs` + `webmidi.ts`. Décisions 47 à 59. Guide + checklist : `GUIDE-PLUGIN.md`.
+- Une vraie FM-1 (« Felucca ») était branchée : les tests n'ouvrent que le port virtuel (GIR_PLUGIN_TEST_PORT).
+- Reste : pré-release `gir-editor-plugin-v1.0-rc1`, tests dans Live et Luna avec l'utilisateur, build Windows,
+  CLAP (clap-juce-extensions incompatible avec JUCE 8.0.15), CI (`web/gir-editor/ci/gir-editor-plugin.yml`).
+
+## rc3 (fait) (passe de correction de l'interface, 27/11/2026)
 - Test « layout lint » : `web/gir-editor/tests/e2e/layout.spec.ts` + `layout-lint.ts`, lancé par
   `npx playwright test -c playwright.layout.config.ts` (`LAYOUT_LABEL=avant|apres`, `LAYOUT_ONLY=<regex>`,
   `LAYOUT_URL=` pour une autre build ; rapport : `node scripts/layout-report.mjs <label>`). Captures et défauts dans

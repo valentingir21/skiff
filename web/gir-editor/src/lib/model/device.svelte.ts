@@ -7,6 +7,8 @@ import { Client, parseNamesTolerant, type Push, type RqOpt } from "../protocol/c
 import type { Desc, Info, Lists, MenuItem, Perform, Pool, ProjNames, Step, TrackRow, UserSlot } from "../protocol/types";
 import { EmulatorTransport } from "../transport/emulator";
 import { WebMidiTransport } from "../transport/webmidi";
+import { PluginTransport } from "../transport/plugin";
+import { plugin } from "../plugin/bridge";
 import { TransportError, type Transport } from "../transport/types";
 import { ID, T, tdesc } from "./tables";
 import { seedDemo } from "./demo";
@@ -90,17 +92,19 @@ export class Device {
   presetName(t: TrackState) { return this.names[t.engine]?.[t.preset] ?? ""; }
 
   // ------------------------------------------------------------------ connect ---
-  async connect(kind: "webmidi" | "emulator") {
+  async connect(kind: "webmidi" | "emulator", opt: { force?: boolean } = {}) {
     if (this.status === "connecting" || this.status === "loading") return;
     await this.disconnect(true);
     this.error = null;
     this.status = "connecting";
     this.kind = kind;
     try {
-      const tr: Transport = this.factory?.(kind) ?? (kind === "emulator" ? new EmulatorTransport() : new WebMidiTransport());
+      // (plugin) the unit through the plugin's own MIDI ports: WKWebView has no Web MIDI
+      const tr: Transport = this.factory?.(kind) ?? (kind === "emulator" ? new EmulatorTransport() : plugin ? new PluginTransport() : new WebMidiTransport());
       this.transport = tr;
       this.listeners.push(tr.onState((s, why) => this.onTransportState(s, why)));
-      if (tr instanceof WebMidiTransport) {
+      if (tr instanceof WebMidiTransport || tr instanceof PluginTransport) {
+        tr.force = !!opt.force;
         await this.probe(tr);
       } else {
         await tr.connect();
@@ -131,12 +135,13 @@ export class Device {
   }
 
   /** the first port pair that answers INFO (the installer's handshake); "busy": a pair seen but none would open */
-  private async probe(tr: WebMidiTransport) {
+  private async probe(tr: WebMidiTransport | PluginTransport) {
     const pairs = await tr.candidates();
     if (!pairs.length) throw new TransportError("nodevice");
     let busy: TransportError | null = null;
     for (const pair of pairs) {
-      try { await tr.use(pair); } catch (e) { busy = e as TransportError; continue; }
+      // (another Gir Editor holds the unit: said, with where, and offered to take over)
+      try { await (tr.use as (p: unknown) => Promise<void>)(pair); } catch (e) { if ((e as TransportError).code === "held") throw e; busy = e as TransportError; continue; }
       this.makeClient();
       try {
         this.info = await this.client!.ask(req.info(), { timeout: 500, retries: 2, quiet: true });
@@ -174,6 +179,11 @@ export class Device {
   afterInfo: ((d: Device) => Promise<void> | void) | null = null;
 
   private onTransportState(s: string, why?: string) {
+    if (s === "lost" && why?.startsWith("taken:")) {
+      // (plugin, desktop app) another Gir Editor took the unit over: this one lets go, says where, offers it back
+      this.disconnect(true).then(() => { this.status = "off"; this.kind = null; this.error = { code: "taken", detail: why.slice(6) }; });
+      return;
+    }
     if (s === "lost" && this.status !== "off") {
       this.status = "lost";
       this.lostWhy = why ?? "unplug";
@@ -195,7 +205,7 @@ export class Device {
     const tr = this.transport;
     if (!tr) return;
     this.status = "reconnecting";
-    if (tr instanceof WebMidiTransport) await this.probe(tr);
+    if (tr instanceof WebMidiTransport || tr instanceof PluginTransport) await this.probe(tr);
     else {
       (tr as EmulatorTransport).reattach?.();
       this.makeClient();

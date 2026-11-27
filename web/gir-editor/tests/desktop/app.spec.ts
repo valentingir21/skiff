@@ -10,6 +10,7 @@ const REL = new URL("../../release/", import.meta.url).pathname.replace(/^\/([A-
 const OUT = new URL("../../ci-shots/", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
 mkdirSync(OUT, { recursive: true });
 function exe(): string {
+  if (process.env.GIR_APP) return process.env.GIR_APP;   // (an installed app, e.g. /Applications/Gir Editor.app/…)
   if (process.platform === "darwin") {
     for (const d of ["mac-universal", "mac-arm64", "mac"]) {
       const p = join(REL, d, "Gir Editor.app", "Contents", "MacOS", "Gir Editor");

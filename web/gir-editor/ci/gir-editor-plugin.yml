@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Gir Editor plugin (AU + VST3, universal, macOS 12+): built on a macOS runner, signed ad hoc, then tested there as on
+# the developer's Mac (plugin/tests/run-mac.sh): auval (arm64 and x86_64), Steinberg's VST3 validator, the test host
+# on its virtual FM-1 (the demo with the layout lint, the SysEx bridge, a backup, two instances and the lock), the
+# desktop app and the plugin sharing the lock. The zips and the captures are kept. Windows: not built yet.
+# To activate: git mv web/gir-editor/ci/gir-editor-plugin.yml .github/workflows/ (a token with the workflow scope).
+name: Gir Editor plugin
+on:
+  push:
+    branches: [gir-editor-plugin]
+    paths: ["plugin/**", "web/gir-editor/**", ".github/workflows/gir-editor-plugin.yml"]
+    tags: ["gir-editor-plugin-v*"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: brew install cmake ninja
+      - name: The firmware's generated headers (the test host's virtual FM-1, compiled natively)
+        run: pip3 install --break-system-packages Pillow numpy && python3 -c "import sys; sys.path.insert(0, 'tools'); import build; build.generate()"
+      - run: npm ci && npx playwright install chromium
+        working-directory: web/gir-editor
+      - name: Build (AU, VST3, test host), install for the current user
+        run: plugin/build-mac.sh
+      - name: Tests
+        run: plugin/tests/run-mac.sh
+        env: { GIR_SHOTS: "${{ github.workspace }}/plugin-screens" }
+      - name: Zips
+        run: |
+          cd "plugin/build/GirEditorPlugin_artefacts/Release"
+          ditto -c -k --keepParent "AU/Gir Editor.component" "$GITHUB_WORKSPACE/Gir-Editor-plugin-mac-AU.zip"
+          ditto -c -k --keepParent "VST3/Gir Editor.vst3" "$GITHUB_WORKSPACE/Gir-Editor-plugin-mac-VST3.zip"
+      - uses: actions/upload-artifact@v4
+        with: { name: gir-editor-plugin-mac, path: "Gir-Editor-plugin-mac-*.zip" }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: gir-editor-plugin-screens, path: plugin-screens/, if-no-files-found: ignore }

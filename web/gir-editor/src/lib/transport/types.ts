@@ -27,7 +27,9 @@ export type ConnectError =
   | "busy"            // a port found but another app holds it (Windows)
   | "noanswer"        // a port opened but nothing answered INFO (held elsewhere, or not a Skiff or Gir firmware)
   | "noaudio"         // the demo needs an AudioContext
-  | "wasm";           // the virtual FM-1 did not load
+  | "wasm"            // the virtual FM-1 did not load
+  | "held"            // (plugin, desktop app) another Gir Editor holds the FM-1 (detail: where); it can be taken over
+  | "taken";          // (plugin, desktop app) another Gir Editor took the FM-1 over (detail: where)
 
 export class TransportError extends Error {
   constructor(public code: ConnectError, message?: string) {

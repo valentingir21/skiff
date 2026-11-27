@@ -6,6 +6,9 @@
 import { portPairs } from "../legacy/proto.js";
 import { listeners, TransportError, type Transport, type TransportState } from "./types";
 
+type Lock = { lock?(force: boolean): Promise<{ ok: boolean; by?: string }>; unlock?(): Promise<void> };
+const desktopLock = (): Lock | undefined => (globalThis as unknown as { girDesktop?: Lock }).girDesktop;
+
 export function hasWebMidi(): boolean {
   return typeof navigator !== "undefined" && typeof (navigator as Navigator).requestMIDIAccess === "function";
 }
@@ -21,6 +24,8 @@ export class WebMidiTransport implements Transport {
   private st = listeners<[TransportState, string?]>();
   /** tried in turn by the protocol: candidates() then use(pair) */
   pairs: [MIDIInput, MIDIOutput][] = [];
+  /** (the desktop app) the next use() takes the FM-1 over from another Gir Editor holding it */
+  force = false;
 
   private set(s: TransportState, why?: string) { this.state = s; this.st.emit(s, why); }
 
@@ -45,6 +50,13 @@ export class WebMidiTransport implements Transport {
 
   async use(pair: [MIDIInput, MIDIOutput]) {
     this.detach();
+    // (the desktop app) one Gir Editor at a time talks to the FM-1: the lock shared with the plugin's instances
+    const d = desktopLock();
+    if (d?.lock) {
+      const r = await d.lock(this.force);
+      if (!r.ok) throw new TransportError("held", r.by || "");
+      this.force = false;
+    }
     const [i, o] = pair;
     this.input = i; this.output = o; this.name = i.name || "FM-1";
     i.onmidimessage = (e) => { if (e.data) this.msg.emit(e.data); };
@@ -83,6 +95,12 @@ export class WebMidiTransport implements Transport {
     }
   }
 
+  /** (the desktop app) another Gir Editor took the FM-1 over */
+  taken(by: string) {
+    this.detach();
+    this.set("lost", "taken:" + by);
+  }
+
   private detach() {
     if (this.input) this.input.onmidimessage = null;
     this.input = null; this.output = null;
@@ -90,6 +108,7 @@ export class WebMidiTransport implements Transport {
 
   async disconnect() {
     this.detach();
+    desktopLock()?.unlock?.();
     this.set("idle");
   }
 }

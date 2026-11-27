@@ -6,4 +6,6 @@ contextBridge.exposeInMainWorld("girDesktop", {
   compact: (on) => ipcRenderer.invoke("gir:compact", on),
   onTop: (on) => ipcRenderer.invoke("gir:ontop", on),
   state: () => ipcRenderer.invoke("gir:state"),
+  lock: (force) => ipcRenderer.invoke("gir:lock", force),
+  unlock: () => ipcRenderer.invoke("gir:unlock"),
 });

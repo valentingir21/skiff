@@ -10,24 +10,11 @@
   import Fader from "../ui/components/Fader.svelte";
   import PageCard from "./sound/PageCard.svelte";
   import CardGrid from "../ui/CardGrid.svelte";
+  import { killed, killOn, killOff } from "../lib/kill.svelte";
 
   const EQ = [ID.P_EQ_LOW, ID.P_EQ_MID, ID.P_EQ_HIGH];
   const BAND = ["LOW", "MID", "HIGH"];
-  // a kill: the band's value before it, while held or locked (key "k:band")
-  let killed = $state<Record<string, { before: number; locked: boolean }>>({});
-  async function killOn(k: number, b: number, lock: boolean) {
-    const key = `${k}:${b}`, cur = killed[key];
-    if (cur && lock) { await killOff(k, b, true); return; }
-    if (cur) return;
-    killed[key] = { before: device.tracks[k].p[EQ[b]], locked: lock };
-    await device.setParam(k, EQ[b], 0, { undo: false });
-  }
-  async function killOff(k: number, b: number, force = false) {
-    const key = `${k}:${b}`, cur = killed[key];
-    if (!cur || (cur.locked && !force)) return;
-    delete killed[key];
-    await device.setParam(k, EQ[b], cur.before, { undo: false });
-  }
+  // a kill: lib/kill.svelte.ts (the plugin's KILL parameters use the same)
   const glo = T.PAGES.filter((p) => p.fam === "GLO" && p.title !== "EQ");
   // (rc3) under six strips in sight: they scroll sideways, and the view says how many are out of sight
   let strips: HTMLDivElement | undefined = $state();

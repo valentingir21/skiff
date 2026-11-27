@@ -25,8 +25,10 @@
   import DemoView from "./views/DemoView.svelte";
   import CompactView from "./views/CompactView.svelte";
   import { initDesktop } from "./lib/desktop";
+  import { initPlugin } from "./lib/plugin/index.svelte";
   import { theme, apply as applyTheme } from "./lib/theme.svelte";
   initDesktop();
+  initPlugin();
 
   device.onEvent = (e) => toastKey(e.level, e.key, e.vars);
 

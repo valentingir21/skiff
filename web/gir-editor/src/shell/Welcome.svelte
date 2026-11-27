@@ -5,13 +5,17 @@
   import { hasWebMidi } from "../lib/transport/webmidi";
   import { t, i18n, setLang } from "../lib/i18n/index.svelte";
   import { ic } from "../ui/icons";
+  import { plugin } from "../lib/plugin/bridge";
+  import { whereText } from "../lib/plugin/where";
 
-  const midi = hasWebMidi();
+  // (plugin) the FM-1 through the plugin's own MIDI ports
+  const midi = hasWebMidi() || !!plugin;
+  const held = $derived(device.error?.code === "held" || device.error?.code === "taken");
   const busy = $derived(device.status === "connecting" || device.status === "loading");
   let which = $state<"webmidi" | "emulator" | null>(null);
-  async function go(kind: "webmidi" | "emulator") {
+  async function go(kind: "webmidi" | "emulator", force = false) {
     which = kind;
-    try { await device.connect(kind); } catch { /* device.error says why */ }
+    try { await device.connect(kind, { force }); } catch { /* device.error says why */ }
   }
   const rows = [
     ["1", "SUPERSAW", "LD SS ANTHEM"], ["2", "ACID", "BS 303"], ["3", "MINI", "BS MOOG HARD"],
@@ -36,7 +40,7 @@
         <button class="act primary" disabled={!midi || busy} onclick={() => go("webmidi")}>
           <i class="ic" aria-hidden="true">{ic("port_usb_c")}</i>
           <span class="tt">{busy && which === "webmidi" ? (device.status === "loading" ? t("welcome.loading") : t("welcome.connecting")) : t("welcome.connect")}</span>
-          <span class="sub">{t("welcome.connectSub")}</span>
+          <span class="sub">{t(plugin ? "welcome.connectSubPlugin" : "welcome.connectSub")}</span>
         </button>
         <button class="act" disabled={busy} onclick={() => go("emulator")}>
           <i class="ic" aria-hidden="true">{ic("control_play_f")}</i>
@@ -48,7 +52,13 @@
         <div class="bar" role="progressbar" aria-valuenow={device.progress.pct}><div style="width:{device.progress.pct}%"></div></div>
       {/if}
 
-      {#if device.error}
+      {#if device.error && held}
+        <!-- (plugin, desktop app) another Gir Editor talks to the FM-1: where, and taking it over -->
+        <div class="error held" role="alert">
+          <span>{t("err." + device.error.code, { detail: whereText(device.error.detail ?? "") })}</span>
+          <button class="take" disabled={busy} onclick={() => go("webmidi", true)}>{t(device.error.code === "taken" ? "welcome.takeBack" : "welcome.takeOver")}</button>
+        </div>
+      {:else if device.error}
         <div class="error" role="alert">{t("err." + device.error.code, { detail: device.error.detail ?? "" })}</div>
       {/if}
       {#if !midi}
@@ -58,8 +68,8 @@
       <ol class="steps" aria-label={t("welcome.steps")}>
         <li>{t("welcome.step1")}</li>
         <li>{t("welcome.step2")}</li>
-        <li>{t("welcome.step3")}</li>
-        <li>{t("welcome.step4")}</li>
+        <li>{t(plugin ? "welcome.step3Plugin" : "welcome.step3")}</li>
+        <li>{t(plugin ? "welcome.step4Plugin" : "welcome.step4")}</li>
       </ol>
     </section>
 
@@ -79,7 +89,7 @@
   </div>
 
   <footer>
-    <nav><a href="../try/">{t("welcome.try")}</a><a href="https://github.com/valentingir21/skiff/releases">{t("welcome.desktop")}</a><a href="https://github.com/valentingir21/skiff">Source</a></nav>
+    <nav><a href={plugin ? "https://valentingir21.github.io/skiff/try/" : "../try/"}>{t("welcome.try")}</a><a href="https://github.com/valentingir21/skiff/releases">{t("welcome.desktop")}</a><a href="https://github.com/valentingir21/skiff">Source</a></nav>
     {t("welcome.footer")} · Skiff (illuminus5) · Felucca (Leo Kuroshita, Hügelton Instruments)
   </footer>
 </div>
@@ -109,6 +119,8 @@
   .bar { height: 3px; background: var(--surf-3); border-radius: 3px; margin-top: 14px; overflow: hidden; }
   .bar div { height: 100%; background: var(--accent); transition: width var(--t-med); }
   .error { margin-top: 16px; padding: 12px 14px; border-radius: var(--r-m); background: color-mix(in srgb, var(--err) 14%, var(--surf)); border: 1px solid color-mix(in srgb, var(--err) 40%, transparent); color: #ffd0d4; line-height: 1.45; }
+  .error.held { display: flex; align-items: center; gap: 14px; justify-content: space-between; }
+  .take { flex: none; padding: 8px 14px; border-radius: var(--r-m); background: var(--accent); color: var(--accent-ink); border: 0; font-weight: 700; }
   .note { margin-top: 16px; padding: 12px 14px; border-radius: var(--r-m); background: var(--surf); color: var(--fg-2); line-height: 1.45; }
   .steps { margin: 32px 0 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; color: var(--fg-2); line-height: 1.45; }
   .steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; }

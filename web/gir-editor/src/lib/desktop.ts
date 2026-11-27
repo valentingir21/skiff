@@ -4,7 +4,8 @@ import { device } from "./model/device.svelte";
 import { ui, go, type View } from "./ui.svelte";
 import { backup, restore, prepareUpdate } from "./backup.svelte";
 
-interface Desktop { on(cb: (what: string, arg?: string) => void): void; compact(on: boolean): Promise<void>; onTop(on: boolean): Promise<void>; state(): Promise<{ compact: boolean; onTop: boolean; platform: string; version: string }> }
+interface Desktop { on(cb: (what: string, arg?: string) => void): void; compact(on: boolean): Promise<void>; onTop(on: boolean): Promise<void>; state(): Promise<{ compact: boolean; onTop: boolean; platform: string; version: string }>;
+  /** (the port lock shared with the plugin, electron/main.cjs) */ lock?(force: boolean): Promise<{ ok: boolean; by?: string }>; unlock?(): Promise<void> }
 export const desktop: Desktop | null = (globalThis as unknown as { girDesktop?: Desktop }).girDesktop ?? null;
 
 export function initDesktop() {
@@ -19,6 +20,7 @@ export function initDesktop() {
     else if (what === "backup") backup();
     else if (what === "restore") restore();
     else if (what === "update") prepareUpdate();
+    else if (what === "taken") (device.transport as { taken?: (by: string) => void } | null)?.taken?.(arg ?? "");
     else if (what === "save") (document.querySelector(".top .save") as HTMLButtonElement | null)?.click();
   });
 }

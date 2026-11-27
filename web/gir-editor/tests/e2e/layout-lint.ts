@@ -152,7 +152,7 @@ export function lint(o: LintOpts): Defect[] {
     const own = [...h.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim().length > 0);
     if (!own && !h.matches("input, select, button")) continue;
     const s = getComputedStyle(h);
-    if (s.display === "inline" || h.clientWidth <= 1 || h.matches(".sr-only")) continue;
+    if (s.display === "inline" || h.clientWidth <= 1 || h.matches(".sr-only") || h.closest("svg")) continue;   // (SVG text has no box to spill out of)
     if (/auto|scroll/.test(s.overflowX) || /auto|scroll/.test(s.overflowY)) continue;
     if (h.tagName === "INPUT" || h.tagName === "TEXTAREA") continue;
     if (h.scrollWidth > h.clientWidth + 1 && s.textOverflow !== "ellipsis") add("cut", el, `text ${h.scrollWidth} px in ${h.clientWidth} px`);

@@ -11,8 +11,8 @@ Lire ce fichier d'abord. Branche `gir-editor` (depuis le tag `gir-v1.0`). Docs :
 - Fait : Knob à 2 tailles, grille de cartes (`lib/layout.svelte.ts` pack), MOD, mixer, points de rupture (tiroir de
   presets, pistes compactes, onglets courts), descriptions (`lib/model/describe.ts`, `generated/presets.*.json`),
   séquenceur ajusté, Écran façon Try Gir, FM6 vide, DECISIONS 36 à 45.
-- Reste : matrice complète à 0 défaut, 2 passes de revue visuelle, appli Mac, RAPPORT-LAYOUT.md, GUIDE, publication
-  gh-pages, pré-release rc3.
+- Fait aussi : matrice complète à 0 défaut (rc2 : 61 400), 2 passes de revue, appli Mac (lint dans l'appli),
+  RAPPORT-LAYOUT.md, GUIDE, DECISIONS 36 à 46, version 1.0.0-rc3. Puis : gh-pages et pré-release rc3.
 
 ## rc2
 **rc2 publiée** (27/11/2026) : voir `../livraison/EDITOR/RAPPORT-RC2.md` (checklist matériel de 30 min). La rc1 :

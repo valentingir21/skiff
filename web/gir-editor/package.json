@@ -1,7 +1,7 @@
 {
   "name": "gir-editor",
   "private": true,
-  "version": "1.0.0-rc2",
+  "version": "1.0.0-rc3",
   "description": "Gir Editor: the editor of the Gir firmware for the M-VAVE FM-1",
   "license": "GPL-3.0-only",
   "type": "module",

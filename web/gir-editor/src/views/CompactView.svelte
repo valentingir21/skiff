@@ -33,7 +33,7 @@
     <button class="tb" class:on={device.playing} aria-label={t("top.play")} onclick={() => device.togglePlay()}><i class="ic">{ic(device.playing ? "control_stop_f" : "control_play_f")}</i></button>
     <span class="bpm dot">{bpm}</span><span class="u">BPM</span>
     <span class="pn dot">{device.proj?.name ?? ""}</span>
-    {#if desktop}<button class="x" onclick={() => desktop!.compact(false)} title="Full window">⤢</button>{/if}
+    {#if desktop}<button class="x" onclick={() => desktop!.compact(false)} title={t("compact.full")} aria-label={t("compact.full")}>⤢</button>{/if}
   </header>
   <div class="strips">
     {#each device.tracks as tr, k}

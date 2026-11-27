@@ -488,4 +488,5 @@ export default {
   "mixer.scrollMore": "{n} pistes de plus sur le côté : faites défiler les tranches (Maj + molette).",
   "help.knob.K.CLICK": "un « tok » (une sinusoïde qui plonge de 2,4 kHz vers le corps en ~3 ms : la plongée rapide d'un 909 ou d'un kick hard techno) et un souffle de bruit de 1,5 ms, la batte (0–127, déf. 0)",
   "help.knob.K.PUNCH": "un transient shaper : les ~10 premières ms du corps montent (jusqu'à x4), le reste descend (jusqu'à −6 dB, remonte en ~0,2 s) : la place pour le rumble (0–127, déf. 0)",
+  "compact.full": "Fenêtre complète",
 };

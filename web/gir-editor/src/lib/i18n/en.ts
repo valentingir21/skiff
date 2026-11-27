@@ -507,4 +507,5 @@ export default {
   "mixer.scrollMore": "{n} more tracks to the side: scroll the strips sideways (Shift + wheel).",
   "help.knob.K.CLICK": "a \"tok\" (a sine diving from 2.4 kHz to the body in ~3 ms, the fast pitch dive of a 909 or a hard techno kick) and a 1.5 ms breath of noise, the beater (0–127, default 0)",
   "help.knob.K.PUNCH": "a transient shaper: the body's first ~10 ms rise (up to x4), the rest falls (down to −6 dB, back in ~0.2 s), room for the rumble (0–127, default 0)",
+  "compact.full": "Full window",
 };

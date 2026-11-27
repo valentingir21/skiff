@@ -21,6 +21,7 @@ function exe(): string {
   }
   throw new Error("no packaged app in " + REL + ": " + (existsSync(REL) ? readdirSync(REL).join(", ") : "none"));
 }
+import { lint } from "../e2e/layout-lint";
 const plat = process.platform === "darwin" ? "mac" : process.platform === "win32" ? "windows" : process.platform;
 
 test("the desktop app starts, opens the demo, and its compact window", async () => {
@@ -40,6 +41,16 @@ test("the desktop app starts, opens the demo, and its compact window", async () 
   const st = await win.evaluate(() => { const d = (window as any).__gir.device; return { tracks: d.tracks.length, ver: d.info.version, desktop: !!(window as any).girDesktop }; });
   expect(st.tracks).toBe(6);
   expect(st.desktop).toBe(true);
+  // (rc3) the layout lint in the app's own window, on every view
+  const bad: string[] = [];
+  for (const v of ["sound", "seq", "song", "mixer", "library", "projects", "samples", "fm6", "screen", "settings"]) {
+    await win.evaluate((v) => ((window as any).__gir.ui.view = v), v);
+    await win.waitForTimeout(v === "screen" || v === "song" ? 1200 : 600);
+    const d = await win.evaluate(lint, { knobSizes: [48, 34], view: v });
+    bad.push(...d.map((x) => `${v} ${x.rule} ${x.el} ${x.more ?? ""}`));
+    await win.screenshot({ path: join(OUT, `${plat}-view-${v}.png`) });
+  }
+  expect(bad.slice(0, 30)).toEqual([]);
   await win.evaluate(() => (window as any).__gir.ui.view = "screen");
   await win.waitForTimeout(1200);
   await win.screenshot({ path: join(OUT, `${plat}-3-demo-screen.png`) });
@@ -52,6 +63,8 @@ test("the desktop app starts, opens the demo, and its compact window", async () 
   await w2.waitForFunction(() => (window as any).__gir?.device.status === "ready", null, { timeout: 60_000 }).catch(() => {});
   await w2.waitForTimeout(1200);
   await w2.screenshot({ path: join(OUT, `${plat}-4-compact.png`) });
+  const dc = await w2.evaluate(lint, { knobSizes: [48, 34], view: "compact" });
+  expect(dc.map((x) => `compact ${x.rule} ${x.el} ${x.more ?? ""}`)).toEqual([]);
   const remembered = await w2.evaluate(() => (window as any).girDesktop.state());
   expect(remembered.compact).toBe(true);
   await w2.evaluate(() => (window as any).girDesktop.compact(false));

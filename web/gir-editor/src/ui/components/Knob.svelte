@@ -154,6 +154,8 @@
   .compact .val { font-size: 12.5px; min-width: 44px; }
   .row .val { min-width: 58px; text-align: left; }
   .val:hover { background: var(--surf-3); }
+  /* the value and its unit on one 18 px line whatever the two fonts' metrics (the app's Chromium measures them taller) */
+  .val .v, .val .u { line-height: 1; }
   .u { font-size: 10px; color: var(--dim); margin-left: 2px; font-family: var(--font-ui); }
   .edit { width: 60px; text-align: center; background: var(--surf); border: 1px solid var(--c); font-family: var(--font-ui); font-size: 13px; }
   .disabled { opacity: 0.38; }

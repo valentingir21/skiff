@@ -550,3 +550,22 @@ test("unplugged in the middle of a restore: what is written is said; plugged bac
   await expect(page.locator(".toast", { hasText: "Restore finished." })).toBeVisible({ timeout: 90_000 });
   await expect.poll(() => page.evaluate(() => { const g = (window as any).__gir; return g.device.ask(g.req.get(1, 0)).then((r: any) => r.value); })).toBe(120);
 });
+
+test("a backup from before Skiff 2.0 (Felucca's): converted first (web/conv), what changes listed before writing, restored", async ({ page }) => {
+  test.setTimeout(150_000);
+  await start(page);
+  await view(page, "Projects");
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Restore from a file…" }).click();
+  await (await chooser).setFiles(new URL("../fixtures/backup-felucca-old.json", import.meta.url).pathname);
+  await expect(page.locator(".dlg")).toContainText("comes from an older firmware");
+  await expect(page.locator(".dlg")).toContainText("damaged, left out");
+  await shot(page, "28-conversion");
+  const before = page.waitForEvent("download");
+  await page.locator(".dlg").getByRole("button", { name: "Restore", exact: true }).click();
+  expect((await before).suggestedFilename()).toMatch(/^Skiff-backup-before-restore-/);
+  await expect(page.locator(".toast", { hasText: "Restore finished." })).toBeVisible({ timeout: 120_000 });
+  await expect(page.locator(".rep")).toContainText("Converted from backup-felucca-old.json");
+  const p = await page.evaluate(() => { const g = (window as any).__gir; return g.device.ask(g.req.projName()); });
+  expect(p.slots.filter((s: any) => s.used).length).toBeGreaterThan(0);
+});

@@ -408,3 +408,27 @@ test("theme: the editor follows the FM-1's THEME; THEME CUSTOM edited (shown liv
   expect(await css("--bg")).toBe(bg);
   expect(st.pal).toBeTruthy();
 });
+
+test("APC mini mk2: a clear word when none is plugged in; a controller's pads launch entries, mute, PLAY; its lights follow", async ({ page }) => {
+  // Web MIDI with no controller plugged in (headless Chromium has no MIDI of its own)
+  await page.addInitScript(() => {
+    (navigator as any).requestMIDIAccess = async () => ({ inputs: new Map(), outputs: new Map(), onstatechange: null, sysexEnabled: false });
+  });
+  await start(page);
+  await view(page, "Song");
+  const box = page.getByTestId("apc");
+  await box.getByRole("button", { name: "Use an APC mini mk2" }).click();
+  await expect(box).toContainText("No APC mini mk2 found");
+  // a controller (its output's messages recorded), then its pads
+  await page.evaluate(() => { const w = window as any; w.__apcOut = []; w.__gir.apc.apcFake((d: number[]) => w.__apcOut.push(d)); });
+  await expect(box.locator(".grid")).toBeVisible();
+  const before = await page.evaluate(() => (window as any).__gir.device.perform.tracks[1].muted);
+  await page.evaluate(() => (window as any).__gir.apc.press([0x90, 101, 127]));          // MUTE T2
+  await expect.poll(() => page.evaluate(() => (window as any).__gir.device.ask((window as any).__gir.req.perform()).then((r: any) => r.tracks[1].muted))).toBe(!before);
+  await page.evaluate(() => (window as any).__gir.apc.press([0x90, 119, 127]));          // PLAY
+  await expect.poll(() => page.evaluate(() => (window as any).__gir.device.playing)).toBe(true);
+  // its lights: PLAY lit, T2's mute lit (sent to the controller as note-ons)
+  await expect.poll(() => page.evaluate(() => (window as any).__apcOut.some((d: number[]) => d[1] === 119 && d[2] === 1))).toBe(true);
+  await shot(page, "26-song-apc");
+  await page.evaluate(() => (window as any).__gir.apc.press([0x90, 119, 127]));
+});

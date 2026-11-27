@@ -10,6 +10,7 @@
   import { PAT_REST } from "../lib/legacy/proto.js";
   import Seg from "../ui/components/Seg.svelte";
   import Button from "../ui/components/Button.svelte";
+  import ApcPanel from "./song/ApcPanel.svelte";
 
   onMount(() => device.setSongWatch(true));
   onDestroy(() => device.setSongWatch(false));
@@ -129,6 +130,7 @@
         {/each}
       </div>
     </section>
+    <ApcPanel />
   {:else}
     <p class="loading">…</p>
   {/if}

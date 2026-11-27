@@ -380,7 +380,19 @@ export class Device {
     if (this.client) this.stats = { sent: this.client.sent, received: this.client.received, timeouts: this.client.timeouts };
   }
   private async rewatch() { await this.rq(req.watch(3), { quiet: true }).catch(() => {}); }
-  setSongWatch(on: boolean) { this.wantSong = on; if (on) this.readSong(true).catch(() => {}); }
+  private songWatchers = 0;
+  /** the song read again every second while someone shows it (the Song view, the APC mini) */
+  setSongWatch(on: boolean) {
+    this.songWatchers = Math.max(0, this.songWatchers + (on ? 1 : -1));
+    this.wantSong = this.songWatchers > 0;
+    if (on && this.ready) this.readSong(true).catch(() => {});
+  }
+  /** a plain MIDI message to the unit (the APC mini's faders: CC 7 on a track's channel) */
+  sendMidi(bytes: number[]) {
+    const tr = this.transport as any;
+    if (tr instanceof EmulatorTransport) tr.node?.port.postMessage({ type: "midi", data: bytes });
+    else tr?.send?.(bytes);
+  }
 
   // ---------------------------------------------------------------- parameters ---
   private undoPush(e: Entry) {

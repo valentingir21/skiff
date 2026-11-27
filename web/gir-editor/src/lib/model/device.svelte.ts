@@ -705,7 +705,7 @@ export class Device {
   async setMenu(id: number, v: number) {
     const it = this.menu.find((m) => m.id === id);
     if (it) it.value = v;
-    const r = await this.ask<{ rc: number; value: number }>(req.menuSet(id, v), { key: `m:${id}` });
+    const r = await this.ask<{ rc: number; value: number }>(req.menuSet(id, v), { key: `m:${id}`, timeout: 2500, retries: 2 });   // (a settings write)
     if (it) it.value = r.value;
   }
 

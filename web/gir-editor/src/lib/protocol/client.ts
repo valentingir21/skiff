@@ -12,6 +12,8 @@ export interface RqOpt { timeout?: number; retries?: number; key?: string; front
 export type Request = [number, number[]];
 export interface Push { cmd: number; a: number[] }
 
+const ONCE = new Set<number>([CMD.LIST, CMD.LIST2, CMD.POOL, CMD.PERFORM, 67 /* BACKUP_PUT */, 83 /* CAST */]);
+
 export class Client {
   link: InstanceType<typeof Link>;
   info: Info | null = null;
@@ -35,6 +37,11 @@ export class Client {
 
   rq(r: Request, opt?: RqOpt): Promise<number[]> {
     if (this.closed) return Promise.reject(new Error("closed"));
+    // (rc2) a real USB link loses a frame now and then, and the unit answers nothing for up to ~2 s while it writes
+    // its flash: a request that is safe to send again (a read, or a SET of a value) is tried up to 4 times unless its
+    // caller says otherwise. Not the ones a second time would change twice: LIST / POOL / PERFORM ops, TRANSPORT's
+    // ops (REC toggles), a backup piece (the unit stages it once), a STEP write with its toggles (STEP_SET is a SET).
+    if (opt?.retries === undefined && !ONCE.has(r[0]) && !(r[0] === CMD.TRANSPORT && r[1].length)) opt = { ...opt, retries: 3 };
     return this.link.request(r, opt);
   }
 

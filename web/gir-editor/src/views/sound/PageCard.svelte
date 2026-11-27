@@ -64,9 +64,8 @@
   .inner { flex: 1; max-width: 400px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
   /* (rc3) stretched: the knobs' part as wide as a one-column card's (--colw from the Sound view), the help beside */
   .wide .inner { flex: none; width: min(400px, calc(var(--colw, 340px) - 26px)); }
-  .help { display: none; }
-  @container (min-width: 620px) { .help { display: flex; } }
-  ul.help { flex: 1; min-width: 0; margin: 30px 0 0; padding: 0 0 0 18px; border-left: 1px solid var(--line); list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 12px; line-height: 1.45; color: var(--dim); }
+  ul.help { flex: 1; min-width: 0; margin: 30px 0 0; padding: 0 0 0 18px; border-left: 1px solid var(--line); list-style: none; display: none; flex-direction: column; gap: 6px; font-size: 12px; line-height: 1.45; color: var(--dim); }
+  @container (min-width: 620px) { ul.help { display: flex; } }
   .card:hover { border-color: var(--line-2); }
   header { display: flex; align-items: baseline; gap: 10px; }
   h3 { margin: 0; font-size: 15px; font-weight: 400; color: var(--fg); }

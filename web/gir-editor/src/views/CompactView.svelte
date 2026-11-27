@@ -74,18 +74,20 @@
   .u { font-size: 10px; color: var(--dim); font-weight: 700; }
   .pn { flex: 1; text-align: right; color: var(--dim); font-size: 13px; }
   .x { border: 0; background: var(--surf-3); border-radius: 7px; width: 28px; height: 26px; }
-  .strips { flex: 1; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; min-height: 0; }
-  .s { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--surf); border-radius: 10px; padding: 6px 4px; border-top: 3px solid var(--c); min-height: 0; }
+  .strips { flex: 1; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; min-height: 0; }
+  .s { display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--surf); border-radius: 10px; padding: 6px 3px; border-top: 3px solid var(--c); min-height: 0; min-width: 0; }
   .s.sel { background: var(--surf-2); }
   .n { width: 26px; height: 22px; border-radius: 6px; border: 0; background: var(--c); color: #0a0a0a; font-size: 14px; }
   .lvl { flex: 1; width: 22px; min-height: 60px; background: var(--bg); border-radius: 6px; position: relative; overflow: hidden; cursor: ns-resize; }
   .lvl div { position: absolute; bottom: 0; left: 0; right: 0; background: var(--c); opacity: 0.8; }
-  .kills { display: flex; gap: 2px; }
+  .kills { display: flex; gap: 2px; max-width: 100%; }
+  .kills button { min-width: 0; flex: 1 1 20px; }
   .kills button { width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--line-2); background: var(--surf-3); font-size: 10px; font-weight: 800; color: var(--dim); padding: 0; }
   .kills button.on { background: var(--err); border-color: var(--err); color: #fff; }
-  .ms { display: flex; gap: 2px; }
+  .ms { display: flex; gap: 2px; margin-top: 4px; }
   .ms button { width: 26px; height: 20px; border-radius: 4px; border: 1px solid var(--line-2); background: var(--surf-3); font-size: 10px; font-weight: 800; color: var(--dim); }
   .ms .m { background: var(--warn); color: #1a1200; }
   .ms .so { background: var(--info); color: #001a17; }
-  .s :global(.knob .val) { font-size: 11px; }
+  .s :global(.knob) { width: 100%; }
+  .s :global(.knob .val) { font-size: 11px; min-width: 0; }
 </style>

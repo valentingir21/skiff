@@ -30,6 +30,9 @@ jobs:
       - run: npx playwright test
       - run: npx playwright test
         env: { LATENCY: "1" }
+      # (rc3) the layout lint over the whole matrix (sizes x zooms x languages x views x engines): 0 defects
+      - run: npx playwright test -c playwright.layout.config.ts
+        env: { LAYOUT_SHOTS: "0", LAYOUT_WORKERS: "2" }
       - uses: actions/upload-artifact@v4
         if: failure()
         with: { name: e2e-results, path: web/gir-editor/test-results, if-no-files-found: ignore }

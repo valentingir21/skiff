@@ -13,6 +13,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "npm run proto && vitest run",
     "e2e": "playwright test",
+    "layout": "playwright test -c playwright.layout.config.ts && node scripts/layout-report.mjs apres",
     "app": "npm run build && electron .",
     "dist:mac": "npm run build && electron-builder --mac --universal",
     "dist:win": "npm run build && electron-builder --win"

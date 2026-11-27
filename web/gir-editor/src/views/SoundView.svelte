@@ -2,7 +2,7 @@
   // The selected track's sound: its engine (the 15, by the EDIT layer's keys) and preset, then every page of the FM-1
   // the track has, grouped by the device's families, knob names as on its screen; the presets beside.
   import { device } from "../lib/model/device.svelte";
-  import { EDIT_KEYS, GIR_ENGINES, HELP, pagesFor, shownEngines, T, type Page } from "../lib/model/tables";
+  import { EDIT_KEYS, GIR_ENGINES, HELP, helpText, pagesFor, shownEngines, T, type Page } from "../lib/model/tables";
   import { ui, go, TRACK_COLORS } from "../lib/ui.svelte";
   import { t } from "../lib/i18n/index.svelte";
   import { ic, FAM_ICON } from "../ui/icons";
@@ -56,7 +56,7 @@
       <button class="engine" onclick={() => (picking = true)} title={t("sound.changeEngine")}>
         <span class="lbl">{t("sound.engine")} <span class="key">{t("sound.keyOnFm1", { key })}</span></span>
         <span class="en dot">{name}{#if GIR_ENGINES.has(name)}<em>Gir</em>{/if}</span>
-        <span class="pr">{help?.principle ?? ""}</span>
+        <span class="pr">{helpText(help?.principle)}</span>
         <span class="chev" aria-hidden="true">▾</span>
       </button>
       <div class="preset">
@@ -66,7 +66,7 @@
           <span class="pv dot">{tr?.name || "—"}</span>
           <button class="arr" onclick={() => step(1)} aria-label="Next preset">›</button>
         </div>
-        <span class="pr">{help?.uses ?? ""}</span>
+        <span class="pr">{helpText(help?.uses)}</span>
       </div>
     </section>
 

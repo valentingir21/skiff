@@ -2,7 +2,7 @@
   // The 15 engines in the EDIT layer's order (F3 .. F5), each with its key, a line on what it is, its voices; Gir's
   // marked. A light track (T5, T6) can't play GRAIN or PHYS: those are shown, greyed, with why.
   import { device } from "../../lib/model/device.svelte";
-  import { EDIT_KEYS, GIR_ENGINES, HELP, shownEngines, T } from "../../lib/model/tables";
+  import { EDIT_KEYS, GIR_ENGINES, HELP, helpText, shownEngines, T } from "../../lib/model/tables";
   import { t } from "../../lib/i18n/index.svelte";
   interface Props { k: number; onclose: () => void; color: string }
   let { k, onclose, color }: Props = $props();
@@ -19,11 +19,11 @@
       {@const name = device.engineName(e)}
       {@const h = HELP.engines[name]}
       <button class="eng" class:cur={e === cur} class:off={light(e)} disabled={light(e)} onclick={() => pick(e)}
-              title={light(e) ? t("sound.lightTrack") : h?.principle}>
+              title={light(e) ? t("sound.lightTrack") : helpText(h?.principle)}>
         <span class="key dot">{EDIT_KEYS[i]}</span>
         <span class="nm dot">{name}</span>
         {#if GIR_ENGINES.has(name)}<span class="gir">Gir</span>{/if}
-        <span class="pr">{h?.principle ?? ""}</span>
+        <span class="pr">{helpText(h?.principle)}</span>
         <span class="meta">{T.ENG[e].presets.length} presets · {t("sound.voices", { n: T.ENG[e].oneshot ? 8 : T.ENG[e].poly })}</span>
       </button>
     {/each}

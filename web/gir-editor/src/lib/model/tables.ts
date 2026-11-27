@@ -3,6 +3,8 @@
 // ask of them: a track's pages for its engine, where a parameter is on the device, its CC, a preset's category.
 import raw from "../../generated/tables.json";
 import helpRaw from "../../generated/help.json";
+import helpEn from "../../generated/help.en.json";
+import { i18n } from "../i18n/index.svelte";
 import type { Desc } from "../protocol/types";
 
 export interface TDesc { label: string; fmt: number; min: number; max: number; def: number; names: string[] | null; unit: string }
@@ -19,6 +21,15 @@ export const ID = T.ID;
 export interface HelpPage { what: string; knobs: string[] }
 export interface HelpEngine { key?: string; principle?: string; home?: string; voices?: string; uses?: string; gir: boolean; titles: string[]; params: Record<string, string>; doc: string }
 export const HELP = helpRaw as unknown as { pages: Record<string, HelpPage>; engines: Record<string, HelpEngine>; sections: Record<string, string>; reference: { where: string; control: string; action: string; effect: string; range: string; cc: string; note: string }[] };
+
+/** (rc2) a help text in the interface's language: the manual's French, or its English (help.en.json); the bits the
+ *  manual's bullets leave alone ("et", "–", "idem.") are no help: none */
+const EN = helpEn as Record<string, string>;
+export function helpText(fr: string | undefined | null): string {
+  if (!fr || !isHelp(fr)) return "";
+  return i18n.lang === "fr" ? fr : EN[fr] ?? fr;
+}
+export const isHelp = (s: string) => (s.match(/[A-Za-zÀ-ÿ]/g)?.length ?? 0) >= 4 && !/^(et|and|idem\.?|kits|et le)$/i.test(s.trim());
 
 /** the EDIT layer's keys F3 .. F5 for the shown engines (ORDER), G5 INIT */
 export const EDIT_KEYS = ["F3", "G3", "A3", "B3", "C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5", "D5", "E5", "F5"];

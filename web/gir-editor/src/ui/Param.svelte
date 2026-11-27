@@ -3,7 +3,7 @@
   // device formats it, and its help (the manual, the CC, where it is on the FM-1) in the help bar while hovered.
   import { device } from "../lib/model/device.svelte";
   import { fmtValue, aliasOf } from "../lib/legacy/proto.js";
-  import { ccOf, HELP, type Page } from "../lib/model/tables";
+  import { ccOf, HELP, helpText, isHelp, type Page } from "../lib/model/tables";
   import { ui } from "../lib/ui.svelte";
   import { t } from "../lib/i18n/index.svelte";
   import Knob from "./components/Knob.svelte";
@@ -24,10 +24,10 @@
     if (page) {
       const fam = page.fam === "TRK" ? "GLO" : page.fam;
       const h = HELP.pages[`${fam}/${page.title}`]?.knobs?.[slot];
-      if (h) return h;
+      if (h && isHelp(h)) return helpText(h);
     }
     const eng = device.engineName(tr.engine);
-    return HELP.engines[eng]?.params?.[d.label] ?? "";
+    return helpText(HELP.engines[eng]?.params?.[d.label]);
   });
   const fmtR = (v: number) => (d ? fmtValue(d, v).join(" ").trim() : String(v));
   function hover(on: boolean) {

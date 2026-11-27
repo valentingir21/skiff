@@ -297,3 +297,77 @@ test("live screen by CAST, end to end: backup, the unit's restart, the copy foll
   await page.evaluate(() => (window as any).__gir.cast.stopCast());
   await expect.poll(() => page.evaluate(() => (window as any).__gir.cast.cast.state)).toBe("idle");
 });
+
+/** a mono 16-bit WAV: tone bursts at the given seconds (each 120 ms, decaying) */
+function wav(hits: number[], len = 1.2, sr = 22050, f = 220): Buffer {
+  const n = Math.round(len * sr), b = Buffer.alloc(44 + n * 2);
+  b.write("RIFF", 0); b.writeUInt32LE(36 + n * 2, 4); b.write("WAVEfmt ", 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+  b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write("data", 36); b.writeUInt32LE(n * 2, 40);
+  for (let i = 0; i < n; i++) {
+    let v = 0;
+    for (const h of hits) { const t = i / sr - h; if (t >= 0 && t < 0.12) v += Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 30); }
+    b.writeInt16LE(Math.max(-32767, Math.min(32767, Math.round(v * 24000))), 44 + i * 2);
+  }
+  return b;
+}
+const smpInfo = (page: Page) => page.evaluate(() => { const g = (window as any).__gir; return g.device.ask(g.req.smpInfo()); });
+async function choose(page: Page, click: () => Promise<void>, files: { name: string; buffer: Buffer }[]) {
+  const fc = page.waitForEvent("filechooser");
+  await click();
+  await (await fc).setFiles(files.map((f) => ({ ...f, mimeType: "audio/wav" })));
+}
+
+test("samples: a drum kit cut from one WAV at its hits, a lane from its own file, sent to USR1 (asked first)", async ({ page }) => {
+  await start(page);
+  await view(page, "Samples");
+  const slot = page.getByTestId("slot-0");
+  await slot.getByRole("radio", { name: "Drum kit" }).click();
+  await choose(page, () => slot.getByRole("button", { name: "Cut one WAV into the lanes…" }).click(), [{ name: "loop.wav", buffer: wav([0.05, 0.35, 0.65, 0.95]) }]);
+  await expect(slot.locator(".lane canvas")).toHaveCount(4);
+  await choose(page, () => page.getByTestId("lane-0-5").getByRole("button").click(), [{ name: "tom.wav", buffer: wav([0.0], 0.4, 22050, 110) }]);
+  await expect(slot.locator(".lane canvas")).toHaveCount(5);
+  await expect(slot.locator(".room")).toContainText("5 of 16 sounds");
+  await shot(page, "23-samples-kit");
+  await slot.getByRole("button", { name: "Send to USR1" }).click();
+  await expect(page.locator(".dlg")).toContainText("Playback stops");
+  await page.locator(".dlg").getByRole("button", { name: "Stop and send" }).click();
+  await expect(page.locator(".toast", { hasText: "USR1 sent." })).toBeVisible({ timeout: 60_000 });
+  const si = await smpInfo(page);
+  expect(si.slots[0].zones).toBe(5);
+  expect(si.slots[0].name).toBe("LOOP");
+});
+
+test("samples: a recording from the computer's input (level, time), heard back, sent to USR2", async ({ page }) => {
+  // the computer's input, simulated in Chromium: a 330 Hz tone with a slow swell, as getUserMedia's stream (headless
+  // Chromium on macOS waits for the system's microphone permission forever, even with its fake devices)
+  await page.addInitScript(() => {
+    const md = navigator.mediaDevices as any;
+    md.getUserMedia = async () => {
+      const ctx = new AudioContext(), o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+      o.frequency.value = 330; g.gain.value = 0.4; lfo.frequency.value = 2; lg.gain.value = 0.2;
+      lfo.connect(lg).connect(g.gain);
+      const dst = ctx.createMediaStreamDestination();
+      o.connect(g).connect(dst); o.start(); lfo.start();
+      await ctx.resume();
+      return dst.stream;
+    };
+    md.enumerateDevices = async () => [{ kind: "audioinput", deviceId: "sim", label: "Simulated input", groupId: "", toJSON() { return this; } }];
+  });
+  await start(page);
+  await view(page, "Samples");
+  await page.getByLabel("Count in 3 seconds before recording").uncheck();
+  const slot = page.getByTestId("slot-1");
+  await slot.getByRole("button", { name: "● Record" }).click();
+  await expect(slot.getByRole("meter")).toBeVisible();
+  await page.waitForTimeout(1500);
+  await shot(page, "24-samples-enregistrement");
+  await slot.getByRole("button", { name: "■ Stop" }).click();
+  await expect(slot.locator(".snd")).toHaveCount(1);
+  await expect(slot.locator(".snd .fn")).toHaveText("REC 1");
+  await slot.getByRole("button", { name: "Send to USR2" }).click();
+  await page.locator(".dlg").getByRole("button", { name: "Stop and send" }).click();
+  await expect(page.locator(".toast", { hasText: "USR2 sent." })).toBeVisible({ timeout: 60_000 });
+  const si = await smpInfo(page);
+  expect(si.slots[1].zones).toBe(1);
+  expect(si.slots[1].name).toBe("REC");
+});
